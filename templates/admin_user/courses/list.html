@@ -1,0 +1,1531 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_settings.page_title }} · DIGION{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ═══════════════════════════════════════════════════════════
+       ROOT & VARIABLES
+       ═══════════════════════════════════════════════════════════ */
+    :root {
+        --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+        --transition-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CARD ANIMATIONS
+       ═══════════════════════════════════════════════════════════ */
+    .course-card {
+        transition: transform var(--transition-normal),
+                    box-shadow var(--transition-normal),
+                    border-color var(--transition-normal);
+        will-change: transform;
+    }
+    .course-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 40px -12px rgba(15,23,42,0.15),
+                    0 6px 16px -6px rgba(15,23,42,0.08);
+    }
+    .dark .course-card:hover {
+        box-shadow: 0 16px 40px -12px rgba(0,0,0,0.6);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SELECTED CARD
+       ═══════════════════════════════════════════════════════════ */
+    .course-card.selected {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.15),
+                    0 8px 24px -8px rgba(99,102,241,0.25) !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LINE CLAMP
+       ═══════════════════════════════════════════════════════════ */
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ═══════════════════════════════════════════════════════════
+       VIEW SWITCHER BUTTONS
+       ═══════════════════════════════════════════════════════════ */
+    .view-btn { color: #64748b; transition: all var(--transition-fast); }
+    .view-btn:hover { color: #4f46e5; background: rgba(79,70,229,0.05); }
+    .view-btn.active {
+        background: #fff;
+        color: #4f46e5;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .dark .view-btn { color: #94a3b8; }
+    .dark .view-btn:hover { color: #a5b4fc; background: rgba(165,180,252,0.08); }
+    .dark .view-btn.active { background: #334155; color: #a5b4fc; }
+
+    /* ═══════════════════════════════════════════════════════════
+       STAT CARD ENTRANCE ANIMATION
+       ═══════════════════════════════════════════════════════════ */
+    @keyframes statSlideIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card {
+        animation: statSlideIn 400ms cubic-bezier(0.16,1,0.3,1) backwards;
+    }
+    .stat-card:nth-child(1) { animation-delay: 0ms; }
+    .stat-card:nth-child(2) { animation-delay: 50ms; }
+    .stat-card:nth-child(3) { animation-delay: 100ms; }
+    .stat-card:nth-child(4) { animation-delay: 150ms; }
+    .stat-card:nth-child(5) { animation-delay: 200ms; }
+    .stat-card:nth-child(6) { animation-delay: 250ms; }
+
+    /* ═══════════════════════════════════════════════════════════
+       TOAST
+       ═══════════════════════════════════════════════════════════ */
+    @keyframes toastIn {
+        from { opacity: 0; transform: translateX(100%); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes toastOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+    }
+    .toast-enter { animation: toastIn 300ms cubic-bezier(0.16,1,0.3,1); }
+    .toast-exit { animation: toastOut 250ms cubic-bezier(0.16,1,0.3,1) forwards; }
+
+    /* ═══════════════════════════════════════════════════════════
+       FILTER CHIPS
+       ═══════════════════════════════════════════════════════════ */
+    .filter-scroll {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    .filter-chip { white-space: nowrap; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════════
+       SEARCH LOADING
+       ═══════════════════════════════════════════════════════════ */
+    .search-loading {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        border: 2px solid #cbd5e1;
+        border-top-color: #6366f1;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        display: none;
+    }
+    .search-loading.active { display: block; }
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════════════════════
+       SKELETON LOADING
+       ═══════════════════════════════════════════════════════════ */
+    .skeleton {
+        background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+    .dark .skeleton {
+        background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+        background-size: 200% 100%;
+    }
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BULK BAR ANIMATION
+       ═══════════════════════════════════════════════════════════ */
+    @keyframes bulkSlideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .bulk-enter { animation: bulkSlideDown 300ms cubic-bezier(0.16,1,0.3,1); }
+
+    /* ═══════════════════════════════════════════════════════════
+       MODAL ANIMATIONS
+       ═══════════════════════════════════════════════════════════ */
+    @keyframes modalScale {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-enter { animation: modalScale 300ms cubic-bezier(0.16,1,0.3,1); }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE OPTIMIZATIONS
+       ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 640px) {
+        .stat-mini { padding: 0.625rem 0.75rem; }
+        .stat-mini .stat-icon { width: 28px; height: 28px; font-size: 11px; margin-bottom: 0.5rem; }
+        .stat-mini .stat-value { font-size: 1.125rem; }
+        .stat-mini .stat-label { font-size: 10px; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       PRINT
+       ═══════════════════════════════════════════════════════════ */
+    @media print {
+        .no-print { display: none !important; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       DRAG SELECT
+       ═══════════════════════════════════════════════════════════ */
+    .drag-select-box {
+        position: fixed;
+        border: 2px solid rgba(99,102,241,0.5);
+        background: rgba(99,102,241,0.1);
+        pointer-events: none;
+        z-index: 100;
+        border-radius: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       KANBAN VIEW
+       ═══════════════════════════════════════════════════════════ */
+    .kanban-column {
+        min-height: 400px;
+        transition: background-color var(--transition-fast);
+    }
+    .kanban-column.drag-over {
+        background-color: rgba(99,102,241,0.05);
+        border-color: #6366f1 !important;
+    }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PAGE HEADER
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="mb-4 md:mb-6">
+    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-[10px] md:text-[11px] font-semibold mb-3">
+        <i class="fas fa-layer-group text-[9px]"></i>
+        <span>{{ page_settings.page_badge_text }}</span>
+    </div>
+
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 md:gap-4">
+        <div class="min-w-0">
+            <h1 class="font-display text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                <span class="w-8 h-8 sm:w-9 sm:h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/30 shrink-0">
+                    <i class="fas fa-book text-xs md:text-base"></i>
+                </span>
+                <span class="truncate">{{ page_settings.page_title }}</span>
+            </h1>
+            <p class="mt-1 text-[11px] md:text-sm text-slate-500 dark:text-slate-400 max-w-2xl pl-11 sm:pl-12 md:pl-14 line-clamp-2">
+                {{ page_settings.page_subtitle }}
+            </p>
+        </div>
+
+        <div class="flex items-center gap-1.5 md:gap-2">
+            <a href="{% url 'courses_admin:create' %}"
+               class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.97] text-white text-xs md:text-sm font-semibold shadow-md shadow-indigo-500/25 transition-all">
+                <i class="fas fa-plus"></i>
+                <span>{{ page_settings.btn_create }}</span>
+            </a>
+
+            <button type="button" id="refreshBtn"
+                    class="inline-flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors shrink-0"
+                    title="Yangilash (F2)">
+                <i class="fas fa-rotate text-xs md:text-sm"></i>
+            </button>
+
+            <div class="relative">
+                <button type="button" id="exportBtn"
+                        class="hidden sm:inline-flex items-center justify-center w-11 h-11 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors shrink-0"
+                        title="Eksport">
+                    <i class="fas fa-download"></i>
+                </button>
+                <div id="exportMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl p-1.5 z-30">
+                    <a href="?export=csv" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-file-csv text-emerald-500"></i>
+                        CSV fayl
+                    </a>
+                    <a href="?export=excel" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-file-excel text-emerald-600"></i>
+                        Excel fayl
+                    </a>
+                    <a href="?export=pdf" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-file-pdf text-rose-500"></i>
+                        PDF fayl
+                    </a>
+                    <div class="h-px bg-slate-200 dark:bg-slate-800 my-1"></div>
+                    <button type="button" onclick="window.print()" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-print text-slate-500"></i>
+                        Chop etish
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" id="helpBtn"
+                    class="hidden md:inline-flex items-center justify-center w-11 h-11 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors shrink-0"
+                    title="Yordam">
+                <i class="fas fa-question"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     STAT CARDS
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3 mb-4 md:mb-5">
+    <div class="stat-card stat-mini p-3 md:p-4 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div class="stat-icon w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-sm mb-2">
+            <i class="fas fa-book text-[10px] md:text-sm"></i>
+        </div>
+        <div class="stat-value text-lg md:text-2xl lg:text-3xl font-display font-bold text-slate-900 dark:text-white leading-none">{{ stats.total }}</div>
+        <div class="stat-label text-[10px] md:text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-1 truncate">{{ page_settings.stat_total_label }}</div>
+    </div>
+
+    <div class="stat-card stat-mini p-3 md:p-4 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div class="stat-icon w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white shadow-sm mb-2">
+            <i class="fas fa-circle-check text-[10px] md:text-sm"></i>
+        </div>
+        <div class="stat-value text-lg md:text-2xl lg:text-3xl font-display font-bold text-slate-900 dark:text-white leading-none">{{ stats.published }}</div>
+        <div class="stat-label text-[10px] md:text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-1 truncate">{{ page_settings.stat_published_label }}</div>
+    </div>
+
+    <div class="stat-card stat-mini p-3 md:p-4 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div class="stat-icon w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white shadow-sm mb-2">
+            <i class="fas fa-file-lines text-[10px] md:text-sm"></i>
+        </div>
+        <div class="stat-value text-lg md:text-2xl lg:text-3xl font-display font-bold text-slate-900 dark:text-white leading-none">{{ stats.draft }}</div>
+        <div class="stat-label text-[10px] md:text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-1 truncate">{{ page_settings.stat_draft_label }}</div>
+    </div>
+
+    <div class="stat-card stat-mini p-3 md:p-4 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div class="stat-icon w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white shadow-sm mb-2">
+            <i class="fas fa-users text-[10px] md:text-sm"></i>
+        </div>
+        <div class="stat-value text-lg md:text-2xl lg:text-3xl font-display font-bold text-slate-900 dark:text-white leading-none">{{ stats.students }}</div>
+        <div class="stat-label text-[10px] md:text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-1 truncate">{{ page_settings.stat_students_label }}</div>
+    </div>
+
+    <div class="stat-card stat-mini p-3 md:p-4 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div class="stat-icon w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-sm mb-2">
+            <i class="fas fa-star-half-stroke text-[10px] md:text-sm"></i>
+        </div>
+        <div class="stat-value text-lg md:text-2xl lg:text-3xl font-display font-bold text-slate-900 dark:text-white leading-none flex items-baseline gap-1">
+            {{ stats.avg_rating }}<span class="text-sm md:text-lg text-amber-400">★</span>
+        </div>
+        <div class="stat-label text-[10px] md:text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-1">{{ page_settings.stat_avg_rating_label }}</div>
+    </div>
+
+    <div class="stat-card stat-mini p-3 md:p-4 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <div class="stat-icon w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-sm mb-2">
+            <i class="fas fa-clock text-[10px] md:text-sm"></i>
+        </div>
+        <div class="stat-value text-lg md:text-2xl lg:text-3xl font-display font-bold text-slate-900 dark:text-white leading-none">{{ stats.pending }}</div>
+        <div class="stat-label text-[10px] md:text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-1 truncate">Tasdiqlash</div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FILTER FORM
+     ═══════════════════════════════════════════════════════════════ -->
+<form method="get" id="filterForm" class="mb-3 md:mb-4">
+
+    <div class="flex items-stretch gap-2 mb-2.5">
+        <div class="flex-1 relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs md:text-sm pointer-events-none"></i>
+            <input type="text" name="q" id="liveSearchInput" value="{{ search }}"
+                   placeholder="{{ page_settings.filter_search_placeholder }}"
+                   class="w-full pl-9 md:pl-10 pr-9 md:pr-10 py-2 md:py-2.5 rounded-lg md:rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none text-xs md:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 transition-all"
+                   autocomplete="off" enterkeyhint="search">
+            <div id="searchLoading" class="search-loading"></div>
+            {% if search %}
+            <a href="?{% for k, v in request.GET.items %}{% if k != 'q' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
+               class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors"
+               id="searchClearBtn">
+                <i class="fas fa-circle-xmark text-xs"></i>
+            </a>
+            {% endif %}
+        </div>
+
+        <button type="button" id="toggleFiltersBtn"
+                class="inline-flex items-center justify-center gap-1.5 px-3 md:px-4 rounded-lg md:rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 text-slate-700 dark:text-slate-300 text-xs md:text-sm font-semibold transition-colors relative shrink-0">
+            <i class="fas fa-filter"></i>
+            <span class="hidden sm:inline">{{ page_settings.filter_btn_label }}</span>
+            {% if active_filters %}
+            <span class="absolute -top-1.5 -right-1.5 w-4 h-4 md:w-5 md:h-5 rounded-full bg-indigo-600 text-white text-[9px] md:text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-slate-900">
+                {{ active_filters|length }}
+            </span>
+            {% endif %}
+        </button>
+
+        <button type="button" id="saveFilterBtn"
+                class="hidden md:inline-flex items-center justify-center gap-1.5 px-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors shrink-0"
+                title="Filtrlarni saqlash">
+            <i class="fas fa-bookmark"></i>
+        </button>
+    </div>
+
+    <div id="filtersPanel" class="{% if not active_filters %}hidden{% endif %} bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl border border-slate-200 dark:border-slate-800 p-3 md:p-4 mb-2.5">
+
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2.5 md:gap-3">
+            <div>
+                <label class="block text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{{ page_settings.filter_category_label }}</label>
+                <select name="category" class="w-full px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs md:text-sm text-slate-900 dark:text-white focus:border-indigo-500 outline-none">
+                    <option value="">{{ page_settings.filter_category_all }}</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.pk }}" {% if category_filter == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{{ page_settings.filter_level_label }}</label>
+                <select name="level" class="w-full px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs md:text-sm text-slate-900 dark:text-white focus:border-indigo-500 outline-none">
+                    <option value="">{{ page_settings.filter_level_all }}</option>
+                    {% for value, label in level_choices %}
+                    <option value="{{ value }}" {% if level_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{{ page_settings.filter_language_label }}</label>
+                <select name="language" class="w-full px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs md:text-sm text-slate-900 dark:text-white focus:border-indigo-500 outline-none">
+                    <option value="">{{ page_settings.filter_language_all }}</option>
+                    {% for value, label in language_choices %}
+                    <option value="{{ value }}" {% if language_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{{ page_settings.filter_status_label }}</label>
+                <select name="status" class="w-full px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs md:text-sm text-slate-900 dark:text-white focus:border-indigo-500 outline-none">
+                    <option value="">{{ page_settings.filter_status_all }}</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{{ page_settings.filter_price_label }}</label>
+                <select name="price" class="w-full px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs md:text-sm text-slate-900 dark:text-white focus:border-indigo-500 outline-none">
+                    <option value="">{{ page_settings.filter_price_all }}</option>
+                    <option value="free" {% if price_filter == 'free' %}selected{% endif %}>{{ page_settings.filter_price_free }}</option>
+                    <option value="paid" {% if price_filter == 'paid' %}selected{% endif %}>{{ page_settings.filter_price_paid }}</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">{{ page_settings.filter_date_label }}</label>
+                <select name="date" class="w-full px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs md:text-sm text-slate-900 dark:text-white focus:border-indigo-500 outline-none">
+                    <option value="">{{ page_settings.filter_date_all }}</option>
+                    <option value="today" {% if date_filter == 'today' %}selected{% endif %}>{{ page_settings.filter_date_today }}</option>
+                    <option value="week" {% if date_filter == 'week' %}selected{% endif %}>{{ page_settings.filter_date_week }}</option>
+                    <option value="month" {% if date_filter == 'month' %}selected{% endif %}>{{ page_settings.filter_date_month }}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div class="flex-1 flex items-center gap-2">
+                <label class="text-[10px] md:text-[11px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ page_settings.filter_sort_label }}:</label>
+                <select name="sort" class="flex-1 px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs md:text-sm text-slate-900 dark:text-white focus:border-indigo-500 outline-none">
+                    <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>{{ page_settings.filter_sort_newest }}</option>
+                    <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>{{ page_settings.filter_sort_oldest }}</option>
+                    <option value="title" {% if sort == 'title' %}selected{% endif %}>{{ page_settings.filter_sort_title_az }}</option>
+                    <option value="-title" {% if sort == '-title' %}selected{% endif %}>{{ page_settings.filter_sort_title_za }}</option>
+                    <option value="-enrollment_count" {% if sort == '-enrollment_count' %}selected{% endif %}>{{ page_settings.filter_sort_popular }}</option>
+                    <option value="-rating" {% if sort == '-rating' %}selected{% endif %}>{{ page_settings.filter_sort_rating }}</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="hidden" name="per_page" value="{{ per_page }}">
+                <button type="submit"
+                        class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-all">
+                    <i class="fas fa-check"></i>
+                    {{ page_settings.btn_apply }}
+                </button>
+                <a href="{% url 'courses_admin:list' %}"
+                   class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors">
+                    <i class="fas fa-arrow-rotate-left"></i>
+                    <span class="hidden sm:inline">{{ page_settings.btn_reset }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if active_filters %}
+    <div class="filter-scroll -mx-1 px-1 pb-1 flex items-center gap-1.5">
+        {% for f in active_filters %}
+        <a href="?{% for k, v in request.GET.items %}{% if k != f.key and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}"
+           class="filter-chip inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-100 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-[10px] md:text-[11px] font-semibold">
+            <span>{{ f.label }}</span>
+            <i class="fas fa-xmark text-[9px] opacity-70"></i>
+        </a>
+        {% endfor %}
+        <a href="{% url 'courses_admin:list' %}"
+           class="filter-chip inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-100 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 text-[10px] md:text-[11px] font-semibold">
+            <i class="fas fa-broom text-[9px]"></i>
+            <span class="hidden sm:inline">{{ page_settings.active_filters_clear }}</span>
+        </a>
+    </div>
+    {% endif %}
+</form>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VIEW TOOLBAR
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="flex items-center justify-between gap-2 mb-3">
+    <div class="flex items-center gap-2">
+        <div class="inline-flex p-0.5 rounded-lg md:rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <button type="button" data-view="grid" class="view-btn px-2.5 md:px-3 py-1.5 rounded-md md:rounded-lg text-[11px] md:text-xs font-semibold" title="Grid">
+                <i class="fas fa-table-cells"></i>
+            </button>
+            <button type="button" data-view="list" class="view-btn px-2.5 md:px-3 py-1.5 rounded-md md:rounded-lg text-[11px] md:text-xs font-semibold" title="List">
+                <i class="fas fa-list"></i>
+            </button>
+            <button type="button" data-view="compact" class="view-btn hidden sm:inline-block px-2.5 md:px-3 py-1.5 rounded-md md:rounded-lg text-[11px] md:text-xs font-semibold" title="Jadval">
+                <i class="fas fa-bars"></i>
+            </button>
+            <button type="button" data-view="kanban" class="view-btn hidden lg:inline-block px-2.5 md:px-3 py-1.5 rounded-md md:rounded-lg text-[11px] md:text-xs font-semibold" title="Kanban">
+                <i class="fas fa-columns"></i>
+            </button>
+        </div>
+
+        <button type="button" id="selectAllTop"
+                class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 text-slate-700 dark:text-slate-300 text-[11px] font-semibold transition-colors">
+            <i class="fas fa-check-double text-[10px]"></i>
+            <span>Hammasini tanlash</span>
+        </button>
+    </div>
+
+    <div class="flex items-center gap-2 text-[11px] md:text-xs text-slate-500 dark:text-slate-400">
+        <span class="hidden sm:inline">{{ page_obj.start_index|default:0 }}–{{ page_obj.end_index|default:0 }} / {{ page_obj.paginator.count|default:0 }}</span>
+        <select id="perPageSelect" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300 outline-none cursor-pointer">
+            {% for opt in per_page_options %}
+            <option value="{{ opt }}" {% if per_page == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BULK ACTION BAR
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="bulkBar" class="hidden sticky top-20 z-20 mb-3 p-2.5 rounded-xl md:rounded-2xl bg-slate-900 dark:bg-slate-800 text-white shadow-2xl border border-slate-700 bulk-enter">
+    <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center">
+                <i class="fas fa-check-double text-[10px]"></i>
+            </div>
+            <span class="text-xs md:text-sm font-semibold">
+                <span id="bulkCount">0</span> {{ page_settings.bulk_label }}
+            </span>
+        </div>
+        <div class="flex items-center gap-1 flex-wrap">
+            <button type="button" data-bulk="publish" class="bulk-action-btn inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[11px] font-semibold transition-colors" title="E'lon qilish">
+                <i class="fas fa-rocket"></i>
+                <span class="hidden sm:inline">E'lon</span>
+            </button>
+            <button type="button" data-bulk="unpublish" class="bulk-action-btn inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-[11px] font-semibold transition-colors" title="E'londan olish">
+                <i class="fas fa-eye-slash"></i>
+            </button>
+            <button type="button" data-bulk="feature" class="bulk-action-btn inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-[11px] font-semibold transition-colors" title="Tanlash">
+                <i class="fas fa-star"></i>
+            </button>
+            <button type="button" data-bulk="unfeature" class="bulk-action-btn hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-[11px] font-semibold transition-colors" title="Tanlovdan olish">
+                <i class="fas fa-star-half-stroke"></i>
+            </button>
+            <button type="button" data-bulk="archive" class="bulk-action-btn inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-[11px] font-semibold transition-colors" title="Arxivlash">
+                <i class="fas fa-box-archive"></i>
+            </button>
+            <button type="button" data-bulk="duplicate" class="bulk-action-btn hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-[11px] font-semibold transition-colors" title="Nusxalash">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button type="button" data-bulk="delete" class="bulk-action-btn inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-[11px] font-semibold transition-colors" title="O'chirish">
+                <i class="fas fa-trash"></i>
+            </button>
+            <button type="button" id="bulkCancel" class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 text-[11px] transition-colors" title="Bekor qilish">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     GRID VIEW
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="viewGrid" class="view-panel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+    {% for course in courses %}
+    <div class="course-card group relative bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+         data-course-id="{{ course.pk }}"
+         data-status="{{ course.status }}"
+         data-featured="{{ course.is_featured|yesno:'1,0' }}">
+
+        <div class="absolute top-2.5 left-2.5 z-10">
+            <input type="checkbox"
+                   class="course-checkbox w-4 h-4 rounded border-2 border-white bg-white/90 text-indigo-600 focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-md"
+                   value="{{ course.pk }}">
+        </div>
+
+        <button type="button"
+                onclick="previewCourse({{ course.pk }})"
+                class="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Tez ko'rish">
+            <i class="fas fa-expand text-[10px]"></i>
+        </button>
+
+        <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="block relative aspect-[16/9] bg-gradient-to-br from-indigo-500 to-violet-600 overflow-hidden">
+            {% if course.cover_image %}
+            <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-white/70">
+                <div class="text-center">
+                    <i class="fas fa-book text-3xl md:text-4xl mb-2 opacity-80"></i>
+                    <p class="text-[10px] font-medium">{{ page_settings.card_no_cover }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="absolute top-2.5 right-2.5 flex flex-col items-end gap-1">
+                {% if course.is_featured %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-400 text-amber-900 text-[9px] font-bold shadow">⭐</span>
+                {% endif %}
+                {% if course.is_new_flag %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-bold shadow">{{ page_settings.badge_new }}</span>
+                {% endif %}
+                {% if course.total_students >= page_settings.badge_hot_threshold %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold shadow">{{ page_settings.badge_hot }}</span>
+                {% endif %}
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 p-2.5 bg-gradient-to-t from-black/75 to-transparent">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold text-white
+                        {% if course.status == 'published' %}bg-emerald-500/90
+                        {% elif course.status == 'draft' %}bg-slate-500/90
+                        {% elif course.status == 'pending' %}bg-amber-500/90
+                        {% else %}bg-slate-700/90{% endif %}">
+                        <span class="w-1 h-1 rounded-full bg-white/80"></span>
+                        {{ course.get_status_display }}
+                    </span>
+                    {% if course.is_free or course.price == 0 %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[9px] font-bold">{{ page_settings.badge_free }}</span>
+                    {% else %}
+                    <span class="text-white text-[11px] font-bold drop-shadow">{{ course.current_price|floatformat:0 }} <span class="text-[9px] opacity-80">so'm</span></span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+
+        <div class="p-3">
+            <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="block">
+                <h3 class="font-semibold text-slate-900 dark:text-white text-[13px] md:text-sm leading-snug line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors min-h-[2.25rem]">
+                    {{ course.title }}
+                </h3>
+            </a>
+
+            {% if course.short_description %}
+            <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 min-h-[1.75rem]">{{ course.short_description }}</p>
+            {% else %}
+            <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500 italic min-h-[1.75rem]">{{ page_settings.card_no_description }}</p>
+            {% endif %}
+
+            <div class="mt-2 flex items-center gap-1 flex-wrap text-[10px] text-slate-500 dark:text-slate-400">
+                {% if course.category %}
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800">
+                    <i class="fas fa-tag text-[8px]"></i>
+                    <span class="truncate max-w-[60px]">{{ course.category.name }}</span>
+                </span>
+                {% endif %}
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800">
+                    <i class="fas fa-signal text-[8px]"></i>
+                    {{ course.get_level_display }}
+                </span>
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800">
+                    <i class="fas fa-calendar text-[8px]"></i>
+                    {{ course.duration_months }}{{ page_settings.card_duration_suffix }}
+                </span>
+            </div>
+
+            <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                {% if course.teacher %}
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                    {{ course.teacher.initials|default:"?" }}
+                </div>
+                <p class="text-[11px] font-medium text-slate-700 dark:text-slate-300 truncate flex-1">
+                    {{ course.teacher.get_full_name|default:course.teacher.phone_number|truncatechars:20 }}
+                </p>
+                {% else %}
+                <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                    <i class="fas fa-user text-[9px]"></i>
+                </div>
+                <p class="text-[11px] text-slate-400 dark:text-slate-500 italic">{{ page_settings.card_no_teacher }}</p>
+                {% endif %}
+            </div>
+
+            <div class="mt-2 grid grid-cols-3 gap-1.5">
+                <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
+                    <div class="text-[11px] font-bold text-slate-900 dark:text-white">{{ course.months_count_annot|default:0 }}</div>
+                    <div class="text-[9px] text-slate-500 dark:text-slate-400">oy</div>
+                </div>
+                <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
+                    <div class="text-[11px] font-bold text-slate-900 dark:text-white">{{ course.lessons_count_annot|default:0 }}</div>
+                    <div class="text-[9px] text-slate-500 dark:text-slate-400">dars</div>
+                </div>
+                <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
+                    <div class="text-[11px] font-bold text-slate-900 dark:text-white">{{ course.students_count_annot|default:0 }}</div>
+                    <div class="text-[9px] text-slate-500 dark:text-slate-400">talaba</div>
+                </div>
+            </div>
+
+            <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1">
+                <a href="{% url 'courses_admin:detail' pk=course.pk %}"
+                   class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-[11px] font-semibold transition-colors">
+                    <i class="fas fa-eye text-[10px]"></i>
+                    <span>{{ page_settings.card_view_btn }}</span>
+                </a>
+                <a href="{% url 'courses_admin:edit' pk=course.pk %}"
+                   class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-slate-600 dark:text-slate-400 hover:text-indigo-600 transition-colors"
+                   title="{{ page_settings.card_edit_btn }}">
+                    <i class="fas fa-pen-to-square text-[10px]"></i>
+                </a>
+                <button type="button" onclick="deleteCourse({{ course.pk }}, '{{ course.title|escapejs }}')"
+                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-slate-600 dark:text-slate-400 hover:text-rose-600 transition-colors"
+                        title="{{ page_settings.card_delete_btn }}">
+                    <i class="fas fa-trash-can text-[10px]"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full">
+        <div class="py-16 text-center">
+            <div class="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/25 mb-4">
+                <i class="fas fa-book text-2xl md:text-3xl"></i>
+            </div>
+            {% if search or active_filters %}
+            <h3 class="font-display text-base md:text-lg font-bold text-slate-900 dark:text-white mb-1.5">{{ page_settings.empty_search_title }}</h3>
+            <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-4">{{ page_settings.empty_search_subtitle }}</p>
+            <a href="{% url 'courses_admin:list' %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs md:text-sm font-semibold transition-colors">
+                <i class="fas fa-arrow-rotate-left"></i>
+                {{ page_settings.empty_search_cta }}
+            </a>
+            {% else %}
+            <h3 class="font-display text-base md:text-lg font-bold text-slate-900 dark:text-white mb-1.5">{{ page_settings.empty_title }}</h3>
+            <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-4">{{ page_settings.empty_subtitle }}</p>
+            <a href="{% url 'courses_admin:create' %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs md:text-sm font-semibold transition-colors shadow-md shadow-indigo-500/25">
+                <i class="fas fa-plus"></i>
+                {{ page_settings.empty_cta }}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LIST VIEW
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="viewList" class="view-panel hidden space-y-2">
+    {% for course in courses %}
+    <div class="course-card bg-white dark:bg-slate-900 rounded-lg md:rounded-xl border border-slate-200 dark:border-slate-800 p-2.5 md:p-3 flex items-center gap-2.5 md:gap-3"
+         data-course-id="{{ course.pk }}"
+         data-status="{{ course.status }}">
+        <input type="checkbox" class="course-checkbox w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 cursor-pointer shrink-0" value="{{ course.pk }}">
+
+        <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="w-14 h-14 md:w-20 md:h-20 rounded-lg overflow-hidden shrink-0 bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+            {% if course.cover_image %}
+            <img src="{{ course.cover_image.url }}" class="w-full h-full object-cover" alt="" loading="lazy">
+            {% else %}
+            <i class="fas fa-book text-white text-lg md:text-xl"></i>
+            {% endif %}
+        </a>
+
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="font-semibold text-xs md:text-sm text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 truncate transition-colors">
+                    {{ course.title }}
+                </a>
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold
+                    {% if course.status == 'published' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400
+                    {% elif course.status == 'draft' %}bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300
+                    {% elif course.status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400
+                    {% else %}bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400{% endif %}">
+                    {{ course.get_status_display }}
+                </span>
+                {% if course.is_featured %}
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400 text-[9px] font-bold">⭐</span>
+                {% endif %}
+            </div>
+            <div class="flex items-center gap-2 md:gap-3 text-[10px] md:text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
+                {% if course.category %}
+                <span class="inline-flex items-center gap-1"><i class="fas fa-tag text-[8px]"></i>{{ course.category.name|truncatechars:15 }}</span>
+                {% endif %}
+                <span class="inline-flex items-center gap-1"><i class="fas fa-signal text-[8px]"></i>{{ course.get_level_display }}</span>
+                <span class="hidden sm:inline-flex items-center gap-1"><i class="fas fa-user text-[8px]"></i>{{ course.teacher.get_full_name|default:"—"|truncatechars:15 }}</span>
+                <span class="inline-flex items-center gap-1"><i class="fas fa-users text-[8px]"></i>{{ course.students_count_annot|default:0 }}</span>
+                <span class="hidden md:inline-flex items-center gap-1"><i class="fas fa-book-open text-[8px]"></i>{{ course.lessons_count_annot|default:0 }}</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-0.5 md:gap-1 shrink-0">
+            <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors" title="Ko'rish">
+                <i class="fas fa-eye text-[11px]"></i>
+            </a>
+            <a href="{% url 'courses_admin:edit' pk=course.pk %}" class="hidden sm:flex w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 items-center justify-center text-slate-500 dark:text-slate-400 hover:text-indigo-600 transition-colors" title="Tahrirlash">
+                <i class="fas fa-pen-to-square text-[11px]"></i>
+            </a>
+            <button type="button" onclick="deleteCourse({{ course.pk }}, '{{ course.title|escapejs }}')" class="hidden sm:flex w-7 h-7 md:w-8 md:h-8 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-500/20 items-center justify-center text-slate-500 dark:text-slate-400 hover:text-rose-600 transition-colors" title="O'chirish">
+                <i class="fas fa-trash-can text-[11px]"></i>
+            </button>
+        </div>
+    </div>
+    {% empty %}
+    <div class="py-16 text-center">
+        <i class="fas fa-inbox text-4xl text-slate-300 dark:text-slate-700 mb-3"></i>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ page_settings.empty_title }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     COMPACT VIEW (TABLE)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="viewCompact" class="view-panel hidden overflow-x-auto bg-white dark:bg-slate-900 rounded-xl md:rounded-2xl border border-slate-200 dark:border-slate-800">
+    <table class="w-full text-sm min-w-[640px]">
+        <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 sticky top-0">
+            <tr>
+                <th class="px-3 py-3 text-left w-10"><input type="checkbox" id="selectAllCompact" class="w-4 h-4 rounded border-slate-300 text-indigo-600 cursor-pointer"></th>
+                <th class="px-3 py-3 text-left">{{ page_settings.table_col_title }}</th>
+                <th class="px-3 py-3 text-left hidden md:table-cell">{{ page_settings.table_col_category }}</th>
+                <th class="px-3 py-3 text-center hidden md:table-cell">Daraja</th>
+                <th class="px-3 py-3 text-center">Oylar</th>
+                <th class="px-3 py-3 text-center">Talaba</th>
+                <th class="px-3 py-3 text-left">Holat</th>
+                <th class="px-3 py-3 text-right">{{ page_settings.table_col_actions }}</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            {% for course in courses %}
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" data-course-id="{{ course.pk }}">
+                <td class="px-3 py-3"><input type="checkbox" class="course-checkbox w-4 h-4 rounded border-slate-300 text-indigo-600 cursor-pointer" value="{{ course.pk }}"></td>
+                <td class="px-3 py-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                            {% if course.cover_image %}<img src="{{ course.cover_image.url }}" class="w-full h-full object-cover" alt="" loading="lazy">
+                            {% else %}<i class="fas fa-book text-white text-[10px]"></i>{% endif %}
+                        </div>
+                        <div class="min-w-0">
+                            <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="font-semibold text-slate-900 dark:text-white hover:text-indigo-600 truncate block max-w-[200px] text-xs md:text-sm">{{ course.title }}</a>
+                            <span class="text-[10px] text-slate-400">{{ course.duration_months }} oy</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-3 py-3 text-slate-600 dark:text-slate-400 text-xs hidden md:table-cell">{{ course.category.name|default:"—"|truncatechars:20 }}</td>
+                <td class="px-3 py-3 hidden md:table-cell text-center">
+                    <span class="inline-flex px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold">{{ course.get_level_display }}</span>
+                </td>
+                <td class="px-3 py-3 text-center font-bold text-slate-900 dark:text-white text-xs">{{ course.months_count_annot|default:0 }}</td>
+                <td class="px-3 py-3 text-center font-bold text-slate-900 dark:text-white text-xs">{{ course.students_count_annot|default:0 }}</td>
+                <td class="px-3 py-3">
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold
+                        {% if course.status == 'published' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400
+                        {% elif course.status == 'draft' %}bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300
+                        {% elif course.status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400
+                        {% else %}bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400{% endif %}">
+                        {{ course.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-3 py-3">
+                    <div class="flex items-center justify-end gap-0.5">
+                        <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400" title="Ko'rish"><i class="fas fa-eye text-[10px]"></i></a>
+                        <a href="{% url 'courses_admin:edit' pk=course.pk %}" class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400" title="Tahrirlash"><i class="fas fa-pen-to-square text-[10px]"></i></a>
+                        <button type="button" onclick="deleteCourse({{ course.pk }}, '{{ course.title|escapejs }}')" class="w-7 h-7 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-500/20 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-rose-600" title="O'chirish"><i class="fas fa-trash-can text-[10px]"></i></button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="text-center py-16 text-sm text-slate-500 dark:text-slate-400"><i class="fas fa-inbox text-3xl text-slate-300 dark:text-slate-700 mb-3 block"></i>{{ page_settings.empty_title }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     KANBAN VIEW (FIXED — split olib tashlandi)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="viewKanban" class="view-panel hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+
+    <div class="kanban-column rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 p-3" data-kanban="draft">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                Qoralama
+            </h3>
+            <span class="text-xs font-bold text-slate-500 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800" data-kanban-count="draft">0</span>
+        </div>
+        <div class="space-y-2" data-kanban-list="draft"></div>
+    </div>
+
+    <div class="kanban-column rounded-xl border-2 border-dashed border-amber-200 dark:border-amber-500/30 p-3" data-kanban="pending">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-sm text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                Tasdiqlash
+            </h3>
+            <span class="text-xs font-bold text-amber-600 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/20" data-kanban-count="pending">0</span>
+        </div>
+        <div class="space-y-2" data-kanban-list="pending"></div>
+    </div>
+
+    <div class="kanban-column rounded-xl border-2 border-dashed border-emerald-200 dark:border-emerald-500/30 p-3" data-kanban="published">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-sm text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Faol
+            </h3>
+            <span class="text-xs font-bold text-emerald-600 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20" data-kanban-count="published">0</span>
+        </div>
+        <div class="space-y-2" data-kanban-list="published"></div>
+    </div>
+
+    <div class="kanban-column rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 p-3" data-kanban="archived">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-sm text-slate-500 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                Arxiv
+            </h3>
+            <span class="text-xs font-bold text-slate-500 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800" data-kanban-count="archived">0</span>
+        </div>
+        <div class="space-y-2" data-kanban-list="archived"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PAGINATION
+     ═══════════════════════════════════════════════════════════════ -->
+{% if page_obj.has_other_pages %}
+<div class="mt-5 flex items-center justify-center">
+    <nav class="inline-flex items-center gap-0.5 md:gap-1 p-1 rounded-xl md:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        {% if page_obj.has_previous %}
+        <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page=1" class="hidden sm:flex w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 items-center justify-center text-slate-500 dark:text-slate-400 transition-colors">
+            <i class="fas fa-angles-left text-xs"></i>
+        </a>
+        <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors">
+            <i class="fas fa-chevron-left text-xs"></i>
+        </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+            <span class="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-md shadow-indigo-500/30">{{ num }}</span>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}" class="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 transition-colors">
+            <i class="fas fa-chevron-right text-xs"></i>
+        </a>
+        <a href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="hidden sm:flex w-8 h-8 md:w-9 md:h-9 rounded-lg md:rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 items-center justify-center text-slate-500 dark:text-slate-400 transition-colors">
+            <i class="fas fa-angles-right text-xs"></i>
+        </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MOBILE BULK BAR
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="mobileBulkBar" class="hidden md:hidden fixed bottom-[4.5rem] left-3 right-3 z-30 bg-slate-900 dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-700 bulk-enter">
+    <div class="p-2.5">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-lg bg-indigo-500 flex items-center justify-center"><i class="fas fa-check-double text-[10px] text-white"></i></div>
+                <span class="text-xs font-semibold text-white"><span id="mobileBulkCount">0</span> {{ page_settings.bulk_label }}</span>
+            </div>
+            <button type="button" id="mobileBulkCancel" class="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center text-white text-[10px]"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="grid grid-cols-5 gap-1.5">
+            <button type="button" data-bulk="publish" class="bulk-action-btn flex flex-col items-center gap-1 py-2 rounded-lg bg-emerald-500/20 text-emerald-300"><i class="fas fa-rocket text-xs"></i><span class="text-[9px] font-semibold">E'lon</span></button>
+            <button type="button" data-bulk="unpublish" class="bulk-action-btn flex flex-col items-center gap-1 py-2 rounded-lg bg-slate-700 text-slate-300"><i class="fas fa-eye-slash text-xs"></i><span class="text-[9px] font-semibold">Yopish</span></button>
+            <button type="button" data-bulk="feature" class="bulk-action-btn flex flex-col items-center gap-1 py-2 rounded-lg bg-amber-500/20 text-amber-300"><i class="fas fa-star text-xs"></i><span class="text-[9px] font-semibold">Tanla</span></button>
+            <button type="button" data-bulk="archive" class="bulk-action-btn flex flex-col items-center gap-1 py-2 rounded-lg bg-slate-700 text-slate-300"><i class="fas fa-box-archive text-xs"></i><span class="text-[9px] font-semibold">Arxiv</span></button>
+            <button type="button" data-bulk="delete" class="bulk-action-btn flex flex-col items-center gap-1 py-2 rounded-lg bg-rose-500/20 text-rose-300"><i class="fas fa-trash text-xs"></i><span class="text-[9px] font-semibold">O'chir</span></button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TOAST CONTAINER
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="toastContainer" class="fixed bottom-24 md:bottom-6 right-3 left-3 md:left-auto md:right-6 z-[70] flex flex-col gap-2 pointer-events-none md:max-w-sm"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CONFIRM MODAL
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="confirmModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden modal-enter">
+        <div class="p-5">
+            <div class="flex items-start gap-3">
+                <div class="w-11 h-11 rounded-full bg-rose-100 dark:bg-rose-500/15 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 id="confirmTitle" class="font-display font-bold text-slate-900 dark:text-white text-base"></h3>
+                    <p id="confirmMessage" class="mt-1 text-sm text-slate-500 dark:text-slate-400 break-words"></p>
+                    <p class="mt-2 text-xs text-rose-600 dark:text-rose-400 font-medium">
+                        <i class="fas fa-circle-exclamation mr-1"></i>{{ page_settings.msg_confirm_delete_extra }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-end gap-2">
+            <button type="button" id="confirmCancel" class="px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-100 transition-colors">
+                {{ page_settings.bulk_cancel }}
+            </button>
+            <button type="button" id="confirmOk" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold transition-colors">
+                {{ page_settings.card_delete_btn }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PREVIEW MODAL
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="previewModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+    <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden modal-enter">
+        <div id="previewContent" class="p-6"></div>
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-end gap-2">
+            <button type="button" onclick="closePreview()" class="px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-100 transition-colors">
+                Yopish
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HELP MODAL
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="helpModal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 modal-enter">
+        <div class="p-5 border-b border-slate-200 dark:border-slate-800">
+            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fas fa-keyboard text-indigo-500"></i>
+                Klaviatura yorliqlari
+            </h3>
+        </div>
+        <div class="p-5 space-y-2.5">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Yangi kurs yaratish</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">Ctrl+N</kbd>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Qidirish</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">Ctrl+K</kbd>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Hammasini tanlash</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">Ctrl+A</kbd>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Sahifani yangilash</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">F2</kbd>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Rejim almashtirish</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">Ctrl+Shift+D</kbd>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">CSV eksport</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">Ctrl+E</kbd>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Chop etish</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">Ctrl+P</kbd>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-600 dark:text-slate-400">Bekor qilish</span>
+                <kbd class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">Esc</kbd>
+            </div>
+        </div>
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+            <button type="button" onclick="document.getElementById('helpModal').classList.add('hidden')" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors">
+                Tushundim
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+function getCookie(name) {
+    let v = null;
+    document.cookie.split(';').forEach(c => {
+        const [k, val] = c.trim().split('=');
+        if (k === name) v = decodeURIComponent(val);
+    });
+    return v;
+}
+const CSRF = getCookie('csrftoken');
+
+function toast(message, type = 'success') {
+    const colors = {
+        success: 'bg-emerald-500',
+        error: 'bg-rose-500',
+        warning: 'bg-amber-500',
+        info: 'bg-indigo-500'
+    };
+    const icons = {
+        success: 'fa-circle-check',
+        error: 'fa-circle-xmark',
+        warning: 'fa-triangle-exclamation',
+        info: 'fa-circle-info'
+    };
+    const el = document.createElement('div');
+    el.className = `pointer-events-auto px-3.5 py-2.5 rounded-xl text-white text-xs md:text-sm font-semibold shadow-2xl flex items-center gap-2 toast-enter ${colors[type] || colors.info}`;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span class="flex-1">${message}</span>`;
+    document.getElementById('toastContainer').appendChild(el);
+    setTimeout(() => {
+        el.classList.add('toast-exit');
+        el.classList.remove('toast-enter');
+        setTimeout(() => el.remove(), 300);
+    }, 3500);
+}
+window.toast = toast;
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE SEARCH
+   ═══════════════════════════════════════════════════════════════ */
+(function initLiveSearch() {
+    const searchInput = document.getElementById('liveSearchInput');
+    const searchLoading = document.getElementById('searchLoading');
+    const filterForm = document.getElementById('filterForm');
+    if (!searchInput) return;
+
+    let debounceTimer = null;
+    let lastQuery = searchInput.value.trim();
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            if (e.submitter && e.submitter.type === 'submit') return;
+            e.preventDefault();
+        });
+    }
+
+    function performSearch(value) {
+        if (value === lastQuery) return;
+        lastQuery = value;
+        if (searchLoading) searchLoading.classList.add('active');
+
+        const url = new URL(window.location.href);
+        if (value) {
+            url.searchParams.set('q', value);
+        } else {
+            url.searchParams.delete('q');
+        }
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+    }
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const value = this.value.trim();
+        debounceTimer = setTimeout(() => performSearch(value), 400);
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(debounceTimer);
+            performSearch(this.value.trim());
+        }
+        if (e.key === 'Escape') {
+            this.value = '';
+            clearTimeout(debounceTimer);
+            performSearch('');
+        }
+    });
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   VIEW SWITCHER
+   ═══════════════════════════════════════════════════════════════ */
+const viewPanels = {
+    grid: document.getElementById('viewGrid'),
+    list: document.getElementById('viewList'),
+    compact: document.getElementById('viewCompact'),
+    kanban: document.getElementById('viewKanban'),
+};
+const viewBtns = document.querySelectorAll('.view-btn');
+
+function setView(view) {
+    if (!viewPanels[view]) view = 'grid';
+    Object.keys(viewPanels).forEach(k => {
+        if (viewPanels[k]) viewPanels[k].classList.toggle('hidden', k !== view);
+    });
+    viewBtns.forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    try { localStorage.setItem('courses-view', view); } catch(e) {}
+
+    if (view === 'kanban') initKanban();
+}
+viewBtns.forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+(function() {
+    try {
+        const saved = localStorage.getItem('courses-view') || 'grid';
+        if (window.innerWidth < 640 && saved === 'compact') setView('grid');
+        else setView(saved);
+    } catch(e) { setView('grid'); }
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   KANBAN INIT
+   ═══════════════════════════════════════════════════════════════ */
+function initKanban() {
+    document.querySelectorAll('[data-kanban-list]').forEach(el => el.innerHTML = '');
+    document.querySelectorAll('[data-kanban-count]').forEach(el => el.textContent = '0');
+
+    const gridCards = document.querySelectorAll('#viewGrid .course-card');
+    const counts = { draft: 0, pending: 0, published: 0, archived: 0 };
+
+    gridCards.forEach(card => {
+        const status = card.dataset.status;
+        const list = document.querySelector(`[data-kanban-list="${status}"]`);
+        if (!list) return;
+
+        const cloned = card.cloneNode(true);
+        cloned.classList.remove('opacity-0', 'scale-95');
+        list.appendChild(cloned);
+        counts[status] = (counts[status] || 0) + 1;
+    });
+
+    Object.keys(counts).forEach(k => {
+        const countEl = document.querySelector(`[data-kanban-count="${k}"]`);
+        if (countEl) countEl.textContent = counts[k];
+    });
+
+    document.querySelectorAll('.kanban-column').forEach(col => {
+        col.addEventListener('dragover', e => {
+            e.preventDefault();
+            col.classList.add('drag-over');
+        });
+        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        col.addEventListener('drop', async e => {
+            e.preventDefault();
+            col.classList.remove('drag-over');
+            const newStatus = col.dataset.kanban;
+            if (!newStatus) return;
+            toast('Kanban yangilash — tez orada qo\'shiladi', 'info');
+        });
+    });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FILTERS
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById('toggleFiltersBtn')?.addEventListener('click', () => {
+    document.getElementById('filtersPanel')?.classList.toggle('hidden');
+});
+
+document.getElementById('perPageSelect')?.addEventListener('change', (e) => {
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', e.target.value);
+    url.searchParams.delete('page');
+    window.location = url.toString();
+});
+
+document.getElementById('refreshBtn')?.addEventListener('click', () => window.location.reload());
+
+/* ═══════════════════════════════════════════════════════════════
+   EXPORT MENU
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById('exportBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('exportMenu')?.classList.toggle('hidden');
+});
+document.addEventListener('click', () => {
+    document.getElementById('exportMenu')?.classList.add('hidden');
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   HELP MODAL
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById('helpBtn')?.addEventListener('click', () => {
+    document.getElementById('helpModal')?.classList.remove('hidden');
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   BULK SELECTION
+   ═══════════════════════════════════════════════════════════════ */
+const bulkBar = document.getElementById('bulkBar');
+const bulkCount = document.getElementById('bulkCount');
+const mobileBulkBar = document.getElementById('mobileBulkBar');
+const mobileBulkCount = document.getElementById('mobileBulkCount');
+
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('.course-checkbox:checked')).map(c => c.value);
+}
+
+function updateBulkBar() {
+    const ids = getSelectedIds();
+    const has = ids.length > 0;
+
+    document.querySelectorAll('.course-card').forEach(card => {
+        const cb = card.querySelector('.course-checkbox');
+        card.classList.toggle('selected', !!(cb && cb.checked));
+    });
+
+    if (has) {
+        bulkBar?.classList.remove('hidden');
+        mobileBulkBar?.classList.remove('hidden');
+        if (bulkCount) bulkCount.textContent = ids.length;
+        if (mobileBulkCount) mobileBulkCount.textContent = ids.length;
+    } else {
+        bulkBar?.classList.add('hidden');
+        mobileBulkBar?.classList.add('hidden');
+    }
+}
+
+document.addEventListener('change', (e) => {
+    if (e.target.classList?.contains('course-checkbox')) updateBulkBar();
+    if (e.target.id === 'selectAllCompact') {
+        document.querySelectorAll('.course-checkbox').forEach(c => c.checked = e.target.checked);
+        updateBulkBar();
+    }
+});
+
+document.getElementById('selectAllTop')?.addEventListener('click', () => {
+    const allChecked = getSelectedIds().length === document.querySelectorAll('.course-checkbox').length;
+    document.querySelectorAll('.course-checkbox').forEach(c => c.checked = !allChecked);
+    updateBulkBar();
+});
+
+function clearSelection() {
+    document.querySelectorAll('.course-checkbox').forEach(c => c.checked = false);
+    const sa = document.getElementById('selectAllCompact');
+    if (sa) sa.checked = false;
+    updateBulkBar();
+}
+document.getElementById('bulkCancel')?.addEventListener('click', clearSelection);
+document.getElementById('mobileBulkCancel')?.addEventListener('click', clearSelection);
+
+/* ═══════════════════════════════════════════════════════════════
+   BULK ACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.bulk-action-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+        const action = btn.dataset.bulk;
+        const ids = getSelectedIds();
+        if (!ids.length) return;
+
+        if (action === 'delete') {
+            const ok = await confirmAction('{{ page_settings.msg_confirm_bulk_delete|escapejs }}', 'Ommaviy o\'chirish');
+            if (!ok) return;
+        }
+
+        const form = new FormData();
+        form.append('action', action);
+        ids.forEach(id => form.append('ids[]', id));
+
+        try {
+            const res = await fetch("{% url 'courses_admin:bulk' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+                body: form,
+            });
+            const data = await res.json();
+            if (data.success) {
+                toast(data.message, 'success');
+                setTimeout(() => window.location.reload(), 700);
+            } else {
+                toast(data.error || '{{ page_settings.msg_error|escapejs }}', 'error');
+            }
+        } catch (err) {
+            toast('{{ page_settings.msg_network_error|escapejs }}', 'error');
+        }
+    });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   DELETE
+   ═══════════════════════════════════════════════════════════════ */
+function deleteCourse(pk, title) {
+    confirmAction('{{ page_settings.msg_confirm_delete|escapejs }}', title || 'Kursni o\'chirish').then(ok => {
+        if (!ok) return;
+        fetch(`/boshqaruv/kurslar/${pk}/ochirish/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                toast('{{ page_settings.msg_deleted|escapejs }}', 'success');
+                setTimeout(() => window.location.reload(), 500);
+            } else {
+                toast(data.error || '{{ page_settings.msg_error|escapejs }}', 'error');
+            }
+        })
+        .catch(() => toast('{{ page_settings.msg_network_error|escapejs }}', 'error'));
+    });
+}
+window.deleteCourse = deleteCourse;
+
+/* ═══════════════════════════════════════════════════════════════
+   CONFIRM MODAL
+   ═══════════════════════════════════════════════════════════════ */
+function confirmAction(message, title) {
+    return new Promise(resolve => {
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('confirmTitle').textContent = title || 'Tasdiqlash';
+        document.getElementById('confirmMessage').textContent = message;
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        const okBtn = document.getElementById('confirmOk');
+        const cancelBtn = document.getElementById('confirmCancel');
+
+        function cleanup(result) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+            modal.removeEventListener('click', onBackdrop);
+            document.removeEventListener('keydown', onEsc);
+            resolve(result);
+        }
+        function onOk() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+        function onBackdrop(e) { if (e.target === modal) cleanup(false); }
+        function onEsc(e) { if (e.key === 'Escape') cleanup(false); }
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        modal.addEventListener('click', onBackdrop);
+        document.addEventListener('keydown', onEsc);
+    });
+}
+window.confirmAction = confirmAction;
+
+/* ═══════════════════════════════════════════════════════════════
+   PREVIEW MODAL
+   ═══════════════════════════════════════════════════════════════ */
+function previewCourse(pk) {
+    const card = document.querySelector(`[data-course-id="${pk}"]`);
+    if (!card) return;
+
+    const title = card.querySelector('h3')?.textContent?.trim() || '—';
+    const description = card.querySelector('p')?.textContent?.trim() || '—';
+    const coverImg = card.querySelector('img')?.src || '';
+
+    document.getElementById('previewContent').innerHTML = `
+        <div class="flex items-start justify-between mb-4">
+            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">${title}</h3>
+            <button type="button" onclick="closePreview()" class="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+        ${coverImg ? `<img src="${coverImg}" class="w-full h-48 object-cover rounded-lg mb-4" alt="">` : ''}
+        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">${description}</p>
+        <div class="flex gap-2">
+            <a href="/boshqaruv/kurslar/${pk}/" class="flex-1 text-center px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors">
+                Batafsil ko'rish
+            </a>
+            <a href="/boshqaruv/kurslar/${pk}/tahrirlash/" class="flex-1 text-center px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold transition-colors">
+                Tahrirlash
+            </a>
+        </div>
+    `;
+
+    document.getElementById('previewModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+window.previewCourse = previewCourse;
+
+function closePreview() {
+    document.getElementById('previewModal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+window.closePreview = closePreview;
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS (kengaytirilgan)
+   ═══════════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+    // Ctrl+K — Search
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('liveSearchInput')?.focus();
+    }
+    // Ctrl+N — New
+    if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+        e.preventDefault();
+        window.location.href = "{% url 'courses_admin:create' %}";
+    }
+    // Ctrl+A — Select all
+    if ((e.metaKey || e.ctrlKey) && e.key === 'a' &&
+        !e.target.matches('input, textarea')) {
+        e.preventDefault();
+        document.querySelectorAll('.course-checkbox').forEach(c => c.checked = true);
+        updateBulkBar();
+    }
+    // Ctrl+E — Export CSV
+    if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+        e.preventDefault();
+        window.location.href = '?export=csv';
+    }
+    // Ctrl+Shift+D — Dark mode toggle
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme',
+            document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+        );
+        toast('Rejim o\'zgardi', 'info', 1500);
+    }
+    // F2 — Refresh
+    if (e.key === 'F2') {
+        e.preventDefault();
+        window.location.reload();
+    }
+    // Esc — Clear
+    if (e.key === 'Escape') {
+        document.getElementById('filtersPanel')?.classList.add('hidden');
+        document.getElementById('exportMenu')?.classList.add('hidden');
+        document.getElementById('confirmModal')?.classList.add('hidden');
+        document.getElementById('previewModal')?.classList.add('hidden');
+        document.getElementById('helpModal')?.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   THEME INIT (tizim sozlamasi)
+   ═══════════════════════════════════════════════════════════════ */
+(function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+    }
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTO-INIT
+   ═══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Courses list loaded');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1142 @@
+{% extends "student/telegram_base.html" %}
+
+{% block title %}{{ homework.title }} | DIGION{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     BREADCRUMB
+     ═══════════════════════════════════════════════════════════ -->
+<nav class="flex items-center gap-2 text-xs mb-4 animate-fade-in"
+     style="color: var(--tg-hint);">
+  <a href="/" class="hover:underline">
+    <i class="fas fa-home"></i> Bosh
+  </a>
+  <i class="fas fa-chevron-right text-[8px]"></i>
+  <a href="/courses/" class="hover:underline">
+    {{ course.title|truncatechars:25 }}
+  </a>
+  <i class="fas fa-chevron-right text-[8px]"></i>
+  <span class="truncate">{{ homework.title|truncatechars:20 }}</span>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card card-gradient mb-4 animate-slide-up" style="padding: 24px;">
+  <div class="flex items-start justify-between gap-3 mb-3">
+    <div class="flex-1">
+      <p class="text-xs uppercase tracking-wider opacity-80 mb-1">
+        <i class="fas fa-book mr-1"></i>
+        {{ course.title }}
+      </p>
+      <h1 class="text-xl font-bold leading-tight mb-2">
+        {{ homework.title }}
+      </h1>
+      <p class="text-sm opacity-90">
+        📝 {{ lesson.lesson_number }}-dars — {{ lesson.title|truncatechars:40 }}
+      </p>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-2 mt-4">
+    {% if group_lesson %}
+    <span class="px-3 py-1 rounded-full text-xs font-semibold"
+          style="background: rgba(255,255,255,0.2);">
+      <i class="fas fa-users mr-1"></i>
+      {{ group_lesson.group.name }}
+    </span>
+    {% endif %}
+    <span class="px-3 py-1 rounded-full text-xs font-semibold"
+          style="background: rgba(255,255,255,0.2);">
+      <i class="fas fa-trophy mr-1"></i>
+      {{ homework.max_score }} ball
+    </span>
+    {% if homework.deadline_days %}
+    <span class="px-3 py-1 rounded-full text-xs font-semibold"
+          style="background: rgba(255,255,255,0.2);">
+      <i class="fas fa-clock mr-1"></i>
+      {{ homework.deadline_days }} kun
+    </span>
+    {% endif %}
+    {% if homework.homework_type %}
+    <span class="px-3 py-1 rounded-full text-xs font-semibold"
+          style="background: rgba(255,255,255,0.2);">
+      <i class="fas fa-tag mr-1"></i>
+      {{ homework.get_homework_type_display }}
+    </span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PROGRESS STEPPER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up" style="padding: 20px;">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="font-bold text-sm">
+      <i class="fas fa-list-check text-primary mr-2"></i>
+      Jarayon
+    </h3>
+    <span class="badge badge-primary" id="progressLabel">
+      {{ submission|yesno:"Topshirilgan,Kutilmoqda" }}
+    </span>
+  </div>
+
+  <div class="flex items-center justify-between relative">
+    <!-- Line -->
+    <div class="absolute top-4 left-8 right-8 h-0.5"
+         style="background: var(--tg-line); z-index: 0;"></div>
+    <div id="progressBarFill"
+         class="absolute top-4 left-8 h-0.5 transition-all duration-500"
+         style="background: linear-gradient(90deg, #4F46E5, #7C3AED); z-index: 1; width: 0%;"></div>
+
+    <!-- Step 1 -->
+    <div class="flex flex-col items-center relative z-10" data-step="1">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+           style="background: #10B981; color: white;">
+        <i class="fas fa-check"></i>
+      </div>
+      <p class="text-[10px] mt-1.5 font-medium text-center">
+        Yuborildi
+      </p>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="flex flex-col items-center relative z-10" data-step="2">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+           id="step2Circle"
+           style="background: var(--tg-line); color: var(--tg-hint);">
+        <i class="fas fa-pen"></i>
+      </div>
+      <p class="text-[10px] mt-1.5 font-medium text-center">
+        Topshirish
+      </p>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="flex flex-col items-center relative z-10" data-step="3">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+           id="step3Circle"
+           style="background: var(--tg-line); color: var(--tg-hint);">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <p class="text-[10px] mt-1.5 font-medium text-center">
+        Tekshirish
+      </p>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="flex flex-col items-center relative z-10" data-step="4">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all"
+           id="step4Circle"
+           style="background: var(--tg-line); color: var(--tg-hint);">
+        <i class="fas fa-star"></i>
+      </div>
+      <p class="text-[10px] mt-1.5 font-medium text-center">
+        Baho
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DEADLINE
+     ═══════════════════════════════════════════════════════════ -->
+{% if deadline %}
+  {% if is_late %}
+  <div class="alert alert-error flex items-center gap-3 animate-slide-up">
+    <i class="fas fa-exclamation-triangle text-2xl"></i>
+    <div class="flex-1">
+      <p class="font-bold">Muddat o'tgan!</p>
+      <p class="text-xs mt-1">{{ deadline|date:"d.m.Y H:i" }}</p>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-success flex items-start gap-3 animate-slide-up">
+    <i class="fas fa-check-circle text-2xl"></i>
+    <div class="flex-1">
+      <p class="font-bold">Muddat</p>
+      <p class="text-xs mt-1 mb-2">{{ deadline|date:"d.m.Y H:i" }}</p>
+      <!-- Countdown -->
+      <div class="flex items-center gap-2 text-xs font-mono"
+           id="countdown"
+           data-deadline="{{ deadline|date:'c' }}">
+        <i class="fas fa-hourglass-half"></i>
+        <span id="countdownText">hisoblanmoqda...</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     TAVSIF
+     ═══════════════════════════════════════════════════════════ -->
+{% if homework.description %}
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center gap-2">
+      <i class="fas fa-info-circle text-primary"></i>
+      <h3 class="font-bold text-sm uppercase tracking-wide">Vazifa tavsifi</h3>
+    </div>
+    <button onclick="copyText('{{ homework.description|escapejs }}')"
+            class="text-xs px-2 py-1 rounded-lg"
+            style="background: var(--tg-bg); color: var(--tg-hint);">
+      <i class="fas fa-copy"></i>
+    </button>
+  </div>
+  <div class="text-sm leading-relaxed" style="color: var(--tg-text);">
+    {{ homework.description|linebreaks }}
+  </div>
+</div>
+{% endif %}
+
+{% if homework.instructions %}
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-3">
+    <i class="fas fa-list-ol text-accent"></i>
+    <h3 class="font-bold text-sm uppercase tracking-wide">Ko'rsatmalar</h3>
+  </div>
+  <div class="text-sm leading-relaxed">
+    {{ homework.instructions|linebreaks }}
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     FAYL BIRIKTIRILGAN BO'LSA
+     ═══════════════════════════════════════════════════════════ -->
+{% if homework.task_file %}
+<div class="card mb-4 animate-slide-up" style="border-left: 4px solid #06B6D4;">
+  <div class="flex items-center gap-3">
+    <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+         style="background: rgba(6, 182, 212, 0.15);">
+      <i class="fas fa-file-download text-accent text-xl"></i>
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="font-bold text-sm">Vazifa fayli</p>
+      <p class="text-xs truncate" style="color: var(--tg-hint);">
+        {{ homework.task_file.name }}
+      </p>
+    </div>
+    <a href="{{ homework.task_file.url }}"
+       download
+       class="btn btn-sm"
+       style="background: var(--tg-line); color: var(--tg-text); width: auto;">
+      <i class="fas fa-download"></i>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     BOSHLANG'ICH KOD (agar bo'lsa)
+     ═══════════════════════════════════════════════════════════ -->
+{% if homework.starter_code %}
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center gap-2">
+      <i class="fas fa-code text-secondary"></i>
+      <h3 class="font-bold text-sm uppercase tracking-wide">Boshlang'ich kod</h3>
+    </div>
+    <button onclick="copyText(document.getElementById('starterCode').textContent)"
+            class="text-xs px-2 py-1 rounded-lg"
+            style="background: var(--tg-bg); color: var(--tg-hint);">
+      <i class="fas fa-copy"></i>
+    </button>
+  </div>
+  <pre id="starterCode"
+       class="p-3 rounded-xl text-xs font-mono overflow-x-auto"
+       style="background: var(--tg-bg); color: var(--tg-text);">{{ homework.starter_code }}</pre>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     OLDINGI SUBMISSION
+     ═══════════════════════════════════════════════════════════ -->
+{% if submission %}
+<div class="card mb-4 animate-slide-up" style="border-left: 4px solid #4F46E5;">
+  <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center gap-2">
+      <i class="fas fa-check-circle text-success text-xl"></i>
+      <h3 class="font-bold">Siz topshirgansiz</h3>
+    </div>
+    {% if submission.status == 'graded' %}
+    <span class="badge badge-success">Baholangan</span>
+    {% elif submission.status == 'pending' %}
+    <span class="badge badge-warning">Tekshirilmoqda</span>
+    {% elif submission.status == 'late' %}
+    <span class="badge badge-danger">Kechikkan</span>
+    {% endif %}
+  </div>
+
+  <div class="space-y-2 text-sm">
+    <p>
+      <i class="far fa-calendar-alt mr-2" style="color: var(--tg-hint);"></i>
+      {{ submission.submitted_at|date:"d.m.Y H:i" }}
+    </p>
+
+    {% if submission.is_late %}
+    <p class="text-rose">
+      <i class="fas fa-clock mr-2"></i>
+      <b>Kechikkan</b>
+    </p>
+    {% endif %}
+
+    {% if submission.answer_text %}
+    <div class="p-3 rounded-xl text-xs" style="background: var(--tg-bg);">
+      <p class="font-bold mb-1" style="color: var(--tg-hint);">📝 Javob matni:</p>
+      <p class="line-clamp-4">{{ submission.answer_text|truncatechars:200 }}</p>
+    </div>
+    {% endif %}
+
+    {% if submission.answer_code %}
+    <div class="p-3 rounded-xl text-xs" style="background: var(--tg-bg);">
+      <p class="font-bold mb-1" style="color: var(--tg-hint);">💻 Kod:</p>
+      <pre class="font-mono text-xs overflow-x-auto">{{ submission.answer_code|truncatechars:200 }}</pre>
+    </div>
+    {% endif %}
+
+    {% if submission.answer_file %}
+    <div class="p-3 rounded-xl flex items-center gap-2 text-xs"
+         style="background: var(--tg-bg);">
+      <i class="fas fa-file text-accent"></i>
+      <span class="flex-1 truncate">{{ submission.answer_file.name }}</span>
+      <a href="{{ submission.answer_file.url }}"
+         download
+         class="text-primary">
+        <i class="fas fa-download"></i>
+      </a>
+    </div>
+    {% endif %}
+
+    {% if submission.status == 'graded' %}
+    <div class="mt-3 p-4 rounded-2xl"
+         style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.1));">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs font-bold" style="color: var(--tg-hint);">
+          🏆 Natija
+        </p>
+        <span class="badge badge-primary">
+          {{ submission.grade_letter }}
+        </span>
+      </div>
+      <p class="text-2xl font-extrabold text-gradient">
+        {{ submission.score }}/{{ homework.max_score }}
+      </p>
+      <p class="text-xs mt-1" style="color: var(--tg-hint);">
+        {{ submission.percent }}% · {{ submission.graded_at|date:"d.m.Y H:i" }}
+      </p>
+    </div>
+    {% endif %}
+
+    {% if submission.feedback %}
+    <div class="mt-3 p-3 rounded-xl text-xs"
+         style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10B981;">
+      <p class="font-bold mb-1">💬 Ustoz izohi:</p>
+      <p>{{ submission.feedback }}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOPSHIRISH FORMASI
+     ═══════════════════════════════════════════════════════════ -->
+{% if can_submit %}
+<form id="submissionForm" enctype="multipart/form-data" class="animate-slide-up">
+  {% csrf_token %}
+  <input type="hidden" name="init_data" id="initDataInput">
+  <input type="hidden" name="draft_id" id="draftIdInput">
+
+  <div class="card mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-pen-to-square text-secondary"></i>
+        <h3 class="font-bold text-sm uppercase tracking-wide">
+          Javobingizni kiriting
+        </h3>
+      </div>
+      <span class="text-[10px] px-2 py-1 rounded-lg"
+            id="draftStatus"
+            style="background: var(--tg-bg); color: var(--tg-hint);">
+        <i class="fas fa-save"></i>
+        Draft
+      </span>
+    </div>
+
+    <!-- Matn javobi -->
+    <div class="mb-4">
+      <label for="answer_text" class="block text-sm font-medium mb-2">
+        📝 Javob matni
+        <span class="text-xs font-normal" style="color: var(--tg-hint);">
+          (min: {{ min_text_length }} belgi)
+        </span>
+      </label>
+      <textarea
+        id="answer_text"
+        name="answer_text"
+        rows="6"
+        placeholder="Javobingizni shu yerga yozing..."
+        oninput="updateCharCount()"
+        class="w-full px-4 py-3 rounded-xl text-sm resize-y focus:ring-2 focus:ring-primary/40 outline-none transition-all"
+        style="background: var(--tg-bg); color: var(--tg-text); border: 1px solid var(--tg-line);"
+      >{{ submission.answer_text|default:'' }}</textarea>
+      <div class="flex items-center justify-between text-xs mt-1">
+        <span style="color: var(--tg-hint);">
+          <i class="fas fa-keyboard"></i> Ctrl+S — Saqlash
+        </span>
+        <span style="color: var(--tg-hint);">
+          <span id="charCount">0</span> belgi
+        </span>
+      </div>
+    </div>
+
+    <!-- Kod -->
+    <div class="mb-4">
+      <label for="answer_code" class="block text-sm font-medium mb-2">
+        💻 Kod (ixtiyoriy)
+      </label>
+      <textarea
+        id="answer_code"
+        name="answer_code"
+        rows="5"
+        placeholder="// Kodni shu yerga yozing..."
+        class="w-full px-4 py-3 rounded-xl text-sm font-mono resize-y focus:ring-2 focus:ring-primary/40 outline-none"
+        style="background: var(--tg-bg); color: var(--tg-text); border: 1px solid var(--tg-line);"
+      >{{ submission.answer_code|default:'' }}</textarea>
+    </div>
+
+    <!-- Fayl yuklash (drag & drop) -->
+    <div class="mb-2">
+      <label class="block text-sm font-medium mb-2">
+        📎 Fayl yuklash
+      </label>
+
+      <div id="dropZone"
+           class="border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all"
+           style="border-color: var(--tg-line); background: var(--tg-bg);">
+        <input
+          type="file"
+          id="answer_file"
+          name="answer_file"
+          onchange="checkFileSize(this)"
+          class="hidden"
+        >
+        <div id="dropZoneContent">
+          <i class="fas fa-cloud-upload-alt text-4xl mb-3"
+             style="color: var(--tg-hint);"></i>
+          <p class="text-sm font-medium mb-1">
+            Faylni bu yerga tashlang
+          </p>
+          <p class="text-xs" style="color: var(--tg-hint);">
+            yoki <b class="text-primary">tanlang</b>
+          </p>
+          <p class="text-[10px] mt-2" style="color: var(--tg-hint);">
+            Minimal hajm: <b>{{ min_file_size_kb }} KB</b> ·
+            PDF, DOC, ZIP, Rasm, Video
+          </p>
+        </div>
+
+        <!-- Preview -->
+        <div id="filePreview" class="hidden">
+          <div class="flex items-center gap-3 p-3 rounded-xl"
+               style="background: var(--tg-card);">
+            <div id="fileIcon"
+                 class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                 style="background: var(--tg-bg);">
+              📎
+            </div>
+            <div class="flex-1 min-w-0 text-left">
+              <p class="font-semibold text-sm truncate" id="fileName">—</p>
+              <p class="text-xs" style="color: var(--tg-hint);" id="fileSize">—</p>
+            </div>
+            <button type="button"
+                    onclick="clearFile(event)"
+                    class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                    style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">
+              <i class="fas fa-times text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tugmalar -->
+  <div class="space-y-2">
+    <button type="submit" id="submitBtn" class="btn btn-primary">
+      <span id="btnText">
+        <i class="fas fa-paper-plane mr-2"></i>
+        Yuborish
+      </span>
+      <span id="btnLoading" class="loading-spinner hidden"></span>
+    </button>
+
+    <button type="button"
+            onclick="saveDraft()"
+            class="btn"
+            style="background: var(--tg-line); color: var(--tg-text);">
+      <i class="fas fa-save"></i>
+      <span>Draft saqlash</span>
+    </button>
+  </div>
+</form>
+
+{% else %}
+<!-- ═══════════════════════════════════════════════════════════
+     TOPSHIRIB BO'LMAYDI
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card animate-slide-up" style="border-left: 4px solid #F43F5E;">
+  <div class="flex items-start gap-3">
+    <i class="fas fa-lock text-rose text-3xl"></i>
+    <div class="flex-1">
+      <p class="font-bold">Topshirib bo'lmaydi</p>
+      <p class="text-sm mt-1" style="color: var(--tg-hint);">
+        {{ submit_block_reason }}
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOYDALI MA'LUMOTLAR
+     ═══════════════════════════════════════════════════════════ -->
+{% if homework.extra_links %}
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-3">
+    <i class="fas fa-link text-primary"></i>
+    <h3 class="font-bold text-sm uppercase tracking-wide">Foydali havolalar</h3>
+  </div>
+
+  <div class="space-y-2">
+    {% for link in homework.extra_links %}
+    <a href="{{ link.url }}"
+       target="_blank"
+       class="flex items-center gap-3 p-3 rounded-xl transition-all card-hover"
+       style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-external-link-alt text-primary text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm truncate">{{ link.title }}</p>
+        <p class="text-xs truncate" style="color: var(--tg-hint);">
+          {{ link.url|truncatechars:40 }}
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     FAQ
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(124, 58, 237, 0.15);">
+      <i class="fas fa-question-circle text-secondary"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Yordam
+    </h3>
+  </div>
+
+  <div class="space-y-2">
+    <details class="group rounded-xl overflow-hidden" style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Fayl qanday yuklanadi?
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed" style="color: var(--tg-hint);">
+        Faylni "drag & drop" qiling yoki bosib tanlang. Minimal hajm —
+        <b>{{ min_file_size_kb }} KB</b>. Rasm, PDF, DOC, ZIP va video fayllar qabul qilinadi.
+      </div>
+    </details>
+
+    <details class="group rounded-xl overflow-hidden" style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Qayta topshirish mumkinmi?
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed" style="color: var(--tg-hint);">
+        <b>Ha</b>, agar o'qituvchi qayta topshirishga ruxsat bergan bo'lsa.
+        Aks holda bir marta topshirishingiz kerak.
+      </div>
+    </details>
+
+    <details class="group rounded-xl overflow-hidden" style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Muddat o'tsa nima bo'ladi?
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed" style="color: var(--tg-hint);">
+        Agar kech topshirishga ruxsat bo'lmasa — topshira olmaysiz.
+        Ba'zi hollarda jarima foizi qo'llanishi mumkin.
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MUAMMO HAQIDA XABAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-3">
+    <i class="fas fa-flag text-warm"></i>
+    <div class="flex-1">
+      <p class="font-bold text-sm">Muammo bormi?</p>
+      <p class="text-xs mt-0.5" style="color: var(--tg-hint);">
+        Vazifada xato yoki tushunarsiz joy bo'lsa — xabar bering
+      </p>
+    </div>
+    <button onclick="reportIssue()"
+            class="btn btn-sm"
+            style="background: rgba(245, 158, 11, 0.15); color: #F59E0B; width: auto;">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PASTKI QISM
+     ═══════════════════════════════════════════════════════════ -->
+<div class="text-center py-6">
+  <p class="text-xs mb-2" style="color: var(--tg-hint);">
+    Vazifa ID: <span class="font-mono">#{{ homework.pk }}</span>
+  </p>
+  <button onclick="scrollToTop()"
+          class="text-sm font-bold text-gradient">
+    ⬆️ Yuqoriga
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SUCCESS OVERLAY
+     ═══════════════════════════════════════════════════════════ -->
+<div id="successOverlay"
+     class="hidden fixed inset-0 z-[99999] flex items-center justify-center"
+     style="background: var(--tg-overlay); backdrop-filter: blur(8px);">
+  <div class="text-center p-8 rounded-3xl animate-scale-in"
+       style="background: var(--tg-card); max-width: 320px;">
+    <div class="text-7xl mb-4 animate-bounce">🎉</div>
+    <h2 class="text-xl font-extrabold mb-2">Muvaffaqiyatli!</h2>
+    <p class="text-sm mb-4" style="color: var(--tg-hint);">
+      Javobingiz qabul qilindi
+    </p>
+    <div class="loading-spinner loading-spinner-dark mx-auto"
+         style="width: 24px; height: 24px;"></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+// ═══════════════════════════════════════════════════════════
+// KONFIGURATSIYA
+// ═══════════════════════════════════════════════════════════
+const MIN_FILE_SIZE_KB = {{ min_file_size_kb }};
+const MIN_TEXT_LENGTH = {{ min_text_length }};
+const HOMEWORK_ID = {{ homework.pk }};
+const HAS_SUBMISSION = {% if submission %}true{% else %}false{% endif %};
+const DRAFT_KEY = `homework_draft_${HOMEWORK_ID}`;
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(function init() {
+  console.log('📝 Homework page', {
+    homework_id: HOMEWORK_ID,
+    has_submission: HAS_SUBMISSION,
+    can_submit: {% if can_submit %}true{% else %}false{% endif %},
+  });
+
+  // initData
+  const initInput = document.getElementById('initDataInput');
+  if (initInput) initInput.value = getInitData();
+
+  // Char count
+  updateCharCount();
+
+  // Countdown
+  initCountdown();
+
+  // Progress stepper
+  updateProgress();
+
+  // Draft load
+  loadDraft();
+
+  // Haptic
+  haptic('light');
+})();
+
+// ═══════════════════════════════════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════════════════════════════════
+function initCountdown() {
+  const el = document.getElementById('countdown');
+  const textEl = document.getElementById('countdownText');
+  if (!el || !textEl) return;
+
+  const deadlineStr = el.dataset.deadline;
+  if (!deadlineStr) return;
+
+  const deadline = new Date(deadlineStr);
+
+  function update() {
+    const now = new Date();
+    const diff = deadline - now;
+
+    if (diff <= 0) {
+      textEl.textContent = '⏰ Muddat o\'tgan';
+      textEl.parentElement.style.color = '#EF4444';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    let parts = [];
+    if (days > 0) parts.push(`${days} kun`);
+    if (hours > 0) parts.push(`${hours} soat`);
+    parts.push(`${minutes} daq`);
+    if (days === 0) parts.push(`${seconds} sek`);
+
+    textEl.textContent = parts.join(' ') + ' qoldi';
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROGRESS STEPPER
+// ═══════════════════════════════════════════════════════════
+function updateProgress() {
+  const hasSubmission = HAS_SUBMISSION;
+  const status = '{{ submission.status|default:"" }}';
+
+  // Step 2 — Topshirish
+  if (hasSubmission) {
+    document.getElementById('step2Circle').style.background = '#10B981';
+    document.getElementById('step2Circle').style.color = 'white';
+    document.getElementById('step2Circle').innerHTML = '<i class="fas fa-check"></i>';
+    document.getElementById('progressBarFill').style.width = '33%';
+  } else {
+    document.getElementById('step2Circle').style.background = '#4F46E5';
+    document.getElementById('step2Circle').style.color = 'white';
+    document.getElementById('progressBarFill').style.width = '0%';
+  }
+
+  // Step 3 — Tekshirish
+  if (status === 'graded' || status === 'pending') {
+    document.getElementById('step3Circle').style.background = status === 'graded' ? '#10B981' : '#F59E0B';
+    document.getElementById('step3Circle').style.color = 'white';
+    if (status === 'graded') {
+      document.getElementById('step3Circle').innerHTML = '<i class="fas fa-check"></i>';
+    }
+    document.getElementById('progressBarFill').style.width = '66%';
+  }
+
+  // Step 4 — Baho
+  if (status === 'graded') {
+    document.getElementById('step4Circle').style.background = '#10B981';
+    document.getElementById('step4Circle').style.color = 'white';
+    document.getElementById('step4Circle').innerHTML = '<i class="fas fa-check"></i>';
+    document.getElementById('progressBarFill').style.width = '100%';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHAR COUNT
+// ═══════════════════════════════════════════════════════════
+function updateCharCount() {
+  const textarea = document.getElementById('answer_text');
+  const counter = document.getElementById('charCount');
+  if (textarea && counter) {
+    counter.textContent = textarea.value.length;
+
+    // Auto-save draft (debounced)
+    autoSaveDraft();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FAYL BOSHQARUV
+// ═══════════════════════════════════════════════════════════
+function checkFileSize(input) {
+  const file = input.files?.[0];
+  if (!file) {
+    clearFilePreview();
+    return;
+  }
+
+  const sizeKB = file.size / 1024;
+
+  if (sizeKB < MIN_FILE_SIZE_KB) {
+    hapticNotify('error');
+    showToast(
+      `Fayl juda kichik (${sizeKB.toFixed(1)} KB). Min: ${MIN_FILE_SIZE_KB} KB`,
+      'error',
+      4000
+    );
+    input.value = '';
+    clearFilePreview();
+    return;
+  }
+
+  // Preview
+  showFilePreview(file);
+  hapticNotify('success');
+}
+
+function showFilePreview(file) {
+  const dropZoneContent = document.getElementById('dropZoneContent');
+  const filePreview = document.getElementById('filePreview');
+
+  if (!dropZoneContent || !filePreview) return;
+
+  dropZoneContent.classList.add('hidden');
+  filePreview.classList.remove('hidden');
+
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = formatFileSize(file.size);
+
+  // Icon type
+  const iconEl = document.getElementById('fileIcon');
+  const ext = file.name.split('.').pop().toLowerCase();
+  const icons = {
+    'pdf': '📄',
+    'doc': '📝', 'docx': '📝',
+    'xls': '📊', 'xlsx': '📊',
+    'ppt': '📽️', 'pptx': '📽️',
+    'zip': '🗜️', 'rar': '🗜️', '7z': '🗜️',
+    'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️', 'webp': '🖼️',
+    'mp4': '🎬', 'avi': '🎬', 'mov': '🎬', 'mkv': '🎬',
+    'mp3': '🎵', 'wav': '🎵', 'ogg': '🎵',
+    'py': '🐍', 'js': '📜', 'html': '🌐', 'css': '🎨',
+    'txt': '📃', 'md': '📃',
+  };
+  iconEl.textContent = icons[ext] || '📎';
+}
+
+function clearFile(event) {
+  if (event) event.preventDefault();
+  const input = document.getElementById('answer_file');
+  if (input) input.value = '';
+  clearFilePreview();
+  haptic('light');
+}
+
+function clearFilePreview() {
+  document.getElementById('dropZoneContent')?.classList.remove('hidden');
+  document.getElementById('filePreview')?.classList.add('hidden');
+}
+
+// Drag & Drop
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('answer_file');
+
+if (dropZone && fileInput) {
+  dropZone.addEventListener('click', () => fileInput.click());
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '#4F46E5';
+    dropZone.style.background = 'rgba(79, 70, 229, 0.05)';
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--tg-line)';
+    dropZone.style.background = 'var(--tg-bg)';
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--tg-line)';
+    dropZone.style.background = 'var(--tg-bg)';
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      checkFileSize(fileInput);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// DRAFT — Auto-save
+// ═══════════════════════════════════════════════════════════
+let draftTimer = null;
+
+function autoSaveDraft() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => saveDraft(true), 2000);
+}
+
+function saveDraft(silent = false) {
+  const textEl = document.getElementById('answer_text');
+  const codeEl = document.getElementById('answer_code');
+  if (!textEl && !codeEl) return;
+
+  const draft = {
+    answer_text: textEl?.value || '',
+    answer_code: codeEl?.value || '',
+    saved_at: new Date().toISOString(),
+  };
+
+  // Cloud storage yoki localStorage
+  if (tg?.CloudStorage) {
+    tg.CloudStorage.setItem(DRAFT_KEY, JSON.stringify(draft), (err) => {
+      if (!err && !silent) {
+        showDraftSaved();
+      }
+    });
+  } else {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    if (!silent) showDraftSaved();
+  }
+}
+
+function loadDraft() {
+  const load = (data) => {
+    if (!data) return;
+    try {
+      const draft = JSON.parse(data);
+      const textEl = document.getElementById('answer_text');
+      const codeEl = document.getElementById('answer_code');
+
+      if (textEl && !textEl.value && draft.answer_text) {
+        textEl.value = draft.answer_text;
+        updateCharCount();
+      }
+      if (codeEl && !codeEl.value && draft.answer_code) {
+        codeEl.value = draft.answer_code;
+      }
+
+      if (draft.saved_at) {
+        const statusEl = document.getElementById('draftStatus');
+        if (statusEl) {
+          const dt = new Date(draft.saved_at);
+          statusEl.innerHTML = `<i class="fas fa-check text-success"></i> ${dt.getHours()}:${String(dt.getMinutes()).padStart(2, '0')}`;
+        }
+      }
+    } catch (e) {
+      console.warn('Draft parse xato:', e);
+    }
+  };
+
+  if (tg?.CloudStorage) {
+    tg.CloudStorage.getItem(DRAFT_KEY, (err, value) => {
+      if (!err) load(value);
+    });
+  } else {
+    load(localStorage.getItem(DRAFT_KEY));
+  }
+}
+
+function clearDraft() {
+  if (tg?.CloudStorage) {
+    tg.CloudStorage.removeItem(DRAFT_KEY, () => {});
+  }
+  localStorage.removeItem(DRAFT_KEY);
+}
+
+function showDraftSaved() {
+  const statusEl = document.getElementById('draftStatus');
+  if (statusEl) {
+    const now = new Date();
+    statusEl.innerHTML = `<i class="fas fa-check text-success"></i> ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPER: COPY
+// ═══════════════════════════════════════════════════════════
+function copyText(text) {
+  if (!text) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      hapticNotify('success');
+      showToast('Nusxa olindi', 'success', 1500);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FORM SUBMIT
+// ═══════════════════════════════════════════════════════════
+const form = document.getElementById('submissionForm');
+if (form) {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // ─── Validatsiya ───
+    const answerText = document.getElementById('answer_text')?.value?.trim() || '';
+    const answerCode = document.getElementById('answer_code')?.value?.trim() || '';
+    const answerFile = document.getElementById('answer_file')?.files?.[0];
+
+    if (!answerText && !answerCode && !answerFile) {
+      hapticNotify('error');
+      showToast('Kamida matn, kod yoki fayl kiriting', 'error');
+      return;
+    }
+
+    if (answerText && answerText.length < MIN_TEXT_LENGTH && !answerFile && !answerCode) {
+      hapticNotify('error');
+      showToast(`Matn kamida ${MIN_TEXT_LENGTH} belgi bo'lishi kerak`, 'error');
+      return;
+    }
+
+    // ─── Tasdiqlash ───
+    const confirmed = await showConfirm(
+      '📤 Javobni yuborishni tasdiqlaysizmi?\n\n' +
+      'Yuborilgandan keyin o\'zgartirib bo\'lmaydi.'
+    );
+    if (!confirmed) return;
+
+    // ─── Loading ───
+    const btn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoading = document.getElementById('btnLoading');
+
+    btn.disabled = true;
+    btnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Yuborilmoqda...';
+    btnLoading.classList.remove('hidden');
+    haptic('medium');
+
+    try {
+      const formData = new FormData(form);
+      formData.set('init_data', getInitData());
+
+      const response = await fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+          'X-Telegram-Init-Data': getInitData(),
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        // Success!
+        hapticNotify('success');
+        clearDraft();
+
+        // Success overlay
+        const overlay = document.getElementById('successOverlay');
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          setTimeout(() => location.reload(), 2000);
+        } else {
+          showToast('✅ ' + (data.message || 'Muvaffaqiyatli!'), 'success');
+          setTimeout(() => location.reload(), 1500);
+        }
+      } else {
+        hapticNotify('error');
+        showToast('❌ ' + (data.error || 'Xatolik'), 'error', 4000);
+        resetButton();
+      }
+    } catch (err) {
+      console.error(err);
+      hapticNotify('error');
+      showToast('❌ Tarmoq xatosi. Qayta urinib ko\'ring.', 'error', 4000);
+      resetButton();
+    }
+
+    function resetButton() {
+      btn.disabled = false;
+      btnText.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Yuborish';
+      btnLoading.classList.add('hidden');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// MUAMMO HAQIDA XABAR
+// ═══════════════════════════════════════════════════════════
+function reportIssue() {
+  haptic('medium');
+
+  const text = `🐛 Muammo haqida xabar\n\n` +
+    `Vazifa: ${HOMEWORK_ID}\n` +
+    `URL: ${window.location.href}\n\n` +
+    `Muammo: `;
+
+  const url = `https://t.me/digion_support?text=${encodeURIComponent(text)}`;
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  // Ctrl+S — Draft saqlash
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveDraft();
+    showToast('💾 Draft saqlandi', 'success', 1500);
+  }
+  // Ctrl+Enter — Submit
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('submissionForm')?.requestSubmit();
+  }
+  // Esc — Close modals
+  if (e.key === 'Escape') {
+    closeModal();
+    closeBottomSheet();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// BEFORE UNLOAD — Unsaved warning
+// ═══════════════════════════════════════════════════════════
+let hasUnsavedChanges = false;
+document.getElementById('answer_text')?.addEventListener('input', () => {
+  hasUnsavedChanges = true;
+});
+
+window.addEventListener('beforeunload', (e) => {
+  if (hasUnsavedChanges && !HAS_SUBMISSION) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════════════════
+console.log('✅ Homework page ready', {
+  min_file_kb: MIN_FILE_SIZE_KB,
+  min_text: MIN_TEXT_LENGTH,
+  has_submission: HAS_SUBMISSION,
+});
+{% endblock %}

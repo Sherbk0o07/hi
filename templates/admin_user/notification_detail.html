@@ -1,0 +1,314 @@
+﻿{% extends 'admin_user/base.html' %}
+
+{% block title %}Bildirishnoma tafsiloti | Admin Panel{% endblock %}
+
+{% block content %}
+<style>
+  .detail-page { --rail: #6366f1; }
+  .detail-page [data-type="homework_missed"] { --rail: #f43f5e; }
+  .detail-page [data-type="over_activity"]   { --rail: #f59e0b; }
+  .detail-page [data-type="daily_report"]    { --rail: #06b6d4; }
+  .detail-page [data-type="weekly_report"]   { --rail: #a855f7; }
+  .detail-page [data-type="general"]         { --rail: #6366f1; }
+
+  .detail-page .d-card {
+    background: white;
+    border: 1px solid rgba(148,163,184,.18);
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    transition: all .2s ease;
+  }
+  .dark .detail-page .d-card { background: rgb(30 41 59 / .45); }
+  .detail-page .d-card:hover { box-shadow: 0 18px 35px -18px rgb(0 0 0 / .22); }
+
+  .detail-page .d-icon {
+    width: 64px; height: 64px;
+    border-radius: 1.25rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem;
+    background: color-mix(in srgb, var(--rail) 14%, transparent);
+    color: var(--rail);
+    flex-shrink: 0;
+  }
+
+  .detail-page .d-badge {
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .detail-page .d-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-page .d-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    word-break: break-word;
+  }
+  .dark .detail-page .d-value { color: #e2e8f0; }
+
+  .detail-page .d-message {
+    background: rgba(148,163,184,.06);
+    border-left: 4px solid var(--rail);
+    padding: 1.1rem 1.25rem;
+    border-radius: .9rem;
+    color: #334155;
+    font-size: .95rem;
+    line-height: 1.7;
+  }
+  .dark .detail-page .d-message { color: #cbd5e1; }
+
+  .detail-page .d-action-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    padding: .75rem 1.25rem;
+    border-radius: .9rem;
+    font-size: .9rem; font-weight: 600;
+    transition: all .2s ease;
+    border: none; cursor: pointer;
+    width: 100%;
+  }
+  .detail-page .d-action-btn:hover { transform: translateY(-2px); }
+
+  .detail-page .d-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+
+  .detail-page .d-sms-item {
+    padding: .75rem 1rem;
+    border-radius: .8rem;
+    background: rgba(148,163,184,.06);
+  }
+</style>
+
+<div class="detail-page" data-type="{{ notification.notification_type }}">
+
+  <!-- Sarlavha va ortga -->
+  <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Bildirishnoma tafsiloti</p>
+      <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">
+        #{{ notification.pk }} · {{ notification.get_notification_type_display }}
+      </h2>
+    </div>
+    <a href="{% url 'admin_notifications' %}"
+       class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition-all w-fit">
+      <i class="fas fa-arrow-left text-xs"></i> Ortga qaytish
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- Asosiy ma'lumot -->
+    <div class="lg:col-span-2 space-y-5">
+
+      <!-- Xabar kartasi -->
+      <div class="d-card">
+        <div class="flex items-start gap-4">
+          <div class="d-icon">
+            <i class="fas
+              {% if notification.notification_type == 'homework_missed' %}fa-exclamation-triangle
+              {% elif notification.notification_type == 'over_activity' %}fa-clock
+              {% elif notification.notification_type == 'daily_report' %}fa-chart-line
+              {% elif notification.notification_type == 'weekly_report' %}fa-chart-bar
+              {% else %}fa-bell{% endif %}"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+              {{ notification.get_notification_type_display }}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <i class="far fa-user"></i> {{ notification.user.phone_number }}
+              {% if notification.user.get_full_name %}
+                &middot; {{ notification.user.get_full_name }}
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <p class="d-label mb-2">Xabar matni</p>
+          <div class="d-message">{{ notification.message }}</div>
+        </div>
+
+        <!-- Holat ko'rsatkichlari -->
+        <div class="d-info-grid mt-5">
+          <div>
+            <p class="d-label">Holat</p>
+            {% if notification.is_approved %}
+              <span class="d-badge bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10">
+                <i class="fas fa-check-circle"></i> Tasdiqlangan
+              </span>
+            {% else %}
+              <span class="d-badge bg-amber-50 text-amber-600 dark:bg-amber-500/10">
+                <i class="fas fa-hourglass-half"></i> Kutilmoqda
+              </span>
+            {% endif %}
+          </div>
+          <div>
+            <p class="d-label">SMS</p>
+            {% if notification.sent %}
+              <span class="d-badge bg-cyan-50 text-cyan-600 dark:bg-cyan-500/10">
+                <i class="fas fa-sms"></i> Yuborilgan
+              </span>
+            {% else %}
+              <span class="d-badge bg-gray-100 text-gray-500 dark:bg-slate-700">
+                <i class="fas fa-sms"></i> Yuborilmagan
+              </span>
+            {% endif %}
+          </div>
+          <div>
+            <p class="d-label">O‘qilgan</p>
+            {% if notification.is_read %}
+              <span class="d-badge bg-purple-50 text-purple-600 dark:bg-purple-500/10">
+                <i class="fas fa-check"></i> Ha
+              </span>
+            {% else %}
+              <span class="d-badge bg-rose-50 text-rose-600 dark:bg-rose-500/10">
+                <i class="fas fa-times"></i> Yo‘q
+              </span>
+            {% endif %}
+          </div>
+          <div>
+            <p class="d-label">Yaratilgan</p>
+            <p class="d-value text-sm">{{ notification.created_at|date:"d.m.Y H:i" }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasdiqlovchi ma'lumotlari -->
+      {% if notification.is_approved %}
+      <div class="d-card">
+        <h4 class="font-bold text-lg text-gray-900 dark:text-white mb-4">
+          <i class="fas fa-user-check text-emerald-500 mr-2"></i>Tasdiqlash ma’lumotlari
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="d-label">Tasdiqlagan admin</p>
+            <p class="d-value">
+              {% if notification.approved_by %}
+                {{ notification.approved_by.phone_number }}
+              {% else %}
+                —
+              {% endif %}
+            </p>
+          </div>
+          <div>
+            <p class="d-label">Tasdiqlangan vaqt</p>
+            <p class="d-value">
+              {% if notification.approved_at %}
+                {{ notification.approved_at|date:"d.m.Y H:i" }}
+              {% else %}
+                —
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Boshqaruv paneli -->
+    <div class="space-y-5">
+
+      <div class="d-card">
+        <h4 class="font-bold text-lg text-gray-900 dark:text-white mb-4">
+          <i class="fas fa-sliders-h text-primary mr-2"></i>Boshqaruv
+        </h4>
+        <div class="space-y-2.5">
+          {% if not notification.is_approved %}
+          <form method="post" action="{% url 'admin_notification_action' notification.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="approve">
+            <button type="submit" class="d-action-btn bg-primary text-white hover:bg-primary/90">
+              <i class="fas fa-check"></i> Tasdiqlash
+            </button>
+          </form>
+          {% else %}
+          <form method="post" action="{% url 'admin_notification_action' notification.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <button type="submit" class="d-action-btn bg-amber-500 text-white hover:bg-amber-600">
+              <i class="fas fa-times"></i> Bekor qilish
+            </button>
+          </form>
+          {% endif %}
+
+          {% if notification.is_approved and not notification.sent %}
+          <form method="post" action="{% url 'admin_notification_action' notification.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="send_sms">
+            <button type="submit" class="d-action-btn bg-cyan-500 text-white hover:bg-cyan-600">
+              <i class="fas fa-sms"></i> SMS yuborish
+            </button>
+          </form>
+          {% endif %}
+
+          {% if not notification.is_read %}
+          <form method="post" action="{% url 'admin_notification_action' notification.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="mark_read">
+            <button type="submit" class="d-action-btn bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-600">
+              <i class="fas fa-envelope-open"></i> O‘qilgan deb belgilash
+            </button>
+          </form>
+          {% endif %}
+
+          <form method="post" action="{% url 'admin_notification_action' notification.pk %}"
+                onsubmit="return confirm('Rostdan o‘chirishni xohlaysizmi?');">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <button type="submit" class="d-action-btn bg-rose-50 text-rose-600 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20">
+              <i class="fas fa-trash"></i> O‘chirish
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- SMS tarixi -->
+      <div class="d-card">
+        <h4 class="font-bold text-lg text-gray-900 dark:text-white mb-3">
+          <i class="fas fa-history text-cyan-500 mr-2"></i>SMS tarixi
+        </h4>
+        {% if notification.sms_logs.all %}
+        <div class="space-y-2">
+          {% for sms in notification.sms_logs.all %}
+          <div class="d-sms-item">
+            <p class="text-sm font-medium">{{ sms.phone_number }}</p>
+            <p class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+              <span class="d-badge
+                {% if sms.status == 'sent' %}bg-emerald-50 text-emerald-600
+                {% elif sms.status == 'failed' %}bg-rose-50 text-rose-600
+                {% else %}bg-amber-50 text-amber-600{% endif %}">
+                {{ sms.get_status_display }}
+              </span>
+              {% if sms.sent_at %}
+                · {{ sms.sent_at|date:"d.m.Y H:i" }}
+              {% endif %}
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-400">SMS yuborilmagan</p>
+        {% endif %}
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

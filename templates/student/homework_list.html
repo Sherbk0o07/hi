@@ -1,0 +1,2107 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}Uy vazifalarim — DIGION LMS{% endblock %}
+
+{% block student %}
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   HOMEWORK LIST — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --hw-primary: #4F46E5;
+  --hw-secondary: #7C3AED;
+  --hw-pink: #EC4899;
+  --hw-green: #10B981;
+  --hw-amber: #F59E0B;
+  --hw-rose: #F43F5E;
+  --hw-cyan: #06B6D4;
+  --hw-bg-card: rgba(15, 23, 42, 0.5);
+  --hw-border: rgba(148, 163, 184, 0.15);
+}
+
+#hwApp {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 12px 100px;
+  position: relative;
+}
+@media (min-width: 768px) {
+  #hwApp { padding: 20px 24px 80px; }
+}
+
+/* ═══ CARDS ═══ */
+.hw-card {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.5));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+.hw-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(79, 70, 229, 0.05) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.hw-card:hover::before { opacity: 1; }
+
+/* ═══ HERO BANNER ═══ */
+.hw-hero {
+  position: relative;
+  padding: 20px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 50%, #831843 100%);
+  margin-bottom: 16px;
+}
+@media (min-width: 768px) {
+  .hw-hero { padding: 28px; margin-bottom: 20px; }
+}
+.hw-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.4), transparent 70%);
+  border-radius: 50%;
+  animation: heroFloat 8s ease-in-out infinite;
+}
+.hw-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30%; left: -10%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.4), transparent 70%);
+  border-radius: 50%;
+  animation: heroFloat 10s ease-in-out infinite reverse;
+}
+@keyframes heroFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -30px) scale(1.1); }
+}
+
+.hw-hero-content { position: relative; z-index: 2; }
+
+.hw-avatar {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff, #a78bfa);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 900;
+  color: #4F46E5;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(255, 255, 255, 0.1);
+  position: relative;
+  flex-shrink: 0;
+}
+@media (min-width: 768px) {
+  .hw-avatar { width: 72px; height: 72px; font-size: 28px; }
+}
+.hw-avatar-online {
+  position: absolute;
+  bottom: 2px; right: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #10B981;
+  border: 3px solid #1e1b4b;
+  animation: pulseDot 2s infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+.hw-streak-badge {
+  position: absolute;
+  top: -8px; right: -8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #F59E0B, #F43F5E);
+  color: white;
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  display: flex; align-items: center; gap: 3px;
+}
+
+.hw-name {
+  font-size: 20px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #fff, #c4b5fd);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1.2;
+}
+@media (min-width: 768px) {
+  .hw-name { font-size: 26px; }
+}
+
+/* ═══ QUICK STATS ROW ═══ */
+.hw-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+.hw-hero-stat {
+  text-align: center;
+  padding: 8px 4px;
+}
+.hw-hero-stat-value {
+  font-size: 22px;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+}
+@media (min-width: 768px) {
+  .hw-hero-stat-value { font-size: 26px; }
+}
+.hw-hero-stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ═══ PROGRESS BAR ═══ */
+.hw-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.hw-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #10B981, #06B6D4, #4F46E5);
+  transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+.hw-progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ═══ STATS MINI GRID ═══ */
+.hw-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+@media (min-width: 640px) {
+  .hw-stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+  .hw-stats-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+.hw-stat-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.4));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.hw-stat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(148, 163, 184, 0.3);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+.hw-stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--stat-color, #4F46E5);
+}
+.hw-stat-icon {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+  background: color-mix(in srgb, var(--stat-color, #4F46E5) 15%, transparent);
+  color: var(--stat-color, #4F46E5);
+}
+.hw-stat-value {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--stat-color, #4F46E5);
+  line-height: 1;
+}
+.hw-stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ═══ TAB NAV ═══ */
+.hw-tabs-wrap {
+  position: sticky;
+  top: 8px;
+  z-index: 30;
+  margin-bottom: 16px;
+}
+.hw-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hw-tabs::-webkit-scrollbar { display: none; }
+
+.hw-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+  position: relative;
+}
+.hw-tab:hover {
+  color: #c7d2fe;
+  background: rgba(79, 70, 229, 0.1);
+}
+.hw-tab.active {
+  color: white;
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+}
+.hw-tab-badge {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 9px;
+  font-weight: 900;
+  min-width: 18px;
+  text-align: center;
+}
+.hw-tab-badge.danger { background: #F43F5E; color: white; }
+.hw-tab-badge.success { background: #10B981; color: white; }
+
+/* ═══ SECTION TITLE ═══ */
+.hw-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+.hw-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 900;
+  color: white;
+}
+.hw-section-title-icon {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  color: white;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+.hw-section-link {
+  font-size: 11px;
+  font-weight: 800;
+  color: #818cf8;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  transition: all 0.2s;
+}
+.hw-section-link:hover { color: #a5b4fc; transform: translateX(2px); }
+
+/* ═══ HOMEWORK ITEM CARD ═══ */
+.hw-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 768px) { .hw-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1280px) { .hw-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.hw-item {
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.55));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hw-item:hover {
+  transform: translateY(-6px);
+  border-color: rgba(148, 163, 184, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(79, 70, 229, 0.3);
+}
+.hw-item-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  z-index: 2;
+}
+.hw-item-bar.status-new { background: linear-gradient(90deg, #4F46E5, #EC4899); }
+.hw-item-bar.status-missed { background: linear-gradient(90deg, #F43F5E, #DC2626); }
+.hw-item-bar.status-graded { background: linear-gradient(90deg, #10B981, #06B6D4); }
+.hw-item-bar.status-pending { background: linear-gradient(90deg, #F59E0B, #FB923C); }
+.hw-item-bar.status-submitted { background: linear-gradient(90deg, #06B6D4, #3B82F6); }
+.hw-item-bar.status-no_hw { background: linear-gradient(90deg, #64748b, #475569); }
+
+.hw-item-body { padding: 16px; }
+
+.hw-item-num {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.1));
+  color: #a5b4fc;
+  border: 2px solid rgba(79, 70, 229, 0.3);
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.3s;
+}
+.hw-item:hover .hw-item-num {
+  transform: scale(1.1) rotate(-5deg);
+  border-color: rgba(79, 70, 229, 0.6);
+}
+.hw-item-num-dot {
+  position: absolute;
+  top: -4px; right: -4px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 3px solid #0f172a;
+  animation: pulseDot 2s infinite;
+}
+.hw-item-num-dot.new { background: #4F46E5; }
+.hw-item-num-dot.missed { background: #F43F5E; }
+
+.hw-item-course {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 900;
+  color: #818cf8;
+  margin-bottom: 3px;
+}
+.hw-item-title {
+  font-size: 15px;
+  font-weight: 900;
+  color: white;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hw-item-group {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex; align-items: center; gap: 4px;
+}
+
+.hw-badges {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin: 12px 0;
+}
+.hw-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.hw-badge.status-new { background: rgba(79, 70, 229, 0.15); color: #a5b4fc; border: 1px solid rgba(79, 70, 229, 0.3); }
+.hw-badge.status-missed { background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3); }
+.hw-badge.status-graded { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+.hw-badge.status-pending { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+.hw-badge.status-submitted { background: rgba(6, 182, 212, 0.15); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3); }
+.hw-badge.status-no_hw { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+.hw-badge.easy { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
+.hw-badge.medium { background: rgba(245, 158, 11, 0.12); color: #fcd34d; }
+.hw-badge.hard { background: rgba(244, 63, 94, 0.12); color: #fda4af; }
+.hw-badge.urgent {
+  background: linear-gradient(135deg, #F43F5E, #DC2626);
+  color: white;
+  animation: urgentPulse 1.5s infinite;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
+}
+@keyframes urgentPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 6px 18px rgba(244, 63, 94, 0.6); }
+}
+
+.hw-item-hw-title {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(79, 70, 229, 0.06);
+  border: 1px solid rgba(79, 70, 229, 0.15);
+  margin-bottom: 10px;
+}
+.hw-item-hw-title p {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hw-item-mini-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.hw-item-mini-stat {
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.4);
+}
+.hw-item-mini-stat-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.hw-item-mini-stat-value {
+  font-size: 13px;
+  font-weight: 900;
+  color: #e2e8f0;
+}
+.hw-item-mini-stat-value.primary { color: #a5b4fc; }
+.hw-item-mini-stat-value.warn { color: #fcd34d; }
+
+.hw-item-deadline {
+  display: flex; align-items: center; justify-content: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+.hw-item-deadline.urgent { color: #fb7185; }
+
+.hw-item-cta {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: none;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hw-item-cta:hover { transform: scale(1.03); }
+.hw-item-cta:active { transform: scale(0.97); }
+.hw-item-cta.new { background: linear-gradient(135deg, #4F46E5, #EC4899); color: white; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); }
+.hw-item-cta.graded { background: linear-gradient(135deg, #10B981, #06B6D4); color: white; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
+.hw-item-cta.pending { background: linear-gradient(135deg, #F59E0B, #FB923C); color: white; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4); }
+.hw-item-cta.missed { background: linear-gradient(135deg, #F43F5E, #DC2626); color: white; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.4); }
+.hw-item-cta.submitted { background: linear-gradient(135deg, #06B6D4, #3B82F6); color: white; }
+.hw-item-cta.no_hw { background: rgba(100, 116, 139, 0.2); color: #94a3b8; cursor: not-allowed; }
+
+/* ═══ EMPTY STATE ═══ */
+.hw-empty {
+  padding: 40px 20px;
+  text-align: center;
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.3));
+  border: 2px dashed rgba(148, 163, 184, 0.2);
+}
+.hw-empty-emoji {
+  font-size: 72px;
+  margin-bottom: 12px;
+  animation: floatEmoji 3s ease-in-out infinite;
+}
+@keyframes floatEmoji {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* ═══ FILTER CHIPS ═══ */
+.hw-chips {
+  display: flex; gap: 6px; overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.hw-chips::-webkit-scrollbar { display: none; }
+.hw-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+.hw-chip:hover { background: rgba(148, 163, 184, 0.2); }
+.hw-chip.active {
+  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  color: white;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+.hw-chip-count {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+/* ═══ FILTER PANEL ═══ */
+.hw-filter-panel {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  margin-bottom: 16px;
+}
+.hw-input {
+  width: 100%;
+  padding: 10px 36px 10px 36px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: white;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+}
+.hw-input:focus { border-color: rgba(79, 70, 229, 0.5); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
+.hw-input::placeholder { color: #64748b; }
+.hw-select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+}
+
+/* ═══ FAB ═══ */
+.hw-fab-wrap {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .hw-fab-wrap { bottom: 24px; right: 24px; }
+}
+.hw-fab-main {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #4F46E5, #EC4899);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 12px 32px rgba(79, 70, 229, 0.5);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hw-fab-main:hover { transform: scale(1.08); box-shadow: 0 16px 40px rgba(79, 70, 229, 0.6); }
+.hw-fab-main:active { transform: scale(0.95); }
+.hw-fab-main svg { transition: transform 0.3s; }
+.hw-fab-main.open svg { transform: rotate(45deg); }
+
+.hw-fab-menu {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+.hw-fab-menu.open { display: flex; }
+
+.hw-fab-item {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 0;
+  transform: translateY(20px) scale(0.5);
+}
+.hw-fab-menu.open .hw-fab-item {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: fabIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.hw-fab-item:hover { transform: scale(1.1); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4); }
+.hw-fab-item::after {
+  content: attr(data-label);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.95);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.hw-fab-item:hover::after { opacity: 1; }
+@keyframes fabIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.5); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ═══ MODAL ═══ */
+.hw-modal { display: none; position: fixed; inset: 0; z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+.hw-modal.open { display: flex; }
+.hw-modal-back { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(6px); animation: fadeIn 0.2s; }
+.hw-modal-box {
+  position: relative;
+  width: 100%; max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  padding: 22px;
+  animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hw-modal-box::-webkit-scrollbar { width: 4px; }
+.hw-modal-box::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.hw-modal-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(148, 163, 184, 0.15);
+  color: #cbd5e1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.hw-modal-close:hover { background: rgba(148, 163, 184, 0.3); }
+
+/* ═══ DATE BADGE ═══ */
+.hw-date {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+.anim-up { animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-down { animation: slideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-scale { animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+.hide { display: none !important; }
+</style>
+
+
+<div id="hwApp">
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FAB — Expandable floating button
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="hw-fab-wrap" id="fabWrap">
+    <button class="hw-fab-main" id="fabMain" onclick="toggleFab(event)">
+      <i data-lucide="plus" style="width:24px;height:24px;"></i>
+    </button>
+    <div class="hw-fab-menu" id="fabMenu">
+      <button class="hw-fab-item" data-label="Ovozli izoh" onclick="openVoice(event)" style="animation-delay:0ms">
+        <i data-lucide="mic" style="width:20px;height:20px;"></i>
+      </button>
+      <button class="hw-fab-item" data-label="Xatcho'plar" onclick="openBookmarks(event)" style="animation-delay:40ms">
+        <i data-lucide="bookmark" style="width:20px;height:20px;"></i>
+      </button>
+      <button class="hw-fab-item" data-label="AI yordamchi" onclick="openAI(event)" style="animation-delay:80ms">
+        <i data-lucide="sparkles" style="width:20px;height:20px;"></i>
+      </button>
+      <button class="hw-fab-item" data-label="Pomodoro" onclick="openPomodoro(event)" style="animation-delay:120ms">
+        <i data-lucide="timer" style="width:20px;height:20px;"></i>
+      </button>
+      <button class="hw-fab-item" data-label="Tez izoh" onclick="openNote(event)" style="animation-delay:160ms">
+        <i data-lucide="notebook-pen" style="width:20px;height:20px;"></i>
+      </button>
+      <button class="hw-fab-item" data-label="Yuqoriga" onclick="scrollTop(event)" style="animation-delay:200ms">
+        <i data-lucide="arrow-up" style="width:20px;height:20px;"></i>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HERO BANNER
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="hw-hero anim-up">
+    <div class="hw-hero-content">
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+        <div class="hw-avatar">
+          {{ user_data.avatar_letter }}
+          <span class="hw-avatar-online"></span>
+          {% if streak %}
+          <span class="hw-streak-badge">🔥 {{ streak }}</span>
+          {% endif %}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+            <span style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;font-weight:800;color:rgba(255,255,255,0.6);">
+              {{ greeting.text }}
+            </span>
+            <span style="font-size:10px;color:rgba(255,255,255,0.5);font-weight:700;" id="liveTime">--:--</span>
+          </div>
+          <h1 class="hw-name">{{ user_data.full_name }}</h1>
+          <p style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px;line-height:1.4;">
+            {{ greeting.sub }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Hero stats -->
+      <div class="hw-hero-stats">
+        <div class="hw-hero-stat">
+          <div class="hw-hero-stat-value">{{ stats.total }}</div>
+          <div class="hw-hero-stat-label">Bugun jami</div>
+        </div>
+        <div class="hw-hero-stat">
+          <div class="hw-hero-stat-value" style="color:#6ee7b7;">{{ stats.completed }}</div>
+          <div class="hw-hero-stat-label">Bajarildi</div>
+        </div>
+        <div class="hw-hero-stat">
+          <div class="hw-hero-stat-value" style="color:#fcd34d;">{{ stats.pending }}</div>
+          <div class="hw-hero-stat-label">Kutilmoqda</div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.7);">
+        <span>Umumiy progress</span>
+        <span>{{ stats.progress|floatformat:0 }}%</span>
+      </div>
+      <div class="hw-progress-track">
+        <div class="hw-progress-fill" style="width: {{ stats.progress|floatformat:0 }}%"></div>
+      </div>
+
+      <!-- Level + coins row -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.1);color:white;font-size:11px;font-weight:800;">
+          <i data-lucide="star" style="width:12px;height:12px;color:#fbbf24;"></i>
+          Level {{ level.level }} · {{ level.title }}
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.1);color:white;font-size:11px;font-weight:800;">
+          🪙 {{ coins }} coin
+        </span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB NAV
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="hw-tabs-wrap">
+    <div class="hw-tabs">
+      <button class="hw-tab active" data-tab="today">
+        <i data-lucide="sun" style="width:14px;height:14px;"></i>
+        <span>Bugun</span>
+        {% if stats.pending %}<span class="hw-tab-badge">{{ stats.pending }}</span>{% endif %}
+      </button>
+      <button class="hw-tab" data-tab="all">
+        <i data-lucide="list-todo" style="width:14px;height:14px;"></i>
+        <span>Barchasi</span>
+        <span class="hw-tab-badge">{{ stats.total }}</span>
+      </button>
+      <button class="hw-tab" data-tab="deadlines">
+        <i data-lucide="alarm-clock" style="width:14px;height:14px;"></i>
+        <span>Muddat</span>
+        {% if urgent_count %}<span class="hw-tab-badge danger">{{ urgent_count }}</span>{% endif %}
+      </button>
+      <button class="hw-tab" data-tab="history">
+        <i data-lucide="history" style="width:14px;height:14px;"></i>
+        <span>Tarix</span>
+      </button>
+      <button class="hw-tab" data-tab="stats">
+        <i data-lucide="bar-chart-3" style="width:14px;height:14px;"></i>
+        <span>Tahlil</span>
+      </button>
+      <button class="hw-tab" data-tab="feedback">
+        <i data-lucide="message-square-quote" style="width:14px;height:14px;"></i>
+        <span>Izoh</span>
+        {% if teacher_feedback %}<span class="hw-tab-badge">{{ teacher_feedback|length }}</span>{% endif %}
+      </button>
+      <button class="hw-tab" data-tab="achievements">
+        <i data-lucide="trophy" style="width:14px;height:14px;"></i>
+        <span>Yutuq</span>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB: TODAY
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tab-panel="today">
+
+    <!-- Stats grid -->
+    <div class="hw-stats-grid">
+      <div class="hw-stat-card" style="--stat-color:#4F46E5">
+        <div class="hw-stat-icon"><i data-lucide="layers" style="width:20px;height:20px;"></i></div>
+        <div class="hw-stat-value" data-count="{{ stats.total }}">{{ stats.total }}</div>
+        <div class="hw-stat-label">Jami</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#10B981">
+        <div class="hw-stat-icon"><i data-lucide="check-check" style="width:20px;height:20px;"></i></div>
+        <div class="hw-stat-value" data-count="{{ stats.completed }}">{{ stats.completed }}</div>
+        <div class="hw-stat-label">Bajarildi</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#F59E0B">
+        <div class="hw-stat-icon"><i data-lucide="hourglass" style="width:20px;height:20px;"></i></div>
+        <div class="hw-stat-value" data-count="{{ stats.pending }}">{{ stats.pending }}</div>
+        <div class="hw-stat-label">Kutilmoqda</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#F43F5E">
+        <div class="hw-stat-icon"><i data-lucide="alert-circle" style="width:20px;height:20px;"></i></div>
+        <div class="hw-stat-value" data-count="{{ stats.missed }}">{{ stats.missed }}</div>
+        <div class="hw-stat-label">Bajarilmadi</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#7C3AED">
+        <div class="hw-stat-icon"><i data-lucide="award" style="width:20px;height:20px;"></i></div>
+        <div class="hw-stat-value" data-count="{{ stats.graded }}">{{ stats.graded }}</div>
+        <div class="hw-stat-label">Baholandi</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#06B6D4">
+        <div class="hw-stat-icon"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div>
+        <div class="hw-stat-value">{{ stats.progress|floatformat:0 }}%</div>
+        <div class="hw-stat-label">Progress</div>
+      </div>
+    </div>
+
+    <!-- Urgent banner -->
+    {% if urgent_count %}
+    <div class="hw-card anim-up" style="padding:14px;border-left:4px solid #F43F5E;margin-bottom:16px;background:linear-gradient(90deg,rgba(244,63,94,0.1),rgba(244,63,94,0.02));">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#F43F5E,#DC2626);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;animation:urgentPulse 1.5s infinite;">
+          <i data-lucide="alarm-clock" style="width:22px;height:22px;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:900;color:#fda4af;">⚠️ {{ urgent_count }} ta shoshilinch vazifa</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Muddati yaqin — hoziroq bajaring</div>
+        </div>
+        <button onclick="switchTab('deadlines')" class="hw-item-cta missed" style="width:auto;padding:8px 14px;font-size:11px;">
+          Ko'rish
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Daily quests -->
+    {% if daily_quests %}
+    <div class="hw-card anim-up" style="padding:16px;margin-bottom:16px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon"><i data-lucide="target" style="width:16px;height:16px;"></i></div>
+          Kunlik maqsadlar
+        </div>
+        <span style="font-size:16px;font-weight:900;color:#6ee7b7;">
+          {{ quests_done }}<span style="color:#64748b;font-size:11px;">/{{ daily_quests|length }}</span>
+        </span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        {% for quest in daily_quests %}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:rgba(15,23,42,0.4);{% if quest.completed %}opacity:0.55;{% endif %}">
+          <div style="width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;{% if quest.completed %}background:linear-gradient(135deg,#10B981,#059669);{% else %}background:linear-gradient(135deg,#4F46E5,#7C3AED);{% endif %}">
+            {% if quest.completed %}
+            <i data-lucide="check" style="width:16px;height:16px;"></i>
+            {% else %}
+            <i data-lucide="{{ quest.icon }}" style="width:16px;height:16px;"></i>
+            {% endif %}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:800;color:white;{% if quest.completed %}text-decoration:line-through;{% endif %}">{{ quest.title }}</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:2px;">{{ quest.description }}</div>
+          </div>
+          <span style="padding:3px 8px;border-radius:8px;background:rgba(245,158,11,0.15);color:#fcd34d;font-size:10px;font-weight:900;flex-shrink:0;">
+            🪙 {{ quest.reward }}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Today's homework -->
+    <div style="margin-bottom:16px;">
+      <div class="hw-section-head">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon"><i data-lucide="list-todo" style="width:16px;height:16px;"></i></div>
+          Bugungi vazifalar
+        </div>
+        {% if items %}
+        <button class="hw-section-link" onclick="switchTab('all')">
+          Barchasi <i data-lucide="arrow-right" style="width:12px;height:12px;"></i>
+        </button>
+        {% endif %}
+      </div>
+
+      {% if items %}
+      <div class="hw-grid">
+        {% for item in items %}
+          {% include 'student/_homework_card.html' with item=item %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="hw-empty anim-scale">
+        <div class="hw-empty-emoji">📭</div>
+        <h3 style="font-size:18px;font-weight:900;color:white;margin-bottom:6px;">Bugun uyga vazifa yo'q</h3>
+        <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;max-width:400px;margin-left:auto;margin-right:auto;">
+          Bugun darslaringiz yo'q yoki o'qituvchi hali vazifa tayinlamagan
+        </p>
+        <button onclick="switchTab('history')" class="hw-item-cta new" style="width:auto;padding:10px 20px;display:inline-flex;">
+          <i data-lucide="history" style="width:14px;height:14px;"></i>
+          Oldingi vazifalar
+        </button>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Recommendations -->
+    {% if recommendations %}
+    <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px;" class="anim-up">
+      {% for rec in recommendations %}
+      <div class="hw-card" style="padding:12px;cursor:pointer;display:flex;align-items:center;gap:12px;"
+           onclick="handleRec('{{ rec.action }}')">
+        <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--c1,#4F46E5),var(--c2,#7C3AED));display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;
+          {% if rec.color == 'rose' %}background:linear-gradient(135deg,#F43F5E,#DC2626);
+          {% elif rec.color == 'green' %}background:linear-gradient(135deg,#10B981,#059669);
+          {% elif rec.color == 'amber' %}background:linear-gradient(135deg,#F59E0B,#FB923C);
+          {% endif %}">
+          <i data-lucide="{{ rec.icon }}" style="width:18px;height:18px;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:800;color:white;">{{ rec.title }}</div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:2px;">{{ rec.text }}</div>
+        </div>
+        <i data-lucide="chevron-right" style="width:16px;height:16px;color:#64748b;flex-shrink:0;"></i>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Motivation -->
+    <div class="hw-card anim-up" style="padding:14px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#F59E0B,#EC4899);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+          💡
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;font-weight:800;">Motivatsiya</div>
+          <div id="motivationText" style="font-size:12px;font-weight:700;color:#e2e8f0;margin-top:3px;line-height:1.4;">
+            "{{ motivation.text }}"
+          </div>
+        </div>
+        <button onclick="nextMotivation()" style="width:30px;height:30px;border-radius:10px;border:none;background:rgba(148,163,184,0.15);color:#cbd5e1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB: ALL
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tab-panel="all" class="hide">
+
+    <div class="hw-filter-panel">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
+        <div style="position:relative;">
+          <i data-lucide="search" style="width:15px;height:15px;position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#64748b;pointer-events:none;"></i>
+          <input type="text" id="hwSearch" class="hw-input" placeholder="Dars, kurs yoki guruh..." autocomplete="off">
+          <button id="clearSearch" class="hide" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:8px;border:none;background:rgba(148,163,184,0.15);color:#cbd5e1;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="x" style="width:13px;height:13px;"></i>
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <select id="hwSort" class="hw-select" style="flex:1;">
+            <option value="default">📊 Saralash</option>
+            <option value="newest">🆕 Yuqori raqam</option>
+            <option value="oldest">📅 Past raqam</option>
+            <option value="pending">⏳ Kutmoqda</option>
+            <option value="deadline">⏰ Muddat</option>
+            <option value="difficulty">🎯 Qiyinlik</option>
+          </select>
+          <button onclick="location.reload()" class="hw-select" style="cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="refresh-cw" style="width:15px;height:15px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="hw-chips">
+        <button class="hw-chip active" data-filter="all">
+          <i data-lucide="list" style="width:12px;height:12px;"></i>
+          Hammasi <span class="hw-chip-count">{{ stats.total }}</span>
+        </button>
+        <button class="hw-chip" data-filter="new">
+          <i data-lucide="circle-dot" style="width:12px;height:12px;"></i>
+          Yangi <span class="hw-chip-count">{{ stats.pending }}</span>
+        </button>
+        <button class="hw-chip" data-filter="done">
+          <i data-lucide="check-check" style="width:12px;height:12px;"></i>
+          Bajarilgan <span class="hw-chip-count">{{ stats.completed }}</span>
+        </button>
+        <button class="hw-chip" data-filter="pending">
+          <i data-lucide="hourglass" style="width:12px;height:12px;"></i>
+          Kutmoqda
+        </button>
+        {% if stats.missed %}
+        <button class="hw-chip" data-filter="missed">
+          <i data-lucide="alert-circle" style="width:12px;height:12px;"></i>
+          Bajarilmagan <span class="hw-chip-count">{{ stats.missed }}</span>
+        </button>
+        {% endif %}
+        <button class="hw-chip" data-filter="urgent">
+          <i data-lucide="alarm-clock" style="width:12px;height:12px;"></i>
+          Shoshilinch
+        </button>
+      </div>
+    </div>
+
+    {% if items %}
+    <div class="hw-grid" id="hwGrid">
+      {% for item in items %}
+        {% include 'student/_homework_card.html' with item=item %}
+      {% endfor %}
+    </div>
+    <div id="noResults" class="hw-empty hide">
+      <div class="hw-empty-emoji">🔍</div>
+      <h3 style="font-size:18px;font-weight:900;color:white;margin-bottom:6px;">Topilmadi</h3>
+      <p style="font-size:12px;color:#94a3b8;margin-bottom:14px;">Qidiruv yoki filtr shartlarini o'zgartirib ko'ring</p>
+      <button onclick="resetFilters()" class="hw-item-cta new" style="width:auto;padding:10px 20px;display:inline-flex;">
+        <i data-lucide="x" style="width:14px;height:14px;"></i> Tozalash
+      </button>
+    </div>
+    {% else %}
+    <div class="hw-empty">
+      <div class="hw-empty-emoji">📚</div>
+      <h3 style="font-size:18px;font-weight:900;color:white;margin-bottom:6px;">Vazifalar yo'q</h3>
+      <p style="font-size:12px;color:#94a3b8;">Hozircha hech qanday uyga vazifa yo'q</p>
+    </div>
+    {% endif %}
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB: DEADLINES
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tab-panel="deadlines" class="hide">
+
+    <div style="text-align:center;padding:24px 0;" class="anim-up">
+      <div style="font-size:64px;margin-bottom:8px;" class="hw-empty-emoji">⏰</div>
+      <h2 style="font-size:20px;font-weight:900;color:white;margin-bottom:4px;">Muddatlar</h2>
+      <p style="font-size:12px;color:#94a3b8;">Kelgusi 3 kun ichida</p>
+    </div>
+
+    {% if upcoming_deadlines %}
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      {% for d in upcoming_deadlines %}
+      <div class="hw-card" style="padding:14px;border-left:4px solid {% if d.hours_left < 24 %}#F43F5E{% elif d.hours_left < 48 %}#F59E0B{% else %}#4F46E5{% endif %};">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+            {% if d.hours_left < 24 %}background:rgba(244,63,94,0.15);color:#fb7185;
+            {% elif d.hours_left < 48 %}background:rgba(245,158,11,0.15);color:#fcd34d;
+            {% else %}background:rgba(79,70,229,0.15);color:#a5b4fc;{% endif %}">
+            <i data-lucide="clock" style="width:22px;height:22px;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:900;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ d.title }}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;">{{ d.course }} · {{ d.deadline_relative }}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:22px;font-weight:900;line-height:1;
+              {% if d.hours_left < 24 %}color:#fb7185;
+              {% elif d.hours_left < 48 %}color:#fcd34d;
+              {% else %}color:#a5b4fc;{% endif %}">
+              {{ d.hours_left }}<span style="font-size:12px;">h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="hw-empty">
+      <div class="hw-empty-emoji">✅</div>
+      <h3 style="font-size:18px;font-weight:900;color:white;margin-bottom:6px;">Muddati yaqin vazifa yo'q!</h3>
+      <p style="font-size:12px;color:#94a3b8;">Barcha vazifalar vaqtida bajarilgan 🎉</p>
+    </div>
+    {% endif %}
+
+    {% if upcoming_tests %}
+    <div class="hw-card" style="padding:16px;">
+      <div class="hw-section-head" style="margin-bottom:12px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#06B6D4,#3B82F6);">
+            <i data-lucide="clipboard-list" style="width:16px;height:16px;"></i>
+          </div>
+          Kelgusi testlar
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        {% for t in upcoming_tests %}
+        <div style="padding:10px;border-radius:12px;background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(6,182,212,0.2);color:#67e8f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="file-question" style="width:18px;height:18px;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.title }}</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:2px;">{{ t.course }} · {{ t.questions }} savol · {{ t.duration }} daq</div>
+          </div>
+          {% if t.date %}
+          <span style="font-size:11px;font-weight:900;color:#67e8f9;flex-shrink:0;">{{ t.date|date:"d.m" }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB: HISTORY
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tab-panel="history" class="hide">
+
+    <div style="text-align:center;padding:24px 0;" class="anim-up">
+      <div style="font-size:64px;margin-bottom:8px;" class="hw-empty-emoji">📚</div>
+      <h2 style="font-size:20px;font-weight:900;color:white;margin-bottom:4px;">Tarix</h2>
+      <p style="font-size:12px;color:#94a3b8;">So'nggi topshirilgan vazifalar</p>
+    </div>
+
+    {% if recent_submissions %}
+    <div class="hw-card" style="padding:16px;margin-bottom:14px;">
+      <div class="hw-section-head" style="margin-bottom:12px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#10B981,#059669);">
+            <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+          </div>
+          So'nggi topshiriqlar
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        {% for s in recent_submissions %}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:rgba(15,23,42,0.4);">
+          <div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;flex-shrink:0;background:{{ s.grade_color }};">
+            {{ s.grade }}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:800;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.title }}</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:2px;">{{ s.submitted_at }} · {{ s.status }}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:14px;font-weight:900;color:#a5b4fc;">{{ s.score }}/{{ s.max_score }}</div>
+            <div style="font-size:10px;color:#64748b;">{{ s.percent }}%</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if recent_activity %}
+    <div class="hw-card" style="padding:16px;">
+      <div class="hw-section-head" style="margin-bottom:12px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);">
+            <i data-lucide="activity" style="width:16px;height:16px;"></i>
+          </div>
+          Faoliyat
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% for a in recent_activity %}
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+            background:rgba(79,70,229,0.15);color:#a5b4fc;">
+            <i data-lucide="{{ a.icon }}" style="width:14px;height:14px;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:#e2e8f0;">{{ a.text }}</div>
+            <div style="font-size:10px;color:#64748b;margin-top:2px;">{{ a.time_ago }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if not recent_submissions and not recent_activity %}
+    <div class="hw-empty">
+      <div class="hw-empty-emoji">📖</div>
+      <h3 style="font-size:18px;font-weight:900;color:white;margin-bottom:6px;">Hozircha tarix yo'q</h3>
+      <p style="font-size:12px;color:#94a3b8;">Birinchi vazifangizni topshirganingizdan keyin bu yerda ko'rasiz</p>
+    </div>
+    {% endif %}
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB: STATS
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tab-panel="stats" class="hide">
+
+    <div style="text-align:center;padding:24px 0;" class="anim-up">
+      <div style="font-size:64px;margin-bottom:8px;" class="hw-empty-emoji">📊</div>
+      <h2 style="font-size:20px;font-weight:900;color:white;margin-bottom:4px;">Tahlil</h2>
+      <p style="font-size:12px;color:#94a3b8;">Chuqur statistika va tahlillar</p>
+    </div>
+
+    <!-- Week summary -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;">
+      <div class="hw-stat-card" style="--stat-color:#4F46E5">
+        <div class="hw-stat-value">{{ week_summary.total }}</div>
+        <div class="hw-stat-label">Haftada topshirildi</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#10B981">
+        <div class="hw-stat-value">{{ week_summary.graded }}</div>
+        <div class="hw-stat-label">Baholangan</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#F59E0B">
+        <div class="hw-stat-value">{{ week_summary.avg_score }}</div>
+        <div class="hw-stat-label">O'rtacha ball</div>
+      </div>
+      <div class="hw-stat-card" style="--stat-color:#7C3AED">
+        <div class="hw-stat-value">{{ week_summary.perfect }}</div>
+        <div class="hw-stat-label">Mukammal (90+)</div>
+      </div>
+    </div>
+
+    <!-- Weekly chart -->
+    {% if weekly %}
+    <div class="hw-card" style="padding:16px;margin-bottom:14px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon"><i data-lucide="trending-up" style="width:16px;height:16px;"></i></div>
+          Haftalik faollik
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:140px;padding:0 4px;">
+        {% for day in weekly %}
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="font-size:10px;font-weight:900;color:#a5b4fc;">{{ day.count }}</div>
+          <div style="width:100%;height:100px;background:rgba(15,23,42,0.5);border-radius:8px;position:relative;overflow:hidden;">
+            <div style="position:absolute;bottom:0;left:0;right:0;height:{{ day.value }}%;min-height:4px;
+              background:linear-gradient(180deg,#4F46E5,#7C3AED);border-radius:8px 8px 0 0;transition:height 1s;"></div>
+          </div>
+          <span style="font-size:10px;font-weight:900;text-transform:uppercase;{% if day.is_today %}color:#a5b4fc;{% else %}color:#64748b;{% endif %}">
+            {{ day.label }}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Grade distribution -->
+    {% if grade_distribution %}
+    <div class="hw-card" style="padding:16px;margin-bottom:14px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#F59E0B,#FB923C);">
+            <i data-lucide="award" style="width:16px;height:16px;"></i>
+          </div>
+          Ball taqsimoti
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% for g in grade_distribution %}
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:#cbd5e1;margin-bottom:4px;">
+            <span>{{ g.letter }} ({{ g.min }}-{{ g.max }})</span>
+            <span>{{ g.count }} ta · {{ g.percent }}%</span>
+          </div>
+          <div style="height:6px;border-radius:999px;background:rgba(15,23,42,0.5);overflow:hidden;">
+            <div style="height:100%;border-radius:999px;width:{{ g.percent }}%;transition:width 1s;background:linear-gradient(90deg,#4F46E5,#7C3AED);"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Subject scores -->
+    {% if subject_scores %}
+    <div class="hw-card" style="padding:16px;margin-bottom:14px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#06B6D4,#3B82F6);">
+            <i data-lucide="book-open" style="width:16px;height:16px;"></i>
+          </div>
+          Fanlar bo'yicha
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% for s in subject_scores %}
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:#cbd5e1;margin-bottom:4px;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.name }}</span>
+            <span>{{ s.percent }}%</span>
+          </div>
+          <div style="height:6px;border-radius:999px;background:rgba(15,23,42,0.5);overflow:hidden;">
+            <div style="height:100%;border-radius:999px;width:{{ s.percent }}%;transition:width 1s;background:linear-gradient(90deg,#06B6D4,#3B82F6);"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- HW types -->
+    {% if hw_types_stats %}
+    <div class="hw-card" style="padding:16px;margin-bottom:14px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#7C3AED,#EC4899);">
+            <i data-lucide="pie-chart" style="width:16px;height:16px;"></i>
+          </div>
+          Vazifa turlari
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+        {% for s in hw_types_stats %}
+        <div style="padding:12px;border-radius:12px;background:rgba(124,58,237,0.1);text-align:center;">
+          <div style="font-size:10px;font-weight:800;color:#c4b5fd;">{{ s.type }}</div>
+          <div style="font-size:22px;font-weight:900;color:#a78bfa;margin-top:2px;">{{ s.count }}</div>
+          <div style="font-size:9px;color:#94a3b8;">O'rtacha: {{ s.avg_score }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Attendance -->
+    <div class="hw-card" style="padding:16px;margin-bottom:14px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#10B981,#06B6D4);">
+            <i data-lucide="user-check" style="width:16px;height:16px;"></i>
+          </div>
+          Davomat
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+        <div style="text-align:center;padding:10px 4px;border-radius:10px;background:rgba(79,70,229,0.1);">
+          <div style="font-size:18px;font-weight:900;color:#a5b4fc;">{{ attendance_stats.total }}</div>
+          <div style="font-size:8px;text-transform:uppercase;color:#64748b;font-weight:800;margin-top:2px;">Jami</div>
+        </div>
+        <div style="text-align:center;padding:10px 4px;border-radius:10px;background:rgba(16,185,129,0.1);">
+          <div style="font-size:18px;font-weight:900;color:#6ee7b7;">{{ attendance_stats.present }}</div>
+          <div style="font-size:8px;text-transform:uppercase;color:#64748b;font-weight:800;margin-top:2px;">Keldi</div>
+        </div>
+        <div style="text-align:center;padding:10px 4px;border-radius:10px;background:rgba(244,63,94,0.1);">
+          <div style="font-size:18px;font-weight:900;color:#fb7185;">{{ attendance_stats.absent }}</div>
+          <div style="font-size:8px;text-transform:uppercase;color:#64748b;font-weight:800;margin-top:2px;">Kelmadi</div>
+        </div>
+        <div style="text-align:center;padding:10px 4px;border-radius:10px;background:rgba(245,158,11,0.1);">
+          <div style="font-size:18px;font-weight:900;color:#fcd34d;">{{ attendance_stats.late }}</div>
+          <div style="font-size:8px;text-transform:uppercase;color:#64748b;font-weight:800;margin-top:2px;">Kech</div>
+        </div>
+        <div style="text-align:center;padding:10px 4px;border-radius:10px;background:rgba(124,58,237,0.1);">
+          <div style="font-size:18px;font-weight:900;color:#a78bfa;">{{ attendance_stats.percent }}%</div>
+          <div style="font-size:8px;text-transform:uppercase;color:#64748b;font-weight:800;margin-top:2px;">Foiz</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coin & XP history -->
+    {% if coins_history %}
+    <div class="hw-card" style="padding:16px;margin-bottom:14px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#F59E0B,#EC4899);">
+            <i data-lucide="coins" style="width:16px;height:16px;"></i>
+          </div>
+          Coin tarixi (7 kun)
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:4px;height:100px;">
+        {% for c in coins_history %}
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <span style="font-size:9px;font-weight:900;color:#fcd34d;">{{ c.coins }}</span>
+          <div style="width:100%;height:70px;background:rgba(15,23,42,0.5);border-radius:6px;position:relative;overflow:hidden;">
+            <div style="position:absolute;bottom:0;left:0;right:0;height:{{ c.coins }}%;min-height:4px;background:linear-gradient(180deg,#F59E0B,#EC4899);border-radius:6px 6px 0 0;"></div>
+          </div>
+          <span style="font-size:9px;color:#64748b;">{{ c.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if badges_progress %}
+    <div class="hw-card" style="padding:16px;">
+      <div class="hw-section-head" style="margin-bottom:14px;">
+        <div class="hw-section-title">
+          <div class="hw-section-title-icon" style="background:linear-gradient(135deg,#7C3AED,#EC4899);">
+            <i data-lucide="target" style="width:16px;height:16px;"></i>
+          </div>
+          Maqsadlar
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% for b in badges_progress %}
+        <div style="padding:12px;border-radius:12px;background:rgba(15,23,42,0.4);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:32px;height:32px;border-radius:10px;background:rgba(79,70,229,0.15);color:#a5b4fc;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="{{ b.icon }}" style="width:16px;height:16px;"></i>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;font-weight:800;color:white;">{{ b.name }}</div>
+              <div style="font-size:10px;color:#94a3b8;">{{ b.current }}/{{ b.target }}</div>
+            </div>
+            <span style="font-size:13px;font-weight:900;color:#a5b4fc;">{{ b.progress }}%</span>
+          </div>
+          <div style="height:5px;border-radius:999px;background:rgba(15,23,42,0.5);overflow:hidden;">
+            <div style="height:100%;border-radius:999px;width:{{ b.progress }}%;background:linear-gradient(90deg,#4F46E5,#7C3AED);transition:width 1s;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB: FEEDBACK
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tab-panel="feedback" class="hide">
+
+    <div style="text-align:center;padding:24px 0;" class="anim-up">
+      <div style="font-size:64px;margin-bottom:8px;" class="hw-empty-emoji">💬</div>
+      <h2 style="font-size:20px;font-weight:900;color:white;margin-bottom:4px;">O'qituvchi izohlari</h2>
+      <p style="font-size:12px;color:#94a3b8;">Baholangan vazifalaringiz ustidan izohlar</p>
+    </div>
+
+    {% if teacher_feedback %}
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      {% for fb in teacher_feedback %}
+      <div class="hw-card" style="padding:14px;border-left:4px solid #10B981;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:12px;font-weight:800;color:#6ee7b7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ fb.homework }}</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:2px;">{{ fb.teacher }} · {{ fb.date }}</div>
+          </div>
+          {% if fb.score %}
+          <span style="padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.15);color:#6ee7b7;font-size:11px;font-weight:900;flex-shrink:0;">
+            {{ fb.score }} ball
+          </span>
+          {% endif %}
+        </div>
+        <p style="font-size:12px;color:#cbd5e1;line-height:1.5;">{{ fb.text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="hw-empty">
+      <div class="hw-empty-emoji">💬</div>
+      <h3 style="font-size:18px;font-weight:900;color:white;margin-bottom:6px;">Hozircha izohlar yo'q</h3>
+      <p style="font-size:12px;color:#94a3b8;">Vazifalaringiz baholanganda izohlar paydo bo'ladi</p>
+    </div>
+    {% endif %}
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TAB: ACHIEVEMENTS
+       ═══════════════════════════════════════════════════════════════ -->
+  <div data-tab-panel="achievements" class="hide">
+
+    <div style="text-align:center;padding:24px 0;" class="anim-up">
+      <div style="font-size:64px;margin-bottom:8px;" class="hw-empty-emoji">🏆</div>
+      <h2 style="font-size:20px;font-weight:900;color:white;margin-bottom:4px;">Yutuqlar</h2>
+      <p style="font-size:12px;color:#94a3b8;">
+        <b style="color:#fcd34d;">{{ achievements_unlocked }}</b> / {{ achievements_total }} ochilgan
+      </p>
+      <div style="max-width:320px;margin:14px auto 0;height:6px;border-radius:999px;background:rgba(15,23,42,0.5);overflow:hidden;">
+        <div style="height:100%;border-radius:999px;width:{% widthratio achievements_unlocked achievements_total 100 %}%;background:linear-gradient(90deg,#F59E0B,#EC4899);transition:width 1s;"></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:16px;">
+      <div class="hw-card" style="padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:12px;font-weight:800;color:#a5b4fc;">⭐ Level {{ level.level }}</span>
+          <span style="font-size:14px;font-weight:900;color:#a5b4fc;">{{ level.title }}</span>
+        </div>
+        <div style="height:6px;border-radius:999px;background:rgba(15,23,42,0.5);overflow:hidden;margin-bottom:8px;">
+          <div style="height:100%;border-radius:999px;width:{{ level.progress_percent }}%;background:linear-gradient(90deg,#4F46E5,#EC4899);"></div>
+        </div>
+        <div style="font-size:10px;color:#94a3b8;">Keyingi daraja: <b style="color:#a5b4fc;">{{ level.xp_needed }} XP</b></div>
+      </div>
+
+      <div class="hw-card" style="padding:14px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:12px;font-weight:800;color:#fcd34d;">🔥 Streak</span>
+        <span style="font-size:22px;font-weight:900;color:#fcd34d;">{{ streak }} kun</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+      {% for ach in achievements %}
+      <div class="hw-card" style="padding:14px;text-align:center;
+                  {% if ach.unlocked %}border:2px solid rgba(245,158,11,0.3);{% else %}opacity:0.5;filter:grayscale(0.8);{% endif %}">
+        <div style="font-size:34px;margin-bottom:6px;">{{ ach.emoji }}</div>
+        <div style="font-size:12px;font-weight:900;color:white;">{{ ach.title }}</div>
+        <div style="font-size:9px;color:#94a3b8;margin-top:3px;line-height:1.4;">{{ ach.description }}</div>
+        {% if ach.unlocked %}
+        <span style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:rgba(16,185,129,0.15);color:#6ee7b7;font-size:9px;font-weight:900;">✓ OCHILGAN</span>
+        {% else %}
+        <span style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:rgba(100,116,139,0.2);color:#94a3b8;font-size:9px;font-weight:900;">🔒 QULF</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MODALS
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- POMODORO -->
+<div class="hw-modal" id="pomodoroModal">
+  <div class="hw-modal-back" onclick="closeModal('pomodoroModal')"></div>
+  <div class="hw-modal-box" style="text-align:center;">
+    <button class="hw-modal-close" onclick="closeModal('pomodoroModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <h3 style="font-size:18px;font-weight:900;background:linear-gradient(135deg,#a5b4fc,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;">Pomodoro Timer</h3>
+    <p style="font-size:11px;color:#94a3b8;margin-bottom:16px;">Fokus bilan ishlash</p>
+
+    <div style="display:flex;justify-content:center;gap:6px;margin-bottom:16px;">
+      <button class="hw-chip timer-btn active" data-mode="25" onclick="setTimer(25)">25 daq</button>
+      <button class="hw-chip timer-btn" data-mode="15" onclick="setTimer(15)">15 daq</button>
+      <button class="hw-chip timer-btn" data-mode="45" onclick="setTimer(45)">45 daq</button>
+      <button class="hw-chip timer-btn" data-mode="5" onclick="setTimer(5)">5 daq</button>
+    </div>
+
+    <div style="position:relative;width:200px;height:200px;margin:0 auto 20px;">
+      <svg viewBox="0 0 100 100" style="transform:rotate(-90deg);width:100%;height:100%;">
+        <circle cx="50" cy="50" r="45" stroke="rgba(148,163,184,0.15)" stroke-width="6" fill="none"/>
+        <circle id="pomoRing" cx="50" cy="50" r="45" stroke="url(#pomoGrad)" stroke-width="6" fill="none"
+                stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="pomoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4F46E5"/>
+            <stop offset="100%" stop-color="#EC4899"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div id="pomoTime" style="font-size:36px;font-weight:900;background:linear-gradient(135deg,#a5b4fc,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent;">25:00</div>
+        <div style="font-size:9px;text-transform:uppercase;color:#64748b;font-weight:800;letter-spacing:0.08em;margin-top:4px;">Qolgan vaqt</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="hw-item-cta new" style="flex:1;padding:12px;" id="pomoBtn" onclick="pomoStart()">
+        <i data-lucide="play" style="width:16px;height:16px;"></i> Boshlash
+      </button>
+      <button class="hw-select" onclick="pomoReset()" style="padding:12px 16px;">
+        <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE -->
+<div class="hw-modal" id="noteModal">
+  <div class="hw-modal-back" onclick="closeModal('noteModal')"></div>
+  <div class="hw-modal-box">
+    <button class="hw-modal-close" onclick="closeModal('noteModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <h3 style="font-size:16px;font-weight:900;color:white;margin-bottom:12px;">📝 Tez izoh</h3>
+    <textarea id="noteText" placeholder="Eslatma yozing..." class="hw-input" style="padding:12px;min-height:120px;resize:vertical;font-family:inherit;"
+      oninput="document.getElementById('noteCount').textContent = this.value.length + ' / 500'"></textarea>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:#64748b;margin-top:6px;">
+      <span id="noteCount">0 / 500</span>
+      <span>Avtomatik saqlanadi</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button onclick="closeModal('noteModal')" class="hw-select" style="flex:1;padding:10px;">Bekor</button>
+      <button onclick="saveNote()" class="hw-item-cta new" style="flex:1;padding:10px;">
+        <i data-lucide="save" style="width:14px;height:14px;"></i> Saqlash
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKMARKS -->
+<div class="hw-modal" id="bookmarksModal">
+  <div class="hw-modal-back" onclick="closeModal('bookmarksModal')"></div>
+  <div class="hw-modal-box">
+    <button class="hw-modal-close" onclick="closeModal('bookmarksModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <h3 style="font-size:16px;font-weight:900;color:white;margin-bottom:12px;">🔖 Xatcho'plar</h3>
+    <div id="bookmarksList" style="display:flex;flex-direction:column;gap:8px;">
+      <p style="font-size:12px;color:#64748b;text-align:center;padding:24px 0;">Hozircha xatcho'plar yo'q</p>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE -->
+<div class="hw-modal" id="voiceModal">
+  <div class="hw-modal-back" onclick="closeModal('voiceModal')"></div>
+  <div class="hw-modal-box" style="text-align:center;">
+    <button class="hw-modal-close" onclick="closeModal('voiceModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <h3 style="font-size:16px;font-weight:900;color:white;margin-bottom:16px;">🎤 Ovozli izoh</h3>
+    <div style="width:100px;height:100px;border-radius:50%;margin:0 auto 16px;background:linear-gradient(135deg,#06B6D4,#3B82F6);display:flex;align-items:center;justify-content:center;color:white;animation:urgentPulse 1.5s infinite;">
+      <i data-lucide="mic" style="width:44px;height:44px;"></i>
+    </div>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;">Tugmani bosib gapiring</p>
+    <button class="hw-item-cta new" style="padding:12px 24px;display:inline-flex;" onclick="startVoice()">Boshlash</button>
+  </div>
+</div>
+
+<!-- AI -->
+<div class="hw-modal" id="aiModal">
+  <div class="hw-modal-back" onclick="closeModal('aiModal')"></div>
+  <div class="hw-modal-box" style="display:flex;flex-direction:column;max-height:85vh;">
+    <button class="hw-modal-close" onclick="closeModal('aiModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <h3 style="font-size:16px;font-weight:900;color:white;margin-bottom:12px;">✨ AI Yordamchi</h3>
+    <div id="aiMsgs" style="flex:1;overflow-y:auto;background:rgba(15,23,42,0.5);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:200px;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#D946EF,#7C3AED);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;">
+          <i data-lucide="sparkles" style="width:14px;height:14px;"></i>
+        </div>
+        <div style="padding:10px;border-radius:12px;background:rgba(30,41,59,0.7);color:#e2e8f0;font-size:12px;">
+          Salom! Uy vazifalari bo'yicha savollaringiz bormi?
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="aiInput" class="hw-input" placeholder="Savol yozing..." style="flex:1;">
+      <button onclick="sendAI()" class="hw-item-cta new" style="padding:10px 14px;">
+        <i data-lucide="send" style="width:14px;height:14px;"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SHORTCUTS -->
+<div class="hw-modal" id="shortcutsModal">
+  <div class="hw-modal-back" onclick="closeModal('shortcutsModal')"></div>
+  <div class="hw-modal-box">
+    <button class="hw-modal-close" onclick="closeModal('shortcutsModal')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <h3 style="font-size:16px;font-weight:900;color:white;margin-bottom:12px;">⌨️ Klaviatura</h3>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(15,23,42,0.5);font-size:12px;color:#cbd5e1;">
+        <span>Qidiruv</span><kbd style="padding:2px 8px;border-radius:6px;background:rgba(148,163,184,0.15);font-family:monospace;">⌘K</kbd>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(15,23,42,0.5);font-size:12px;color:#cbd5e1;">
+        <span>Pomodoro</span><kbd style="padding:2px 8px;border-radius:6px;background:rgba(148,163,184,0.15);font-family:monospace;">P</kbd>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(15,23,42,0.5);font-size:12px;color:#cbd5e1;">
+        <span>Izoh</span><kbd style="padding:2px 8px;border-radius:6px;background:rgba(148,163,184,0.15);font-family:monospace;">N</kbd>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(15,23,42,0.5);font-size:12px;color:#cbd5e1;">
+        <span>Yuqoriga</span><kbd style="padding:2px 8px;border-radius:6px;background:rgba(148,163,184,0.15);font-family:monospace;">T</kbd>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toastBox" style="position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:340px;width:100%;padding:0 12px;"></div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   HOMEWORK LIST SCRIPT
+   ═══════════════════════════════════════════════════════════════════ */
+
+const STATE = {
+  filter: 'all',
+  search: '',
+  sort: 'default',
+  tab: 'today',
+  fabOpen: false,
+  pomo: { left: 25*60, total: 25*60, timer: null, running: false, mode: 25 },
+};
+
+const MOTIVATIONS = [
+  "Kichik qadamlar katta natijalarga olib keladi.",
+  "Bugun qilgan harakatlaringiz ertangi muvaffaqiyatingizdir.",
+  "Muvaffaqiyat — bu kichik qadamlar yig'indisi.",
+  "Har kuni 1% yaxshilanish — bir yilda 37x o'sish.",
+  "Mukammallik emas, izchillik muhim.",
+  "Bugun boshlash — ertaga g'alaba qozonish.",
+  "Bilim — kuch, uni to'plashda davom eting.",
+];
+
+function refreshIcons() { if (window.lucide?.createIcons) window.lucide.createIcons(); }
+function haptic(t='light') { try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred(t); } catch(e){} }
+function hapticOK() { try { window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success'); } catch(e){} }
+
+function toast(msg, type='info', dur=3000) {
+  const box = document.getElementById('toastBox');
+  if (!box) return;
+  const colors = { success:'#10B981', error:'#F43F5E', warning:'#F59E0B', info:'#4F46E5' };
+  const icons = { success:'check-circle', error:'x-circle', warning:'alert-triangle', info:'info' };
+  const el = document.createElement('div');
+  el.style.cssText = `pointer-events:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:rgba(30,41,59,0.95);border:1px solid rgba(148,163,184,0.15);box-shadow:0 12px 32px rgba(0,0,0,0.4);animation:slideDown .3s;`;
+  el.innerHTML = `<div style="width:32px;height:32px;border-radius:10px;background:${colors[type]};display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;"><i data-lucide="${icons[type]}" style="width:16px;height:16px;"></i></div><p style="font-size:12px;font-weight:700;color:white;flex:1;">${msg}</p>`;
+  box.appendChild(el);
+  refreshIcons();
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateY(-10px)'; el.style.transition='all .3s'; setTimeout(()=>el.remove(),300); }, dur);
+}
+
+// ═══ TAB SWITCHING ═══
+document.querySelectorAll('[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+function switchTab(tab) {
+  STATE.tab = tab;
+  document.querySelectorAll('[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('[data-tab-panel]').forEach(p => p.classList.toggle('hide', p.dataset.tabPanel !== tab));
+  refreshIcons(); haptic('light');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══ FAB ═══
+function toggleFab(e) {
+  e?.stopPropagation();
+  const main = document.getElementById('fabMain');
+  const menu = document.getElementById('fabMenu');
+  STATE.fabOpen = !STATE.fabOpen;
+  main.classList.toggle('open', STATE.fabOpen);
+  menu.classList.toggle('open', STATE.fabOpen);
+  haptic('light');
+}
+document.addEventListener('click', (e) => {
+  if (STATE.fabOpen && !document.getElementById('fabWrap').contains(e.target)) toggleFab();
+});
+
+// ═══ LIVE TIME ═══
+function updateTime() {
+  const el = document.getElementById('liveTime');
+  if (el) el.textContent = new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+updateTime(); setInterval(updateTime, 30000);
+
+// ═══ MOTIVATION ═══
+function nextMotivation() {
+  const el = document.getElementById('motivationText'); if (!el) return;
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.textContent = `"${MOTIVATIONS[Math.floor(Math.random()*MOTIVATIONS.length)]}"`;
+    el.style.transition = 'opacity .3s'; el.style.opacity = '1';
+  }, 150);
+  haptic('light');
+}
+
+// ═══ COUNTERS ═══
+document.querySelectorAll('[data-count]').forEach(el => {
+  const target = parseInt(el.dataset.count) || 0;
+  if (target === 0) return;
+  let c = 0;
+  const step = Math.max(1, Math.ceil(target / 25));
+  const t = setInterval(() => { c += step; if (c >= target) { c = target; clearInterval(t); } el.textContent = c; }, 30);
+});
+
+// ═══ FILTERS ═══
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => { setFilter(btn.dataset.filter); haptic('light'); });
+});
+function setFilter(f) {
+  STATE.filter = f;
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+  applyFilters();
+}
+
+// ═══ SEARCH ═══
+const searchEl = document.getElementById('hwSearch');
+const clearEl = document.getElementById('clearSearch');
+let searchTimer;
+searchEl?.addEventListener('input', () => {
+  STATE.search = searchEl.value;
+  clearEl?.classList.toggle('hide', !searchEl.value);
+  clearTimeout(searchTimer); searchTimer = setTimeout(applyFilters, 180);
+});
+clearEl?.addEventListener('click', () => {
+  searchEl.value = ''; STATE.search = ''; clearEl.classList.add('hide'); applyFilters();
+});
+
+// ═══ SORT ═══
+document.getElementById('hwSort')?.addEventListener('change', (e) => { STATE.sort = e.target.value; applyFilters(); });
+
+function applyFilters() {
+  const grid = document.getElementById('hwGrid'); if (!grid) return;
+  const noResults = document.getElementById('noResults');
+  const items = Array.from(grid.querySelectorAll('.hw-item'));
+  const q = (STATE.search || '').toLowerCase().trim();
+  let visible = 0;
+
+  items.forEach(item => {
+    const status = item.dataset.status;
+    const text = (item.dataset.search || '').toLowerCase();
+    let ok = true;
+    if (STATE.filter === 'new') ok = status === 'new';
+    else if (STATE.filter === 'done') ok = ['graded','submitted'].includes(status);
+    else if (STATE.filter === 'pending') ok = status === 'pending';
+    else if (STATE.filter === 'missed') ok = status === 'missed';
+    else if (STATE.filter === 'urgent') {
+      const dl = parseInt(item.dataset.deadlineTs || '0');
+      const now = Math.floor(Date.now()/1000);
+      ok = dl > 0 && (dl - now) < 86400 && status !== 'graded';
+    }
+    if (q && !text.includes(q)) ok = false;
+    item.style.display = ok ? '' : 'none';
+    if (ok) visible++;
+  });
+
+  if (STATE.sort !== 'default') {
+    const sorted = [...items].sort((a, b) => {
+      const aN = parseInt(a.dataset.lessonNumber)||0, bN = parseInt(b.dataset.lessonNumber)||0;
+      const aD = parseInt(a.dataset.deadlineTs)||0, bD = parseInt(b.dataset.deadlineTs)||0;
+      const dO = { easy:0, medium:1, hard:2 };
+      if (STATE.sort === 'newest') return bN - aN;
+      if (STATE.sort === 'oldest') return aN - bN;
+      if (STATE.sort === 'deadline') return (aD||9999999999) - (bD||9999999999);
+      if (STATE.sort === 'difficulty') return (dO[a.dataset.difficulty]||1) - (dO[b.dataset.difficulty]||1);
+      if (STATE.sort === 'pending') {
+        const p = { new:0, missed:1, pending:2, graded:3, submitted:4 };
+        return (p[a.dataset.status]??99) - (p[b.dataset.status]??99);
+      }
+      return 0;
+    });
+    sorted.forEach(el => grid.appendChild(el));
+  }
+  if (noResults) noResults.classList.toggle('hide', visible > 0);
+}
+
+function resetFilters() {
+  if (searchEl) searchEl.value = '';
+  STATE.search = '';
+  const s = document.getElementById('hwSort'); if (s) s.value = 'default';
+  STATE.sort = 'default';
+  setFilter('all');
+  toast('Filtrlarni tozalandi', 'success');
+}
+
+// ═══ OPEN HOMEWORK DETAIL ═══
+function openHW(id, gl) {
+  if (!id) return;
+  haptic('medium');
+  window.location.href = `/talaba/uyga-vazifa/${id}/?gl=${gl}`;
+}
+
+// ═══ RECOMMENDATION ═══
+function handleRec(action) {
+  const map = {
+    filter_missed: () => { setFilter('missed'); switchTab('all'); },
+    filter_new: () => { setFilter('new'); switchTab('all'); },
+    show_stats: () => switchTab('stats'),
+  };
+  (map[action] || (() => {}))();
+}
+
+// ═══ MODALS ═══
+function openModal(id) { document.getElementById(id)?.classList.add('open'); refreshIcons(); haptic('light'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+function closeAllModals() { document.querySelectorAll('.hw-modal').forEach(m => m.classList.remove('open')); }
+
+function openPomodoro(e) { e?.stopPropagation(); toggleFab(); openModal('pomodoroModal'); }
+function openNote(e) { e?.stopPropagation(); toggleFab(); openModal('noteModal'); setTimeout(() => document.getElementById('noteText')?.focus(), 100); }
+function openBookmarks(e) { e?.stopPropagation(); toggleFab(); openModal('bookmarksModal'); renderBM(); }
+function openVoice(e) { e?.stopPropagation(); toggleFab(); openModal('voiceModal'); }
+function openAI(e) { e?.stopPropagation(); toggleFab(); openModal('aiModal'); }
+function openShortcuts(e) { e?.stopPropagation(); openModal('shortcutsModal'); }
+
+// ═══ POMODORO ═══
+function setTimer(min) {
+  STATE.pomo.mode = min; STATE.pomo.total = min*60; STATE.pomo.left = min*60;
+  pomoStop(); updatePomo();
+  document.querySelectorAll('.timer-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.mode) === min));
+}
+function pomoStart() {
+  if (STATE.pomo.running) { pomoStop(); return; }
+  STATE.pomo.running = true;
+  const btn = document.getElementById('pomoBtn');
+  if (btn) btn.innerHTML = '<i data-lucide="pause" style="width:16px;height:16px;"></i> To\'xtatish';
+  refreshIcons();
+  STATE.pomo.timer = setInterval(() => {
+    STATE.pomo.left--; updatePomo();
+    if (STATE.pomo.left <= 0) { pomoStop(); hapticOK(); toast('🎉 Vaqt tugadi! Dam oling','success',5000); }
+  }, 1000);
+  haptic('medium');
+}
+function pomoStop() {
+  clearInterval(STATE.pomo.timer); STATE.pomo.timer = null; STATE.pomo.running = false;
+  const btn = document.getElementById('pomoBtn');
+  if (btn) btn.innerHTML = '<i data-lucide="play" style="width:16px;height:16px;"></i> Boshlash';
+  refreshIcons();
+}
+function pomoReset() { pomoStop(); STATE.pomo.left = STATE.pomo.total; updatePomo(); }
+function updatePomo() {
+  const m = Math.floor(STATE.pomo.left/60), s = STATE.pomo.left%60;
+  const t = document.getElementById('pomoTime');
+  if (t) t.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const r = document.getElementById('pomoRing');
+  if (r) r.style.strokeDashoffset = (2*Math.PI*45) * (1 - STATE.pomo.left/STATE.pomo.total);
+}
+
+// ═══ NOTE ═══
+function saveNote() {
+  const t = document.getElementById('noteText')?.value || '';
+  if (!t.trim()) { toast('Izoh bo\'sh', 'warning'); return; }
+  localStorage.setItem('quickNote', t);
+  toast('✅ Saqlandi', 'success'); closeModal('noteModal');
+}
+
+// ═══ BOOKMARKS ═══
+function renderBM() {
+  const list = document.getElementById('bookmarksList'); if (!list) return;
+  try {
+    const bm = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    if (!bm.length) { list.innerHTML = '<p style="font-size:12px;color:#64748b;text-align:center;padding:24px 0;">Hozircha xatcho\'plar yo\'q</p>'; return; }
+    list.innerHTML = bm.map(b => `<div style="display:flex;gap:10px;padding:10px;border-radius:12px;background:rgba(15,23,42,0.5);"><div style="width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,0.15);color:#fcd34d;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i data-lucide="bookmark" style="width:16px;height:16px;"></i></div><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:800;color:white;">${b.title || 'Xatcho\'p'}</div><div style="font-size:10px;color:#94a3b8;">${b.note || ''}</div></div></div>`).join('');
+    refreshIcons();
+  } catch(e) {}
+}
+
+// ═══ VOICE ═══
+function startVoice() { toast('🎤 Yozib olinmoqda...','info'); setTimeout(() => { toast('✅ Yozib olindi!','success'); closeModal('voiceModal'); }, 3000); }
+
+// ═══ AI ═══
+function sendAI() {
+  const input = document.getElementById('aiInput');
+  const msgs = document.getElementById('aiMsgs');
+  if (!input || !msgs || !input.value.trim()) return;
+  const u = input.value.trim(); input.value = '';
+  msgs.innerHTML += `<div style="display:flex;justify-content:flex-end;"><div style="padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#4F46E5,#7C3AED);color:white;font-size:12px;max-width:80%;">${u}</div></div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    msgs.innerHTML += `<div style="display:flex;gap:8px;"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#D946EF,#7C3AED);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;"><i data-lucide="sparkles" style="width:14px;height:14px;"></i></div><div style="padding:10px;border-radius:12px;background:rgba(30,41,59,0.7);color:#e2e8f0;font-size:12px;">Tez orada to'liq ishga tushadi!</div></div>`;
+    msgs.scrollTop = msgs.scrollHeight; refreshIcons();
+  }, 700);
+}
+
+// ═══ SCROLL TOP ═══
+function scrollTop(e) { e?.stopPropagation(); toggleFab(); window.scrollTo({ top: 0, behavior: 'smooth' }); haptic('light'); }
+
+// ═══ KEYBOARD ═══
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); switchTab('all'); setTimeout(() => searchEl?.focus(), 200); }
+  if (e.key === 'Escape') { closeAllModals(); if (STATE.fabOpen) toggleFab(); }
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  if (e.key === 'p') { e.preventDefault(); openModal('pomodoroModal'); }
+  if (e.key === 'n') { e.preventDefault(); openModal('noteModal'); }
+  if (e.key === 't') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  if (e.key === '?') { e.preventDefault(); openModal('shortcutsModal'); }
+});
+
+refreshIcons();
+window.addEventListener('load', refreshIcons);
+console.log('%c🚀 DIGION Homework v8.0','background:linear-gradient(90deg,#4F46E5,#EC4899,#06B6D4,#10B981);color:white;padding:8px 16px;border-radius:8px;font-weight:bold;font-size:14px');
+</script>
+{% endblock %}

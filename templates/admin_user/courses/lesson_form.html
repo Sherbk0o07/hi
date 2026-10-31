@@ -1,0 +1,840 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}
+{% if mode == 'create' %}Yangi dars · {{ course.title }}{% else %}Tahrirlash · {{ lesson.title }}{% endif %} · DIGION
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        transition: box-shadow 200ms;
+    }
+    .dark .form-section {
+        background: #13131b;
+        border-color: #1e293b;
+    }
+    .form-section:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    .form-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .dark .form-section-header { border-color: #1e293b; }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.4rem;
+    }
+    .dark .form-label { color: #cbd5e1; }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        border-radius: 0.6rem;
+        border: 1.5px solid #e2e8f0;
+        background: #fff;
+        color: #0f172a;
+        font-size: 0.88rem;
+        transition: all 150ms;
+        outline: none;
+    }
+    .dark .form-input, .dark .form-select, .dark .form-textarea {
+        background: #0a0a0f;
+        border-color: #1e293b;
+        color: #f1f5f9;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+    .form-input.is-invalid, .form-select.is-invalid, .form-textarea.is-invalid {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-hint {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        margin-top: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .form-error {
+        font-size: 0.75rem;
+        color: #ef4444;
+        margin-top: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-weight: 500;
+    }
+
+    .checkbox-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.6rem;
+        border: 1.5px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 150ms;
+    }
+    .dark .checkbox-row { border-color: #1e293b; }
+    .checkbox-row:hover { border-color: #6366f1; background: #f8faff; }
+    .dark .checkbox-row:hover { background: rgba(99, 102, 241, 0.05); }
+
+    .checkbox-row input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #6366f1;
+        margin-top: 2px;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    /* JSON Builder */
+    .json-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.65rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        position: relative;
+    }
+    .dark .json-item { background: #0a0a0f; border-color: #1e293b; }
+
+    .json-item-remove {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: #fee2e2;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        border: none;
+        cursor: pointer;
+        transition: all 150ms;
+    }
+    .json-item-remove:hover { background: #dc2626; color: #fff; }
+
+    .btn-add-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.9rem;
+        border-radius: 0.6rem;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1.5px dashed #c7d2fe;
+        cursor: pointer;
+        transition: all 150ms;
+    }
+    .btn-add-item:hover {
+        background: #6366f1;
+        color: #fff;
+        border-color: #6366f1;
+    }
+    .dark .btn-add-item {
+        background: rgba(99, 102, 241, 0.1);
+        color: #a5b4fc;
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    /* Sticky action bar */
+    .action-bar {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
+        padding: 1rem;
+        margin: 0 -1rem -1rem;
+        border-radius: 0 0 1rem 1rem;
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        z-index: 10;
+    }
+    .dark .action-bar { background: #13131b; border-color: #1e293b; }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.25rem;
+        border-radius: 0.65rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+        transition: all 180ms;
+    }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.25rem;
+        border-radius: 0.65rem;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 150ms;
+        text-decoration: none;
+    }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .dark .btn-secondary { background: #1e293b; color: #cbd5e1; }
+    .dark .btn-secondary:hover { background: #334155; }
+
+    /* Preview card */
+    .preview-card {
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1px dashed #c7d2fe;
+        border-radius: 0.75rem;
+        padding: 1rem;
+    }
+    .dark .preview-card {
+        background: linear-gradient(135deg, #0a0a0f, #13131b);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════ BREADCRUMB ═══════════════ -->
+<nav class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-4">
+    <a href="{% url 'admin_courses' %}" class="hover:text-indigo-600 transition-colors">
+        <i class="fas fa-book text-xs"></i> Kurslar
+    </a>
+    <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+    {% if course %}
+    <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="hover:text-indigo-600 transition-colors truncate max-w-[180px]">
+        {{ course.title }}
+    </a>
+    <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+    {% endif %}
+    {% if month %}
+    <span class="truncate max-w-[180px]">{{ month.title }}</span>
+    <i class="fas fa-chevron-right text-[10px] opacity-40"></i>
+    {% endif %}
+    <span class="text-slate-800 dark:text-slate-200 font-semibold">
+        {% if mode == 'create' %}Yangi dars{% else %}Tahrirlash{% endif %}
+    </span>
+</nav>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+    <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg"
+             style="background: linear-gradient(135deg, {% if mode == 'create' %}#10b981, #059669{% else %}#6366f1, #4f46e5{% endif %});">
+            <i class="fas {% if mode == 'create' %}fa-plus-circle{% else %}fa-pen-to-square{% endif %}"></i>
+        </div>
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider
+                    {% if mode == 'create' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400
+                    {% else %}bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400{% endif %}">
+                    <i class="fas {% if mode == 'create' %}fa-sparkles{% else %}fa-wrench{% endif %} text-[9px]"></i>
+                    {% if mode == 'create' %}Yangi dars{% else %}Tahrirlash{% endif %}
+                </span>
+                {% if course %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-600 dark:text-slate-400">
+                    <i class="fas fa-book text-[9px]"></i>
+                    {{ course.title|truncatechars:30 }}
+                </span>
+                {% endif %}
+            </div>
+            <h1 class="font-display text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                {% if mode == 'create' %}Yangi dars qo'shish{% else %}{{ lesson.title|truncatechars:60 }}{% endif %}
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                {% if mode == 'create' %}
+                Dars ma'lumotlarini to'ldiring va saqlang
+                {% else %}
+                Dars ma'lumotlarini yangilang
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <a href="{% if lesson %}{% url 'courses_admin:lesson_detail' pk=lesson.pk %}{% elif month %}{% url 'courses_admin:detail' pk=course.pk %}{% else %}{% url 'courses_admin:list' %}{% endif %}"
+           class="btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            <span class="hidden sm:inline">Orqaga</span>
+        </a>
+    </div>
+</div>
+
+<!-- ═══════════════ FORM XATOLARI (umumiy) ═══════════════ -->
+{% if form.non_field_errors %}
+<div class="mb-4 p-4 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-900/30 text-rose-800 dark:text-rose-300">
+    <div class="flex items-start gap-3">
+        <i class="fas fa-circle-exclamation mt-0.5"></i>
+        <div class="flex-1 text-sm">
+            {% for err in form.non_field_errors %}
+            <div>{{ err }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════ MAIN FORM ═══════════════ -->
+<form method="post" enctype="multipart/form-data" id="lessonForm" novalidate>
+    {% csrf_token %}
+
+    <!-- ═══ 1. ASOSIY MA'LUMOTLAR ═══ -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <span class="section-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+                <i class="fas fa-info-circle"></i>
+            </span>
+            <div>
+                <h2 class="font-display font-bold text-slate-900 dark:text-white text-base">Asosiy ma'lumotlar</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Dars raqami, sarlavha va tavsif</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Lesson number -->
+            <div class="md:col-span-1">
+                <label for="{{ form.lesson_number.id_for_label }}" class="form-label">
+                    <i class="fas fa-hashtag text-indigo-500 mr-1"></i>
+                    {{ form.lesson_number.label }} <span class="text-rose-500">*</span>
+                </label>
+                {{ form.lesson_number }}
+                {% if form.lesson_number.help_text %}
+                <p class="form-hint"><i class="fas fa-circle-info"></i>{{ form.lesson_number.help_text }}</p>
+                {% else %}
+                <p class="form-hint"><i class="fas fa-circle-info"></i>1, 2, 3... ketma-ket</p>
+                {% endif %}
+                {% if form.lesson_number.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.lesson_number.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Topic -->
+            <div class="md:col-span-3">
+                <label for="{{ form.topic.id_for_label }}" class="form-label">
+                    <i class="fas fa-tags text-violet-500 mr-1"></i>
+                    {{ form.topic.label }}
+                </label>
+                {{ form.topic }}
+                <p class="form-hint"><i class="fas fa-circle-info"></i>Masalan: "String methods", "Lists" (ixtiyoriy)</p>
+                {% if form.topic.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.topic.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Title -->
+            <div class="md:col-span-4">
+                <label for="{{ form.title.id_for_label }}" class="form-label">
+                    <i class="fas fa-heading text-indigo-500 mr-1"></i>
+                    {{ form.title.label }} <span class="text-rose-500">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Short description -->
+            <div class="md:col-span-4">
+                <label for="{{ form.short_description.id_for_label }}" class="form-label">
+                    <i class="fas fa-align-left text-sky-500 mr-1"></i>
+                    {{ form.short_description.label }}
+                </label>
+                {{ form.short_description }}
+                <p class="form-hint"><i class="fas fa-circle-info"></i>Dars kartochkasida ko'rinadi (max 300 belgi)</p>
+                {% if form.short_description.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.short_description.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ 2. KONTENT ═══ -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <span class="section-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-file-lines"></i>
+            </span>
+            <div>
+                <h2 class="font-display font-bold text-slate-900 dark:text-white text-base">Dars kontenti</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Nazariy matn va kod misollari</p>
+            </div>
+        </div>
+
+        <!-- Lesson type -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label for="{{ form.lesson_type.id_for_label }}" class="form-label">
+                    <i class="fas fa-chalkboard text-emerald-500 mr-1"></i>
+                    {{ form.lesson_type.label }} <span class="text-rose-500">*</span>
+                </label>
+                {{ form.lesson_type }}
+                {% if form.lesson_type.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.lesson_type.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="mb-4">
+            <label for="{{ form.content.id_for_label }}" class="form-label">
+                <i class="fas fa-book-open text-emerald-500 mr-1"></i>
+                {{ form.content.label }}
+            </label>
+            {{ form.content }}
+            <p class="form-hint"><i class="fas fa-circle-info"></i>Markdown yoki HTML qo'llab-quvvatlanadi</p>
+            {% if form.content.errors %}
+            <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.content.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Code examples builder -->
+        <div class="mb-4">
+            <label class="form-label">
+                <i class="fas fa-code text-amber-500 mr-1"></i>
+                Kod misollari
+                <span class="text-xs font-normal text-slate-400 ml-1">(ixtiyoriy)</span>
+            </label>
+            <div id="codeExamplesContainer"></div>
+            <button type="button" class="btn-add-item" onclick="addCodeExample()">
+                <i class="fas fa-plus"></i> Kod misoli qo'shish
+            </button>
+            <input type="hidden" name="code_examples" id="codeExamplesInput" value="">
+        </div>
+
+        <!-- Extra sections builder -->
+        <div class="mb-4">
+            <label class="form-label">
+                <i class="fas fa-layer-group text-violet-500 mr-1"></i>
+                Qo'shimcha bo'limlar
+                <span class="text-xs font-normal text-slate-400 ml-1">(diqqat, maslahat, ma'lumot)</span>
+            </label>
+            <div id="extraSectionsContainer"></div>
+            <button type="button" class="btn-add-item" onclick="addExtraSection()">
+                <i class="fas fa-plus"></i> Bo'lim qo'shish
+            </button>
+            <input type="hidden" name="extra_sections" id="extraSectionsInput" value="">
+        </div>
+
+        <!-- Extra materials builder -->
+        <div class="mb-4">
+            <label class="form-label">
+                <i class="fas fa-paperclip text-sky-500 mr-1"></i>
+                Qo'shimcha materiallar
+                <span class="text-xs font-normal text-slate-400 ml-1">(PDF, havola, video)</span>
+            </label>
+            <div id="extraMaterialsContainer"></div>
+            <button type="button" class="btn-add-item" onclick="addExtraMaterial()">
+                <i class="fas fa-plus"></i> Material qo'shish
+            </button>
+            <input type="hidden" name="extra_materials" id="extraMaterialsInput" value="">
+        </div>
+    </div>
+
+    <!-- ═══ 3. MULTIMEDIA ═══ -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <span class="section-icon" style="background: linear-gradient(135deg, #f43f5e, #e11d48);">
+                <i class="fas fa-video"></i>
+            </span>
+            <div>
+                <h2 class="font-display font-bold text-slate-900 dark:text-white text-base">Multimedia</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Video va fayllar</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="{{ form.video_url.id_for_label }}" class="form-label">
+                    <i class="fas fa-link text-rose-500 mr-1"></i>
+                    {{ form.video_url.label }}
+                </label>
+                {{ form.video_url }}
+                <p class="form-hint"><i class="fas fa-circle-info"></i>YouTube, Vimeo yoki boshqa havola</p>
+                {% if form.video_url.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.video_url.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.video_file.id_for_label }}" class="form-label">
+                    <i class="fas fa-file-video text-rose-500 mr-1"></i>
+                    {{ form.video_file.label }}
+                </label>
+                {{ form.video_file }}
+                <p class="form-hint"><i class="fas fa-circle-info"></i>MP4, WEBM — max 200 MB</p>
+                {% if form.video_file.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.video_file.errors.0 }}</p>
+                {% endif %}
+                {% if lesson.video_file %}
+                <div class="preview-card mt-2 flex items-center gap-2">
+                    <i class="fas fa-check-circle text-emerald-500"></i>
+                    <span class="text-xs">Mavjud: <a href="{{ lesson.video_file.url }}" target="_blank" class="text-indigo-600 hover:underline">{{ lesson.video_file.name|truncatechars:40 }}</a></span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ 4. VAQT VA HOLAT ═══ -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <span class="section-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <i class="fas fa-clock"></i>
+            </span>
+            <div>
+                <h2 class="font-display font-bold text-slate-900 dark:text-white text-base">Vaqt va holat</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Sana, davomiylik va ko'rinish sozlamalari</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+                <label for="{{ form.lesson_date.id_for_label }}" class="form-label">
+                    <i class="fas fa-calendar text-amber-500 mr-1"></i>
+                    {{ form.lesson_date.label }}
+                </label>
+                {{ form.lesson_date }}
+                {% if form.lesson_date.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.lesson_date.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.duration_minutes.id_for_label }}" class="form-label">
+                    <i class="fas fa-hourglass-half text-amber-500 mr-1"></i>
+                    {{ form.duration_minutes.label }}
+                </label>
+                {{ form.duration_minutes }}
+                <p class="form-hint"><i class="fas fa-circle-info"></i>Odatda 90 daqiqa</p>
+                {% if form.duration_minutes.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.duration_minutes.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="form-label">
+                    <i class="fas fa-flag text-amber-500 mr-1"></i>
+                    {{ form.status.label }}
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                <p class="form-error"><i class="fas fa-circle-exclamation"></i>{{ form.status.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label class="checkbox-row">
+                {{ form.is_published }}
+                <div class="flex-1">
+                    <div class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        <i class="fas fa-eye text-emerald-500 mr-1"></i>
+                        {{ form.is_published.label }}
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        E'lon qilingan darslar talabalarga ko'rinadi
+                    </p>
+                </div>
+            </label>
+
+            <label class="checkbox-row">
+                {{ form.is_mandatory }}
+                <div class="flex-1">
+                    <div class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        <i class="fas fa-exclamation-circle text-rose-500 mr-1"></i>
+                        {{ form.is_mandatory.label }}
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Majburiy darslar o'tkazib yuborilmaydi
+                    </p>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <!-- ═══════════════ ACTION BAR ═══════════════ -->
+    <div class="form-section" style="padding-bottom: 0;">
+        <div class="action-bar">
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-check"></i>
+                {% if mode == 'create' %}Darsni saqlash{% else %}O'zgarishlarni saqlash{% endif %}
+            </button>
+
+            {% if mode == 'create' %}
+            <button type="submit" name="save_and_new" value="1" class="btn-secondary">
+                <i class="fas fa-plus"></i>
+                <span class="hidden sm:inline">Saqlash va yangi</span>
+            </button>
+            {% endif %}
+
+            <div class="flex-1"></div>
+
+            <a href="{% if lesson %}{% url 'courses_admin:lesson_detail' pk=lesson.pk %}{% elif month %}{% url 'courses_admin:detail' pk=course.pk %}{% else %}{% url 'courses_admin:list' %}{% endif %}"
+               class="btn-secondary">
+                <i class="fas fa-xmark"></i>
+                Bekor qilish
+            </a>
+        </div>
+    </div>
+
+</form>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// JSON BUILDERS — Kod misollari, bo'limlar, materiallar
+// ═══════════════════════════════════════════════════════════════
+
+// ─── Mavjud qiymatlarni yuklash ───
+let codeExamples = {{ form.instance.code_examples|default:"[]"|safe }};
+let extraSections = {{ form.instance.extra_sections|default:"[]"|safe }};
+let extraMaterials = {{ form.instance.extra_materials|default:"[]"|safe }};
+
+// Agar string bo'lsa — array qilib olish
+if (typeof codeExamples === 'string') { try { codeExamples = JSON.parse(codeExamples); } catch(e) { codeExamples = []; } }
+if (typeof extraSections === 'string') { try { extraSections = JSON.parse(extraSections); } catch(e) { extraSections = []; } }
+if (typeof extraMaterials === 'string') { try { extraMaterials = JSON.parse(extraMaterials); } catch(e) { extraMaterials = []; } }
+
+// ═══════════════════════════════════════════════════════════════
+// CODE EXAMPLES
+// ═══════════════════════════════════════════════════════════════
+function renderCodeExamples() {
+    const container = document.getElementById('codeExamplesContainer');
+    container.innerHTML = '';
+    codeExamples.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'json-item';
+        div.innerHTML = `
+            <button type="button" class="json-item-remove" onclick="removeCodeExample(${idx})">
+                <i class="fas fa-trash"></i>
+            </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input type="text" class="form-input" placeholder="Sarlavha (masalan: String birlashtirish)"
+                       value="${escapeHtml(item.title || '')}" onchange="updateCodeExample(${idx}, 'title', this.value)">
+                <select class="form-select" onchange="updateCodeExample(${idx}, 'language', this.value)">
+                    <option value="python" ${item.language === 'python' ? 'selected' : ''}>Python</option>
+                    <option value="javascript" ${item.language === 'javascript' ? 'selected' : ''}>JavaScript</option>
+                    <option value="html" ${item.language === 'html' ? 'selected' : ''}>HTML</option>
+                    <option value="css" ${item.language === 'css' ? 'selected' : ''}>CSS</option>
+                    <option value="sql" ${item.language === 'sql' ? 'selected' : ''}>SQL</option>
+                </select>
+            </div>
+            <textarea class="form-textarea mt-2" rows="4" placeholder="Kod..." style="font-family: monospace;"
+                      onchange="updateCodeExample(${idx}, 'code', this.value)">${escapeHtml(item.code || '')}</textarea>
+            <input type="text" class="form-input mt-2" placeholder="Tushuntirish (masalan: Natija: xy)"
+                   value="${escapeHtml(item.explanation || '')}" onchange="updateCodeExample(${idx}, 'explanation', this.value)">
+        `;
+        container.appendChild(div);
+    });
+    document.getElementById('codeExamplesInput').value = JSON.stringify(codeExamples);
+}
+
+function addCodeExample() {
+    codeExamples.push({ title: '', language: 'python', code: '', explanation: '' });
+    renderCodeExamples();
+}
+function removeCodeExample(idx) {
+    codeExamples.splice(idx, 1);
+    renderCodeExamples();
+}
+function updateCodeExample(idx, key, value) {
+    codeExamples[idx][key] = value;
+    document.getElementById('codeExamplesInput').value = JSON.stringify(codeExamples);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXTRA SECTIONS
+// ═══════════════════════════════════════════════════════════════
+function renderExtraSections() {
+    const container = document.getElementById('extraSectionsContainer');
+    container.innerHTML = '';
+    extraSections.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'json-item';
+        div.innerHTML = `
+            <button type="button" class="json-item-remove" onclick="removeExtraSection(${idx})">
+                <i class="fas fa-trash"></i>
+            </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <select class="form-select" onchange="updateExtraSection(${idx}, 'type', this.value)">
+                    <option value="note" ${item.type === 'note' ? 'selected' : ''}>📝 Diqqat</option>
+                    <option value="warning" ${item.type === 'warning' ? 'selected' : ''}>⚠️ Ogohlantirish</option>
+                    <option value="tip" ${item.type === 'tip' ? 'selected' : ''}>💡 Maslahat</option>
+                    <option value="info" ${item.type === 'info' ? 'selected' : ''}>ℹ️ Ma'lumot</option>
+                </select>
+                <input type="text" class="form-input" placeholder="Sarlavha"
+                       value="${escapeHtml(item.title || '')}" onchange="updateExtraSection(${idx}, 'title', this.value)">
+            </div>
+            <textarea class="form-textarea mt-2" rows="2" placeholder="Matn..."
+                      onchange="updateExtraSection(${idx}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
+        `;
+        container.appendChild(div);
+    });
+    document.getElementById('extraSectionsInput').value = JSON.stringify(extraSections);
+}
+
+function addExtraSection() {
+    extraSections.push({ type: 'note', title: '', text: '' });
+    renderExtraSections();
+}
+function removeExtraSection(idx) {
+    extraSections.splice(idx, 1);
+    renderExtraSections();
+}
+function updateExtraSection(idx, key, value) {
+    extraSections[idx][key] = value;
+    document.getElementById('extraSectionsInput').value = JSON.stringify(extraSections);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXTRA MATERIALS
+// ═══════════════════════════════════════════════════════════════
+function renderExtraMaterials() {
+    const container = document.getElementById('extraMaterialsContainer');
+    container.innerHTML = '';
+    extraMaterials.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'json-item';
+        div.innerHTML = `
+            <button type="button" class="json-item-remove" onclick="removeExtraMaterial(${idx})">
+                <i class="fas fa-trash"></i>
+            </button>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input type="text" class="form-input" placeholder="Sarlavha"
+                       value="${escapeHtml(item.title || '')}" onchange="updateExtraMaterial(${idx}, 'title', this.value)">
+                <select class="form-select" onchange="updateExtraMaterial(${idx}, 'type', this.value)">
+                    <option value="pdf" ${item.type === 'pdf' ? 'selected' : ''}>📄 PDF</option>
+                    <option value="video" ${item.type === 'video' ? 'selected' : ''}>🎬 Video</option>
+                    <option value="link" ${item.type === 'link' ? 'selected' : ''}>🔗 Havola</option>
+                    <option value="book" ${item.type === 'book' ? 'selected' : ''}>📚 Kitob</option>
+                </select>
+                <input type="text" class="form-input" placeholder="URL yoki fayl yo'li"
+                       value="${escapeHtml(item.url || '')}" onchange="updateExtraMaterial(${idx}, 'url', this.value)">
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    document.getElementById('extraMaterialsInput').value = JSON.stringify(extraMaterials);
+}
+
+function addExtraMaterial() {
+    extraMaterials.push({ title: '', type: 'pdf', url: '' });
+    renderExtraMaterials();
+}
+function removeExtraMaterial(idx) {
+    extraMaterials.splice(idx, 1);
+    renderExtraMaterials();
+}
+function updateExtraMaterial(idx, key, value) {
+    extraMaterials[idx][key] = value;
+    document.getElementById('extraMaterialsInput').value = JSON.stringify(extraMaterials);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INITIAL RENDER
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+    renderCodeExamples();
+    renderExtraSections();
+    renderExtraMaterials();
+
+    // Barcha form input'larga class qo'shish
+    document.querySelectorAll('#lessonForm input:not([type="checkbox"]):not([type="file"]), #lessonForm select, #lessonForm textarea').forEach(el => {
+        if (!el.classList.contains('form-input') && !el.classList.contains('form-select') && !el.classList.contains('form-textarea')) {
+            if (el.tagName === 'SELECT') el.classList.add('form-select');
+            else if (el.tagName === 'TEXTAREA') el.classList.add('form-textarea');
+            else el.classList.add('form-input');
+        }
+        if (el.hasAttribute('required') || el.name === 'title' || el.name === 'lesson_number') {
+            el.required = false; // Django o'zi validatsiya qiladi
+        }
+    });
+
+    // Xatolik bor maydonlarni belgilash
+    document.querySelectorAll('.form-error').forEach(err => {
+        const parent = err.parentElement;
+        const input = parent.querySelector('input, select, textarea');
+        if (input) input.classList.add('is-invalid');
+    });
+});
+
+// Ctrl+S — saqlash
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        document.getElementById('lessonForm').submit();
+    }
+});
+</script>
+{% endblock %}

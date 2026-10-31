@@ -1,0 +1,39 @@
+{% extends 's/settings.html' %}
+{% load static %}
+
+<!-- add.html - Yangi qo'shish sahifasi -->
+{% block login %}
+
+                <main class="im-content">
+                    <header class="im-content-header">
+                        <h1 class="im-page-title">➕ Yangi Login uchun rasm qoshish qo'shish</h1>
+                        <a href="" class="im-btn im-btn-secondary">⬅ Ortga</a>
+                    </header>
+                    <div class="im-form-container">
+                        <form action="{% url 'create_img' %}" class="im-iphone-form" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+
+                        <div class="im-form-group">
+                            <label class="im-form-label">Rasm yuklash</label>
+                            <input required type="file"  name="cover_img" class="im-form-input" accept="image/*">
+
+                        </div>
+                            <div class="im-form-group">
+                                <label class="im-form-label">Tavsifi</label>
+                                <textarea required name="description" class="im-form-input" rows="4" placeholder="Mahsulot haqida qisqacha"></textarea>
+                            </div>
+                            <div class="im-form-group">
+                                <label class="im-form-label">Faolmi?</label>
+                                <input  type="checkbox" name="is_active" class="im-form-checkbox" checked>
+                            </div>
+                            <div class="im-form-actions">
+                                <button type="submit" class="im-btn im-btn-primary">💾 Saqlash</button>
+                                <a href="{% url 'create_img' %}" class="im-btn im-btn-secondary">Bekor qilish</a>
+                            </div>
+                        </form>
+                    </div>
+                </main>
+
+
+{% endblock login %}

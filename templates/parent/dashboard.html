@@ -1,0 +1,142 @@
+﻿{% extends 'parent/base.html' %}
+
+{% block title %}Ota-ona Dashboard | LearnCraft{% endblock %}
+
+{% block header_logo %}F{% endblock %}
+{% block header_title %}Farzandingiz: Jasur Karimov{% endblock %}
+{% block header_subtitle %}Frontend-24 · ID: 1042{% endblock %}
+
+{% block content %}
+    <!-- Statistikalar -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card neo-card p-4">
+            <div class="flex items-center gap-3">
+                <div class="stat-icon w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-xl"><i class="fas fa-check-circle"></i></div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Bajarildi</p>
+                    <p class="stat-value text-xl font-bold">18</p>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card neo-card p-4">
+            <div class="flex items-center gap-3">
+                <div class="stat-icon w-10 h-10 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-xl"><i class="fas fa-times-circle"></i></div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Bajarilmagan</p>
+                    <p class="stat-value text-xl font-bold">3</p>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card neo-card p-4">
+            <div class="flex items-center gap-3">
+                <div class="stat-icon w-10 h-10 rounded-xl bg-warm/20 text-warm flex items-center justify-center text-xl"><i class="fas fa-clock"></i></div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Bugungi vaqt</p>
+                    <p class="stat-value text-xl font-bold">2s 45m</p>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card neo-card p-4">
+            <div class="flex items-center gap-3">
+                <div class="stat-icon w-10 h-10 rounded-xl bg-accent/20 text-accent flex items-center justify-center text-xl"><i class="fas fa-star"></i></div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">O‘rtacha ball</p>
+                    <p class="stat-value text-xl font-bold">4.7</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Haftalik progress grafigi -->
+    <div class="neo-card p-5 mb-6">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-primary"></i> Haftalik faollik</h3>
+        <div class="h-64">
+            <canvas id="weeklyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Topshiriqlar holati jadvali -->
+    <div class="neo-card p-5 mb-6">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-tasks text-primary"></i> Oxirgi topshiriqlar holati</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-gray-500 uppercase border-b dark:border-slate-700">
+                        <th class="py-2 pr-4">Topshiriq</th>
+                        <th class="py-2 pr-4">Turi</th>
+                        <th class="py-2 pr-4">Muddat</th>
+                        <th class="py-2 pr-4">Holat</th>
+                        <th class="py-2 pr-4">Ball</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in recent_submissions %}
+                    <tr class="table-row-hover border-b dark:border-slate-700/50">
+                        <td class="py-3 pr-4 font-medium">{{ submission.assignment.task.title }}</td>
+                        <td class="py-3 pr-4"><span class="badge bg-blue-100 text-blue-600">{{ submission.assignment.task.get_task_type_display }}</span></td>
+                        <td class="py-3 pr-4 text-xs">{{ submission.assignment.closes_at|date:"d.m.Y H:i" }}</td>
+                        <td class="py-3 pr-4">
+                            {% if submission.is_late %}
+                                <span class="badge bg-rose-100 text-rose-600">Kechikkan</span>
+                            {% elif submission.test_result %}
+                                <span class="badge bg-primary/20 text-primary">Bajarildi</span>
+                            {% else %}
+                                <span class="badge bg-gray-100 text-gray-500">Kutilmoqda</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 pr-4 font-bold">{{ submission.score|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="py-4 text-center text-gray-500">Ma'lumot yo‘q</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SMS xabarlar tarixi -->
+    <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-sms text-primary"></i> SMS xabarlar tarixi</h3>
+        <div class="space-y-3">
+            {% for sms in sms_history %}
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50">
+                <i class="fas fa-comment-sms text-primary mt-1"></i>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ sms.message }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ sms.created_at|date:"d.m.Y H:i" }} · {{ sms.get_notification_type_display }}</p>
+                </div>
+                {% if sms.is_approved %}
+                    <span class="badge bg-primary/20 text-primary">Tasdiqlangan</span>
+                {% else %}
+                    <span class="badge bg-yellow-100 text-yellow-600">Kutilmoqda</span>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-center text-gray-500 py-4">Hozircha xabar yo‘q</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    if (document.getElementById('weeklyChart')) {
+        new Chart(document.getElementById('weeklyChart'), {
+            type: 'line',
+            data: {
+                labels: ['Dush','Sesh','Chor','Pay','Juma','Shan'],
+                datasets: [{
+                    label: 'Daqiqalar',
+                    data: [180, 210, 165, 240, 200, 120],
+                    borderColor: '#14b8a6',
+                    backgroundColor: 'rgba(20,184,166,0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#14b8a6'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+</script>
+{% endblock %}

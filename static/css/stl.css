@@ -1,0 +1,716 @@
+/* styles.css - Prefiksli versiya (im- = iManager) */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(145deg, #0c0c17 0%, #1a1a2a 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+/* Tashqi konteyner */
+.im-outer-container {
+    display: flex;
+    flex-direction: column;
+    width: 1400px;
+    max-width: 100%;
+    height: 900px;
+    max-height: 98vh;
+    background: rgba(20, 20, 30, 0.2);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: 48px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+}
+
+/* Tashqi navbar */
+.im-top-navbar {
+    padding: 16px 30px;
+    background: rgba(25, 25, 35, 0.6);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+}
+
+.im-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.im-logo-icon {
+    font-size: 32px;
+}
+
+.im-logo-text {
+    font-weight: 600;
+    font-size: 20px;
+    background: linear-gradient(135deg, #fff, #aab);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.im-nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.im-nav-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.im-nav-links a:hover {
+    color: white;
+}
+
+/* Split container */
+.im-split-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Chap panel (ichki sidebar) */
+.im-sidebar {
+    width: 25%;
+    background: rgba(25, 25, 35, 0.5);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.im-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    color: white;
+}
+
+.im-logo .im-logo-icon {
+    font-size: 36px;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+}
+
+.im-logo h2 {
+    font-weight: 600;
+    font-size: 24px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff, #aab);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.im-nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.im-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.im-nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.im-nav-item.active {
+    background: rgba(0, 122, 255, 0.25);
+    border-color: rgba(0, 122, 255, 0.4);
+    color: white;
+}
+
+.im-nav-icon {
+    font-size: 22px;
+    width: 30px;
+    text-align: center;
+}
+
+.im-sidebar-footer {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 12px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Asosiy kontent */
+.im-content {
+    width: 75%;
+    padding: 30px;
+    overflow-y: auto;
+    background: rgba(10, 10, 20, 0.2);
+}
+
+.im-content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.im-page-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    letter-spacing: -0.5px;
+}
+
+/* Tugmalar */
+.im-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    cursor: pointer;
+}
+
+.im-btn-primary {
+    background: rgba(0, 122, 255, 0.3);
+    border-color: rgba(0, 122, 255, 0.5);
+}
+
+.im-btn-primary:hover {
+    background: rgba(0, 122, 255, 0.5);
+    transform: scale(1.02);
+}
+
+.im-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.im-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.im-btn-danger {
+    background: rgba(255, 59, 48, 0.3);
+    border-color: rgba(255, 59, 48, 0.5);
+}
+
+.im-btn-danger:hover {
+    background: rgba(255, 59, 48, 0.5);
+}
+
+/* Filter va qidiruv */
+.im-filter-section {
+    margin-bottom: 30px;
+}
+
+.im-filter-form {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.im-filter-form .im-form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.im-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.im-search-box .im-form-input {
+    padding-right: 50px;
+}
+
+.im-search-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 8px 12px;
+    border-radius: 30px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.im-search-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Elementlar grid */
+.im-items-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.im-item-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 25px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s;
+}
+
+.im-item-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateX(5px);
+}
+
+.im-item-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.im-item-details {
+    flex: 1;
+}
+
+.im-item-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.im-item-category {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 5px;
+}
+
+.im-item-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.im-item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.im-action-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.im-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.im-action-btn.view:hover { background: rgba(0, 122, 255, 0.4); }
+.im-action-btn.edit:hover { background: rgba(255, 204, 0, 0.4); }
+.im-action-btn.delete:hover { background: rgba(255, 59, 48, 0.4); }
+
+/* Form sahifalari */
+.im-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border-radius: 40px;
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.im-iphone-form .im-form-group {
+    margin-bottom: 25px;
+}
+
+.im-form-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+
+.im-form-input {
+    width: 100%;
+    padding: 16px 22px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 30px;
+    font-size: 16px;
+    color: white;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.im-form-input:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.im-form-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+select.im-form-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 22px center;
+    background-size: 16px;
+}
+
+textarea.im-form-input {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.im-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.im-form-actions .im-btn {
+    flex: 1;
+}
+
+/* Ko'rish sahifasi */
+.im-view-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    border-radius: 40px;
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.im-detail-icon {
+    font-size: 90px;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+}
+
+.im-detail-card {
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.im-detail-row {
+    display: flex;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 20px;
+}
+
+.im-detail-label {
+    width: 140px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.im-detail-value {
+    flex: 1;
+    color: white;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.im-view-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* Scrollbar */
+.im-content::-webkit-scrollbar,
+.im-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.im-content::-webkit-scrollbar-track,
+.im-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.im-content::-webkit-scrollbar-thumb,
+.im-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+}
+
+/* Mobil moslashuv */
+@media (max-width: 900px) {
+    .im-outer-container {
+        flex-direction: column;
+        height: auto;
+        border-radius: 32px;
+    }
+
+    .im-split-container {
+        flex-direction: column;
+    }
+
+    .im-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding: 20px;
+    }
+
+    .im-nav-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .im-nav-item {
+        flex: 1 1 auto;
+    }
+
+    .im-content {
+        width: 100%;
+        padding: 20px;
+    }
+}
+    .im-modal {
+    position: fixed;          /* page scroll bilan birga turadi */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7); /* sahifa ustini qorong'ilashtirish */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;            /* barcha elementlar ustida chiqadi */
+}
+
+.im-modal-content {
+    background: #222;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    animation: fadeIn 0.2s ease-in-out;
+}
+    <style>
+        /* iPhone uslubidagi flash message */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1e1e2f, #2a2a40);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Xabarlar ro'yxati (namuna uchun) */
+        .demo-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* iPhone uslubidagi xabar */
+        .imsg-message {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 22px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        /* Xabar ikonkasi */
+        .imsg-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Xabar matni */
+        .imsg-content {
+            flex: 1;
+        }
+
+        .imsg-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+
+        .imsg-description {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Yopish tugmasi */
+        .imsg-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
+        }
+
+        .imsg-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        /* Turli xil rang variantlari */
+        .imsg-message.error .imsg-icon {
+            background: rgba(255, 69, 58, 0.3);
+            border-color: rgba(255, 69, 58, 0.5);
+            color: #ff453a;
+        }
+
+        .imsg-message.success .imsg-icon {
+            background: rgba(48, 209, 88, 0.3);
+            border-color: rgba(48, 209, 88, 0.5);
+            color: #30d158;
+        }
+
+        .imsg-message.warning .imsg-icon {
+            background: rgba(255, 214, 10, 0.3);
+            border-color: rgba(255, 214, 10, 0.5);
+            color: #ffd60a;
+        }
+
+        .imsg-message.info .imsg-icon {
+            background: rgba(10, 132, 255, 0.3);
+            border-color: rgba(10, 132, 255, 0.5);
+            color: #0a84ff;
+        }
+
+        /* Tugma (namuna uchun) */
+        .demo-btn {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 40px;
+            padding: 12px 24px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: 0.2s;
+        }
+        .demo-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+@keyframes fadeIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}

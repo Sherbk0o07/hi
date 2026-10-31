@@ -1,0 +1,1177 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="uz" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}Admin Panel · DIGION{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#6366f1', 500: '#6366f1', 600: '#4f46e5' },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Space Grotesk', 'Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)',
+                        'large': '0 12px 32px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04)',
+                    },
+                    animation: {
+                        'slide-down': 'slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    keyframes: {
+                        slideDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            font-feature-settings: 'cv11', 'ss01';
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+        /* ═══════════════════════════════════════════════
+           NAV LINK — RANGLI IKONKA BILAN
+           ═══════════════════════════════════════════════ */
+        .nav-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.4rem 0.65rem;
+            border-radius: 0.5rem;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #475569;
+            transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1px;
+        }
+        .nav-link:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .dark .nav-link { color: #94a3b8; }
+        .dark .nav-link:hover { background: #1e293b; color: #f1f5f9; }
+
+        .nav-link.active {
+            background: #eef2ff;
+            color: #4338ca;
+            font-weight: 600;
+        }
+        .dark .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: -0.65rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 22px;
+            background: linear-gradient(180deg, #6366f1, #8b5cf6);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .nav-icon-box {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        .nav-link:hover .nav-icon-box { transform: scale(1.08) rotate(-3deg); }
+        .nav-link.active .nav-icon-box {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        /* RANG PALITRASI */
+        .icon-indigo   { background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; }
+        .icon-violet   { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; }
+        .icon-purple   { background: linear-gradient(135deg, #a855f7, #9333ea); color: #fff; }
+        .icon-fuchsia  { background: linear-gradient(135deg, #d946ef, #c026d3); color: #fff; }
+        .icon-pink     { background: linear-gradient(135deg, #ec4899, #db2777); color: #fff; }
+        .icon-rose     { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff; }
+        .icon-red      { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+        .icon-orange   { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+        .icon-amber    { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+        .icon-yellow   { background: linear-gradient(135deg, #eab308, #ca8a04); color: #fff; }
+        .icon-lime     { background: linear-gradient(135deg, #84cc16, #65a30d); color: #fff; }
+        .icon-green    { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+        .icon-emerald  { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+        .icon-teal     { background: linear-gradient(135deg, #14b8a6, #0d9488); color: #fff; }
+        .icon-cyan     { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; }
+        .icon-sky      { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; }
+        .icon-blue     { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; }
+        .icon-slate    { background: linear-gradient(135deg, #64748b, #475569); color: #fff; }
+
+        .nav-category {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            padding: 0 0.65rem;
+            margin: 1.25rem 0 0.5rem;
+        }
+        .dark .nav-category { color: #475569; }
+
+        .sidebar {
+            width: 268px;
+            transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar.collapsed { width: 72px; }
+        .sidebar.collapsed .nav-label,
+        .sidebar.collapsed .nav-category,
+        .sidebar.collapsed .sidebar-header-text,
+        .sidebar.collapsed .sidebar-footer-content { display: none; }
+        .sidebar.collapsed .nav-link { justify-content: center; padding: 0.5rem 0.4rem; }
+        .sidebar.collapsed .nav-link.active::before { left: -0.4rem; }
+        .sidebar.collapsed .nav-link .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            padding: 0.1rem 0.35rem;
+            font-size: 0.55rem;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            flex: 1;
+            padding: 0.4rem 0.25rem;
+            border-radius: 0.65rem;
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 180ms;
+            min-width: 0;
+        }
+        .mobile-nav-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #64748b;
+            background: transparent;
+            transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mobile-nav-item.active { color: #6366f1; }
+        .mobile-nav-item.active .mobile-nav-icon {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+            transform: scale(1.05);
+        }
+        .dark .mobile-nav-item { color: #64748b; }
+        .dark .mobile-nav-item.active { color: #a5b4fc; }
+
+        .grid-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: transform 200ms;
+        }
+        .grid-icon:hover { transform: scale(1.08) rotate(-4deg); }
+
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.1rem 0.45rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+        .pulse-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25); }
+            50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.08); }
+        }
+        .search-input {
+            background: #f1f5f9;
+            border: 1px solid transparent;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+            font-size: 0.875rem;
+            color: #0f172a;
+            width: 100%;
+            outline: none;
+            transition: all 150ms;
+        }
+        .search-input:focus {
+            background: #fff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+        .dark .search-input { background: #1e293b; color: #f1f5f9; }
+        .dark .search-input:focus { background: #0f172a; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="min-h-screen bg-slate-50 dark:bg-[#0a0a0f] text-slate-800 dark:text-slate-100 antialiased transition-colors">
+<!--____________________-->
+<!-- ═══════════════════════════════════════════════════════════════
+     🍁 KUZGI BARGLAR ANIMATSIYASI — DIGION LMS
+     Bu blokni </body> tegidan OLDIN joylashtiring. Tamom.
+     O'chirish: shu butun blokni o'chirib tashlang.
+     ═══════════════════════════════════════════════════════════════ -->
+<style id="autumn-leaves-style">
+    /* ═══ KONTEYNER ═══ */
+    #autumn-leaves {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1;
+        contain: strict;
+    }
+
+    /* ═══ BARG ═══ */
+    .al-leaf {
+        position: absolute;
+        top: -100px;
+        will-change: transform, opacity;
+        opacity: 0;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        animation-fill-mode: both;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        user-select: none;
+        pointer-events: none;
+    }
+
+    .al-leaf svg,
+    .al-leaf img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: contain;
+        pointer-events: none;
+    }
+
+    /* ═══ 6 XIL HARAKAT YO'LI — TABIIY KUZGI ═══ */
+
+    /* 1. Zigzag — chapga-o'ngga tebranish */
+    @keyframes alFall1 {
+        0%   { transform: translate3d(0, -10vh, 0) rotate(0deg) scale(1); opacity: 0; }
+        6%   { opacity: var(--al-op, .8); }
+        20%  { transform: translate3d(45px, 18vh, 0) rotate(80deg) scale(1.02); }
+        40%  { transform: translate3d(-30px, 42vh, 0) rotate(190deg) scale(.98); }
+        60%  { transform: translate3d(38px, 64vh, 0) rotate(290deg) scale(1.02); }
+        80%  { transform: translate3d(-22px, 86vh, 0) rotate(380deg) scale(.98); }
+        94%  { opacity: var(--al-op, .8); }
+        100% { transform: translate3d(10px, 115vh, 0) rotate(460deg) scale(1); opacity: 0; }
+    }
+
+    /* 2. O'ngga sirg'alish */
+    @keyframes alFall2 {
+        0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+        6%   { opacity: var(--al-op, .8); }
+        25%  { transform: translate3d(70px, 24vh, 0) rotate(140deg); }
+        50%  { transform: translate3d(130px, 52vh, 0) rotate(280deg); }
+        75%  { transform: translate3d(190px, 80vh, 0) rotate(420deg); }
+        94%  { opacity: var(--al-op, .8); }
+        100% { transform: translate3d(240px, 115vh, 0) rotate(560deg); opacity: 0; }
+    }
+
+    /* 3. Chapga sirg'alish */
+    @keyframes alFall3 {
+        0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+        6%   { opacity: var(--al-op, .8); }
+        25%  { transform: translate3d(-70px, 24vh, 0) rotate(-140deg); }
+        50%  { transform: translate3d(-130px, 52vh, 0) rotate(-280deg); }
+        75%  { transform: translate3d(-190px, 80vh, 0) rotate(-420deg); }
+        94%  { opacity: var(--al-op, .8); }
+        100% { transform: translate3d(-240px, 115vh, 0) rotate(-560deg); opacity: 0; }
+    }
+
+    /* 4. Sekin tebranish — eng tabiiy */
+    @keyframes alFall4 {
+        0%   { transform: translate3d(0, -10vh, 0) rotate(0deg) scale(1); opacity: 0; }
+        6%   { opacity: var(--al-op, .8); }
+        15%  { transform: translate3d(28px, 15vh, 0) rotate(60deg) scale(1.03); }
+        30%  { transform: translate3d(-24px, 30vh, 0) rotate(130deg) scale(.97); }
+        45%  { transform: translate3d(30px, 46vh, 0) rotate(200deg) scale(1.03); }
+        60%  { transform: translate3d(-26px, 62vh, 0) rotate(270deg) scale(.97); }
+        75%  { transform: translate3d(24px, 78vh, 0) rotate(330deg) scale(1.02); }
+        94%  { opacity: var(--al-op, .8); }
+        100% { transform: translate3d(0, 115vh, 0) rotate(400deg) scale(1); opacity: 0; }
+    }
+
+    /* 5. Aylanib tushish — kuchliroq */
+    @keyframes alFall5 {
+        0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+        6%   { opacity: var(--al-op, .8); }
+        20%  { transform: translate3d(-50px, 20vh, 0) rotate(120deg); }
+        40%  { transform: translate3d(60px, 42vh, 0) rotate(280deg); }
+        60%  { transform: translate3d(-40px, 64vh, 0) rotate(460deg); }
+        80%  { transform: translate3d(50px, 86vh, 0) rotate(640deg); }
+        94%  { opacity: var(--al-op, .8); }
+        100% { transform: translate3d(0, 115vh, 0) rotate(800deg); opacity: 0; }
+    }
+
+    /* 6. Yumshoq siljish */
+    @keyframes alFall6 {
+        0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+        6%   { opacity: var(--al-op, .8); }
+        30%  { transform: translate3d(35px, 30vh, 0) rotate(110deg); }
+        60%  { transform: translate3d(-25px, 62vh, 0) rotate(230deg); }
+        94%  { opacity: var(--al-op, .8); }
+        100% { transform: translate3d(20px, 115vh, 0) rotate(360deg); opacity: 0; }
+    }
+
+    /* ═══ HURMAT: Reduced motion ═══ */
+    @media (prefers-reduced-motion: reduce) {
+        #autumn-leaves { display: none !important; }
+    }
+
+    /* ═══ Chop etishda ko'rinmasin ═══ */
+    @media print {
+        #autumn-leaves { display: none !important; }
+    }
+
+    /* ═══ Dark mode — yorqinroq ═══ */
+    .dark .al-leaf {
+        filter: brightness(1.2) drop-shadow(0 2px 6px rgba(0,0,0,.35));
+    }
+
+    /* ═══ Mobilda — yengilroq ═══ */
+    @media (max-width: 640px) {
+        .al-leaf { filter: none; }
+        .dark .al-leaf { filter: brightness(1.15); }
+    }
+</style>
+
+<div id="autumn-leaves" aria-hidden="true"></div>
+
+<script id="autumn-leaves-script">
+(function () {
+    'use strict';
+
+    /* ═══════════════════════════════════════════════════════════
+       ⚙️ SOZLAMALAR — shu yerni o'zgartirsangiz bo'ldi
+       ═══════════════════════════════════════════════════════════ */
+    var CONFIG = {
+        count: 30,               // Desktop'da nechta barg
+        countMobile: 14,         // Mobilda nechta barg
+        minSize: 16,             // Eng kichik barg (px)
+        maxSize: 42,             // Eng katta barg (px)
+        minDuration: 11,         // Eng tez tushish (sekund)
+        maxDuration: 26,         // Eng sekin tushish (sekund)
+        minOpacity: 0.55,        // Shaffoflik min
+        maxOpacity: 0.92,        // Shaffoflik max
+
+        /* ═══ KUZGI RANGLAR — tabiiy palitra ═══ */
+        colors: [
+            '#c2410c', // to'q zarg'aldoq
+            '#ea580c', // zarg'aldoq
+            '#f97316', // och zarg'aldoq
+            '#d97706', // amber
+            '#b45309', // to'q amber
+            '#f59e0b', // sariq-amber
+            '#dc2626', // qizil
+            '#b91c1c', // to'q qizil
+            '#991b1b', // qon-qizil
+            '#a16207', // sariq-jigarrang
+            '#78350f', // jigarrang
+            '#eab308', // sariq
+        ]
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       🖼️ RASMLAR — agar rasm qo'ymoqchi bo'lsangiz
+       ═══════════════════════════════════════════════════════════
+       Bo'sh qoldirsangiz — SVG barglar ishlatiladi (tavsiya).
+       Rasmlar qo'ysangiz — ular ishlatiladi.
+
+       Misol:
+           var LEAF_IMAGES = [
+               '/static/images/leaf1.png',
+               '/static/images/leaf2.png',
+               '/media/autumn/maple.png',
+           ];
+
+       Rasm talablari:
+       - PNG yoki SVG (shaffof fon bilan)
+       - O'lcham: ~200x200px
+       - Ko'rinishi: barg shakli
+       ═══════════════════════════════════════════════════════════ */
+    var LEAF_IMAGES = [
+        // '/static/images/leaf1.png',
+        // '/static/images/leaf2.png',
+    ];
+
+    /* ═══════════════════════════════════════════════════════════
+       🍁 SVG BARGLAR — real kuzgi ko'rinish
+       ═══════════════════════════════════════════════════════════ */
+    var SVG_LEAVES = [
+        // ─── 1. ZARANG (Maple) — 5 lobli ───
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M50 2 L55 16 L57 20 L72 14 L68 26 L68 30 L88 24 L78 40 L80 44 L96 44 L84 56 L86 60 L94 76 L76 72 L74 76 L72 88 L58 78 L56 82 L50 96 L44 82 L42 78 L28 88 L26 76 L24 72 L6 76 L14 60 L16 56 L4 44 L20 44 L22 40 L12 24 L32 30 L32 26 L28 14 L43 20 L45 16 Z" ' +
+        'stroke="rgba(0,0,0,.15)" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '</svg>',
+
+        // ─── 2. EMAN (Oak) — to'lqinli ───
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M50 4 C56 12 60 18 64 22 C70 18 78 22 80 30 C88 32 92 42 88 50 C94 54 92 66 84 68 C86 78 76 86 68 80 C64 90 56 94 50 90 C44 94 36 90 32 80 C24 86 14 78 16 68 C8 66 6 54 12 50 C8 42 12 32 20 30 C22 22 30 18 36 22 C40 18 44 12 50 4 Z" ' +
+        'stroke="rgba(0,0,0,.15)" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '</svg>',
+
+        // ─── 3. ODDIY BARG (Birch) — yurak shakli ───
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M50 6 C62 18 74 34 78 50 C82 66 76 82 62 92 C56 96 52 94 50 92 C48 94 44 96 38 92 C24 82 18 66 22 50 C26 34 38 18 50 6 Z" ' +
+        'stroke="rgba(0,0,0,.15)" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<path d="M50 10 L50 90" stroke="rgba(0,0,0,.12)" stroke-width=".8" fill="none"/>' +
+        '<path d="M50 30 L38 42 M50 30 L62 42 M50 50 L34 62 M50 50 L66 62 M50 70 L38 78 M50 70 L62 78" ' +
+        'stroke="rgba(0,0,0,.10)" stroke-width=".7" fill="none"/>' +
+        '</svg>',
+
+        // ─── 4. TILSIMLI BARG (Aspen) — yumaloq ───
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M50 8 C70 20 84 40 84 58 C84 78 68 92 50 92 C32 92 16 78 16 58 C16 40 30 20 50 8 Z" ' +
+        'stroke="rgba(0,0,0,.15)" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '</svg>',
+
+        // ─── 5. UCH BURCHAKLI BARG (Ivy) ───
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M50 6 L58 30 L82 26 L66 46 L90 58 L64 62 L74 88 L50 72 L26 88 L36 62 L10 58 L34 46 L18 26 L42 30 Z" ' +
+        'stroke="rgba(0,0,0,.15)" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '</svg>',
+
+        // ─── 6. KICHIK BARG (Willow) ───
+        '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M50 6 C62 22 72 44 72 62 C72 80 62 92 50 94 C38 92 28 80 28 62 C28 44 38 22 50 6 Z" ' +
+        'stroke="rgba(0,0,0,.15)" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<path d="M50 14 L50 92" stroke="rgba(0,0,0,.10)" stroke-width=".8" fill="none"/>' +
+        '</svg>'
+    ];
+
+    var FALLS = ['alFall1','alFall2','alFall3','alFall4','alFall5','alFall6'];
+
+    /* ═══════════════════════════════════════════════════════════
+       YORDAMCHI
+       ═══════════════════════════════════════════════════════════ */
+    function rand(a, b) { return Math.random() * (b - a) + a; }
+    function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+    function pick(arr) { return arr[randInt(0, arr.length - 1)]; }
+
+    /* ═══════════════════════════════════════════════════════════
+       BARG YARATISH
+       ═══════════════════════════════════════════════════════════ */
+    function createLeaf() {
+        var el = document.createElement('div');
+        el.className = 'al-leaf';
+
+        // ─── Rasm yoki SVG? ───
+        if (LEAF_IMAGES.length > 0) {
+            // RASM ishlatamiz
+            var img = document.createElement('img');
+            img.src = pick(LEAF_IMAGES);
+            img.alt = '';
+            img.draggable = false;
+            el.appendChild(img);
+        } else {
+            // SVG ishlatamiz
+            var color = pick(CONFIG.colors);
+            var svgStr = pick(SVG_LEAVES).replace(
+                '<path',
+                '<path fill="' + color + '"'
+            );
+            el.innerHTML = svgStr;
+        }
+
+        // ─── O'lcham ───
+        var size = rand(CONFIG.minSize, CONFIG.maxSize);
+        el.style.width = size.toFixed(1) + 'px';
+        el.style.height = size.toFixed(1) + 'px';
+
+        // ─── Joylashuv ───
+        el.style.left = rand(-8, 108).toFixed(2) + '%';
+
+        // ─── Animatsiya ───
+        var duration = rand(CONFIG.minDuration, CONFIG.maxDuration);
+        var delay = rand(0, duration * 0.9);
+        var opacity = rand(CONFIG.minOpacity, CONFIG.maxOpacity);
+
+        el.style.setProperty('--al-op', opacity.toFixed(2));
+        el.style.animationName = pick(FALLS);
+        el.style.animationDuration = duration.toFixed(1) + 's';
+        el.style.animationDelay = '-' + delay.toFixed(1) + 's';
+
+        return el;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       INIT
+       ═══════════════════════════════════════════════════════════ */
+    function init() {
+        var old = document.getElementById('autumn-leaves');
+        if (old) old.parentNode.removeChild(old);
+
+        // ─── Reduced motion? ───
+        if (window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+
+        var container = document.createElement('div');
+        container.id = 'autumn-leaves';
+        container.setAttribute('aria-hidden', 'true');
+
+        var isMobile = window.innerWidth < 768;
+        var count = isMobile ? CONFIG.countMobile : CONFIG.count;
+
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < count; i++) {
+            frag.appendChild(createLeaf());
+        }
+        container.appendChild(frag);
+
+        document.body.appendChild(container);
+
+        if (window.console && console.log) {
+            console.log(
+                '%c🍁 Kuzgi barglar %c' + count + ' ta ' +
+                (isMobile ? '(mobil)' : '(desktop)') +
+                (LEAF_IMAGES.length ? ' [RASM]' : ' [SVG]'),
+                'background:#ea580c;color:#fff;padding:3px 8px;border-radius:4px 0 0 4px;font-weight:700;',
+                'background:#0f172a;color:#fff;padding:3px 8px;border-radius:0 4px 4px 0;font-weight:600;'
+            );
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       AUTO START
+       ═══════════════════════════════════════════════════════════ */
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       GLOBAL API (konsol uchun)
+       ═══════════════════════════════════════════════════════════ */
+    window.AutumnLeaves = {
+        init: init,
+        remove: function () {
+            var el = document.getElementById('autumn-leaves');
+            if (el) el.remove();
+        },
+        toggle: function () {
+            if (document.getElementById('autumn-leaves')) {
+                this.remove();
+            } else {
+                init();
+            }
+        },
+        config: CONFIG,
+        images: LEAF_IMAGES
+    };
+})();
+</script>
+<!-- ═══════════════════════════════════════════════════════════════
+     🍁 KUZGI BARGLAR — TUGADI
+     ═══════════════════════════════════════════════════════════════ -->
+<!--_____________________-->
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between h-16 px-4 md:px-6 gap-4">
+
+            <div class="flex items-center gap-3">
+                <button id="sidebarToggle"
+                        class="hidden md:flex items-center justify-center w-9 h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
+                    <i class="fas fa-bars-staggered"></i>
+                </button>
+
+                <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/30">
+                        <i class="fas fa-bolt text-sm"></i>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="font-display font-bold text-slate-900 dark:text-white text-base leading-tight">DIGION</h1>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-500 font-medium tracking-wide uppercase">Admin Panel</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="hidden lg:flex flex-1 max-w-md mx-auto relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+                <input type="text" placeholder="Qidirish..." class="search-input" autocomplete="off">
+                <kbd class="hidden xl:inline-flex items-center gap-1 absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 dark:text-slate-500 bg-slate-200 dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600">
+                    <span>⌘</span><span>K</span>
+                </kbd>
+            </div>
+
+            <div class="flex items-center gap-1.5 md:gap-2">
+                <button class="lg:hidden w-9 h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                    <i class="fas fa-search text-sm"></i>
+                </button>
+
+                <button id="themeToggle" class="w-9 h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                    <i class="fas fa-moon text-sm" id="themeIcon"></i>
+                </button>
+
+                <div class="relative">
+                    <button id="notifBtn" class="w-9 h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 relative">
+                        <i class="far fa-bell text-sm"></i>
+                        {% if pending_requests and pending_requests > 0 %}
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-[#0a0a0f]"></span>
+                        {% endif %}
+                    </button>
+                </div>
+
+                <div class="relative pl-2 ml-1 border-l border-slate-200 dark:border-slate-700">
+                    <button id="profileBtn" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
+                            {% if request.user.first_name %}{{ request.user.first_name|first|upper }}{% else %}A{% endif %}
+                        </div>
+                        <div class="hidden md:block text-left">
+                            <p class="text-xs font-semibold text-slate-900 dark:text-white leading-tight">
+                                {{ request.user.get_full_name|default:request.user.phone_number|truncatechars:15 }}
+                            </p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Administrator</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-[10px] text-slate-400 hidden md:block"></i>
+                    </button>
+
+                    <div id="profileDropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-white dark:bg-[#13131b] border border-slate-200 dark:border-slate-800 rounded-xl shadow-large overflow-hidden animate-slide-down">
+                        <div class="p-4 border-b border-slate-200 dark:border-slate-800">
+                            <p class="font-semibold text-sm text-slate-900 dark:text-white">
+                                {{ request.user.get_full_name|default:request.user.phone_number }}
+                            </p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ request.user.phone_number }}</p>
+                        </div>
+                        <div class="p-1.5">
+                            <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                <i class="fas fa-gauge-high w-4 text-center text-slate-400"></i><span>Dashboard</span>
+                            </a>
+                            <a href="{% url 'admin_settings' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                <i class="fas fa-gear w-4 text-center text-slate-400"></i><span>Sozlamalar</span>
+                            </a>
+                            <a href="{% url 'admin:index' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                <i class="fas fa-database w-4 text-center text-slate-400"></i><span>Django Admin</span>
+                            </a>
+                        </div>
+                        <div class="p-1.5 border-t border-slate-200 dark:border-slate-800">
+                            <a href="{% url 'logout' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                                <i class="fas fa-arrow-right-from-bracket w-4 text-center"></i><span>Chiqish</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════ LAYOUT ═══════════════ -->
+    <div class="flex">
+
+        <!-- ═══════════════ SIDEBAR ═══════════════ -->
+        <aside id="sidebar" class="sidebar hidden md:flex flex-col fixed top-16 bottom-0 left-0 z-20 bg-white dark:bg-[#0a0a0f] border-r border-slate-200 dark:border-slate-800 overflow-hidden">
+
+            <nav class="flex-1 overflow-y-auto px-3 py-4">
+
+                {% with path=request.path %}
+
+                <!-- ASOSIY -->
+                <div class="nav-category">Asosiy</div>
+                <a href="{% url 'admin_dashboard' %}" class="nav-link {% if path == '/boshqaruv/' %}active{% endif %}">
+                    <span class="nav-icon-box icon-indigo"><i class="fas fa-gauge-high"></i></span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a href="{% url 'admin_notifications' %}" class="nav-link {% if 'bildirishnoma' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-rose"><i class="fas fa-bell"></i></span>
+                    <span class="nav-label">Bildirishnomalar</span>
+                    {% if pending_notifications %}
+                    <span class="badge ml-auto bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">{{ pending_notifications }}</span>
+                    {% endif %}
+                </a>
+
+                <!-- FOYDALANUVCHILAR -->
+                <div class="nav-category">Foydalanuvchilar</div>
+                <a href="{% url 'admin_students' %}" class="nav-link {% if 'oquvchilar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-blue"><i class="fas fa-user-graduate"></i></span>
+                    <span class="nav-label">O‘quvchilar</span>
+                </a>
+                <a href="{% url 'admin_parents' %}" class="nav-link {% if 'ota-onalar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-violet"><i class="fas fa-people-roof"></i></span>
+                    <span class="nav-label">Ota-onalar</span>
+                </a>
+                <a href="{% url 'admin_teachers' %}" class="nav-link {% if 'oqituvchilar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-cyan"><i class="fas fa-chalkboard-user"></i></span>
+                    <span class="nav-label">O‘qituvchilar</span>
+                </a>
+                <a href="{% url 'admin_managers' %}" class="nav-link {% if 'managerlar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-amber"><i class="fas fa-user-tie"></i></span>
+                    <span class="nav-label">Managerlar</span>
+                </a>
+
+                <!-- ═══════════════════════════════════════════════════════
+                     O'QUV JARAYONI — ANIQ SHARTLAR
+
+                     MUHIM: har bir link faqat o'z URL'ida aktiv bo'ladi
+                     ═══════════════════════════════════════════════════════ -->
+                <div class="nav-category">O‘quv jarayoni</div>
+
+                {# ═══ KURSLAR — /kurslar/, /kurslar/create/, /kurslar/5/, /kurslar/month/5/ ═══ #}
+                {# Istisno: /kurslar/lessons/, /kurslar/lesson/, /kurslar/groups/, /kurslar/quiz/ #}
+                <a href="{% url 'admin_courses' %}"
+                   class="nav-link {% if '/boshqaruv/kurslar/' in path and '/lessons/' not in path and '/lesson/' not in path and '/groups/' not in path and '/quiz/' not in path and '/question/' not in path and '/choice/' not in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-emerald"><i class="fas fa-book"></i></span>
+                    <span class="nav-label">Kurslar</span>
+                </a>
+
+                {# ═══ DARSLAR — /lessons/, /lesson/5/, /month/5/lesson/create/, /lesson/5/homework/ ═══ #}
+                <a href="{% url 'courses_admin:lesson_list' %}"
+                   class="nav-link {% if '/boshqaruv/kurslar/lessons/' in path or '/boshqaruv/kurslar/lesson/' in path or '/lesson/create/' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-sky"><i class="fas fa-calendar-day"></i></span>
+                    <span class="nav-label">Darslar</span>
+                </a>
+                 {# ═══ UYGA VAZIFALAR ═══ #}
+                <a href="{% url 'courses_admin:homework_list' %}"
+                   class="nav-link {% if '/boshqaruv/kurslar/homeworks/' in path or '/homework/' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-orange"><i class="fas fa-clipboard-check"></i></span>
+                    <span class="nav-label">Uyga vazifalar</span>
+                    {% if stats.pending and stats.pending > 0 %}
+                    <span class="badge ml-auto bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{{ stats.pending }}</span>
+                    {% endif %}
+                </a>
+
+                {# ═══ GURUHLAR — /groups/, /groups/5/ ═══ #}
+                <a href="{% url 'courses_admin:group_list' %}"
+                   class="nav-link {% if '/boshqaruv/kurslar/groups/' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-violet"><i class="fas fa-users-rectangle"></i></span>
+                    <span class="nav-label">Guruhlar</span>
+                </a>
+
+
+                {# ═══ TOPSHIRIQLAR ═══ #}
+                <a href="{% url 'admin_tasks' %}"
+                   class="nav-link {% if 'topshiriq' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-orange"><i class="fas fa-clipboard-check"></i></span>
+                    <span class="nav-label">Topshiriqlar</span>
+                </a>
+
+                {# ═══ QUIZLAR — /quiz/5/, /quiz/5/edit/, /question/, /choice/ ═══ #}
+                {# Istisno: /lesson/5/quiz/ — bu dars sahifasida #}
+                <a href="{% url 'admin_quizzes' %}"
+                   class="nav-link {% if '/boshqaruv/kurslar/quiz/' in path or '/boshqaruv/kurslar/question/' in path or '/boshqaruv/kurslar/choice/' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-pink"><i class="fas fa-circle-question"></i></span>
+                    <span class="nav-label">Quizlar</span>
+                </a>
+
+                {# ═══ KALENDAR ═══ #}
+                <a href="{% url 'admin_calendar' %}"
+                   class="nav-link {% if 'kalendar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-teal"><i class="fas fa-calendar-days"></i></span>
+                    <span class="nav-label">Kalendar</span>
+                </a>
+
+                {# ═══ KOD MUHARRIRI ═══ #}
+                <a href="{% url 'admin_code_editor' %}"
+                   class="nav-link {% if 'kod' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-slate"><i class="fas fa-code"></i></span>
+                    <span class="nav-label">Kod muharriri</span>
+                </a>
+
+                <!-- RIVOJLANISH -->
+                <div class="nav-category">Rivojlanish</div>
+                <a href="{% url 'admin_grades' %}" class="nav-link {% if 'baholar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-yellow"><i class="fas fa-star"></i></span>
+                    <span class="nav-label">Baholar</span>
+                </a>
+                <a href="{% url 'admin_attendance' %}" class="nav-link {% if 'davomat' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-green"><i class="fas fa-user-check"></i></span>
+                    <span class="nav-label">Davomat</span>
+                </a>
+                <a href="{% url 'admin_statistics' %}" class="nav-link {% if 'statistika' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-fuchsia"><i class="fas fa-chart-line"></i></span>
+                    <span class="nav-label">Statistika</span>
+                </a>
+                <a href="{% url 'admin_achievements' %}" class="nav-link {% if 'yutuq' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-orange"><i class="fas fa-medal"></i></span>
+                    <span class="nav-label">Yutuqlar</span>
+                </a>
+                <a href="{% url 'admin_ranking' %}" class="nav-link {% if 'reyting' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-amber"><i class="fas fa-ranking-star"></i></span>
+                    <span class="nav-label">Reyting</span>
+                </a>
+
+                <!-- MULOQOT -->
+                <div class="nav-category">Muloqot</div>
+                <a href="{% url 'admin_group_chat' %}" class="nav-link {% if 'guruh' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-indigo"><i class="fas fa-comments"></i></span>
+                    <span class="nav-label">Guruh chati</span>
+                </a>
+                <a href="{% url 'admin_public_chat' %}" class="nav-link {% if 'ommaviy' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-cyan"><i class="fas fa-globe"></i></span>
+                    <span class="nav-label">Ommaviy chat</span>
+                </a>
+                <a href="{% url 'admin_parent_requests' %}" class="nav-link {% if 'sorov' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-rose"><i class="fas fa-inbox"></i></span>
+                    <span class="nav-label">So‘rovlar</span>
+                </a>
+
+                <!-- DO'KON -->
+                <div class="nav-category">Do‘kon</div>
+                <a href="{% url 'admin_shop' %}" class="nav-link {% if 'dokon' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-fuchsia"><i class="fas fa-cart-shopping"></i></span>
+                    <span class="nav-label">Do‘kon</span>
+                </a>
+                <a href="{% url 'admin_inventory' %}" class="nav-link {% if 'inventar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-orange"><i class="fas fa-box"></i></span>
+                    <span class="nav-label">Inventar</span>
+                </a>
+
+                <!-- TIZIM -->
+                <div class="nav-category">Tizim</div>
+                <a href="{% url 'admin_settings' %}" class="nav-link {% if 'sozlamalar' in path %}active{% endif %}">
+                    <span class="nav-icon-box icon-slate"><i class="fas fa-sliders"></i></span>
+                    <span class="nav-label">Sozlamalar</span>
+                </a>
+                <a href="{% url 'admin_menu_sections' %}" class="nav-link">
+                    <span class="nav-icon-box icon-purple"><i class="fas fa-list"></i></span>
+                    <span class="nav-label">Menyular</span>
+                </a>
+
+                {% endwith %}
+            </nav>
+
+            <!-- Sidebar footer -->
+            <div class="border-t border-slate-200 dark:border-slate-800 p-3">
+                <div class="sidebar-footer-content flex items-center gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-900/50">
+                    <span class="pulse-dot"></span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">Tizim aktiv</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-500">Barcha xizmatlar ishlayapti</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══════════════ MAIN ═══════════════ -->
+        <main id="mainContent" class="flex-1 min-h-[calc(100vh-4rem)] md:ml-[268px] transition-[margin] duration-250"
+              style="padding-bottom: calc(5rem + env(safe-area-inset-bottom));">
+            <div class="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+
+                {% if messages %}
+                <div class="space-y-2 mb-6">
+                    {% for message in messages %}
+                    <div class="message-alert flex items-start gap-3 p-3.5 rounded-xl border animate-slide-down
+                        {% if message.tags == 'success' %}bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300
+                        {% elif message.tags == 'error' %}bg-rose-50 dark:bg-rose-900/10 border-rose-200 dark:border-rose-900/30 text-rose-800 dark:text-rose-300
+                        {% elif message.tags == 'warning' %}bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-900/30 text-amber-800 dark:text-amber-300
+                        {% else %}bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-900/30 text-blue-800 dark:text-blue-300{% endif %}"
+                         data-message-id="msg-{{ forloop.counter }}">
+                        <i class="fas {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-circle-exclamation{% elif message.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %} mt-0.5"></i>
+                        <div class="flex-1 text-sm font-medium">{{ message }}</div>
+                        <button type="button" class="message-close-btn opacity-60 hover:opacity-100" data-message-id="msg-{{ forloop.counter }}">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══════════════ MOBILE NAV ═══════════════ -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-[#0a0a0f]/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe">
+        <div class="flex items-center justify-around px-1 py-1.5">
+            <a href="{% url 'admin_dashboard' %}" class="mobile-nav-item {% if request.path == '/boshqaruv/' %}active{% endif %}">
+                <span class="mobile-nav-icon"><i class="fas fa-gauge-high"></i></span>
+                <span>Asosiy</span>
+            </a>
+            <a href="{% url 'admin_students' %}" class="mobile-nav-item {% if 'oquvchilar' in request.path %}active{% endif %}">
+                <span class="mobile-nav-icon"><i class="fas fa-user-graduate"></i></span>
+                <span>O‘quvchi</span>
+            </a>
+            <a href="{% url 'admin_courses' %}" class="mobile-nav-item {% if '/boshqaruv/kurslar/' in request.path and '/lessons/' not in request.path and '/lesson/' not in request.path and '/groups/' not in request.path and '/quiz/' not in request.path %}active{% endif %}">
+                <span class="mobile-nav-icon"><i class="fas fa-book"></i></span>
+                <span>Kurslar</span>
+            </a>
+            <a href="{% url 'admin_statistics' %}" class="mobile-nav-item {% if 'statistika' in request.path %}active{% endif %}">
+                <span class="mobile-nav-icon"><i class="fas fa-chart-line"></i></span>
+                <span>Statistika</span>
+            </a>
+            <button id="moreBtn" class="mobile-nav-item">
+                <span class="mobile-nav-icon"><i class="fas fa-ellipsis"></i></span>
+                <span>Ko‘proq</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════ MOBILE MENU ═══════════════ -->
+    <div id="mobileMenuOverlay" class="hidden md:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm"></div>
+    <div id="mobileMenuPanel" class="md:hidden fixed inset-x-0 bottom-0 z-50 bg-white dark:bg-[#0a0a0f] rounded-t-3xl max-h-[85vh] overflow-y-auto transform translate-y-full transition-transform duration-300"
+         style="padding-bottom: env(safe-area-inset-bottom);">
+
+        <div class="sticky top-0 bg-white dark:bg-[#0a0a0f] z-10 border-b border-slate-200 dark:border-slate-800">
+            <div class="flex justify-center pt-3 pb-2">
+                <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+            </div>
+            <div class="flex items-center justify-between px-5 pb-3">
+                <h3 class="font-display font-bold text-slate-900 dark:text-white">Barcha bo‘limlar</h3>
+                <button id="closeMobileMenu" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                    <i class="fas fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 grid grid-cols-4 gap-2">
+            <a href="{% url 'admin_parents' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-violet"><i class="fas fa-people-roof"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Ota-onalar</span>
+            </a>
+            <a href="{% url 'admin_teachers' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-cyan"><i class="fas fa-chalkboard-user"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">O‘qituvchilar</span>
+            </a>
+            <a href="{% url 'admin_managers' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-amber"><i class="fas fa-user-tie"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Managerlar</span>
+            </a>
+            {# ✅ TUZATILDI: admin_lessons → courses_admin:lesson_list #}
+            <a href="{% url 'courses_admin:lesson_list' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-sky"><i class="fas fa-calendar-day"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Darslar</span>
+            </a>
+            <a href="{% url 'admin_quizzes' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-pink"><i class="fas fa-circle-question"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Quizlar</span>
+            </a>
+            <a href="{% url 'admin_calendar' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-teal"><i class="fas fa-calendar-days"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Kalendar</span>
+            </a>
+            <a href="{% url 'admin_grades' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-yellow"><i class="fas fa-star"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Baholar</span>
+            </a>
+            <a href="{% url 'admin_attendance' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-green"><i class="fas fa-user-check"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Davomat</span>
+            </a>
+            <a href="{% url 'admin_achievements' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-orange"><i class="fas fa-medal"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Yutuqlar</span>
+            </a>
+            <a href="{% url 'admin_group_chat' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-indigo"><i class="fas fa-comments"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Guruh chat</span>
+            </a>
+            <a href="{% url 'admin_parent_requests' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-rose"><i class="fas fa-inbox"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">So‘rovlar</span>
+            </a>
+            <a href="{% url 'admin_shop' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-fuchsia"><i class="fas fa-cart-shopping"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Do‘kon</span>
+            </a>
+            <a href="{% url 'admin_ranking' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-amber"><i class="fas fa-ranking-star"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Reyting</span>
+            </a>
+            <a href="{% url 'admin_settings' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-slate"><i class="fas fa-sliders"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Sozlamalar</span>
+            </a>
+            <a href="{% url 'admin_sms_history' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-lime"><i class="fas fa-sms"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">SMS</span>
+            </a>
+            <a href="{% url 'admin:index' %}" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                <span class="grid-icon icon-slate"><i class="fas fa-database"></i></span>
+                <span class="text-[9px] font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Django</span>
+            </a>
+        </div>
+
+        <div class="px-4 pb-4">
+            <a href="{% url 'logout' %}" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 text-sm font-semibold">
+                <i class="fas fa-arrow-right-from-bracket"></i>
+                Tizimdan chiqish
+            </a>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        // THEME
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        function applyTheme(dark) {
+            html.classList.toggle('dark', dark);
+            if (themeIcon) themeIcon.className = dark ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm';
+            try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch(e) {}
+        }
+        (function() {
+            let saved = null;
+            try { saved = localStorage.getItem('theme'); } catch(e) {}
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(saved ? saved === 'dark' : prefersDark);
+        })();
+        themeToggle?.addEventListener('click', () => applyTheme(!html.classList.contains('dark')));
+
+        // SIDEBAR TOGGLE
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        function toggleSidebar() {
+            const collapsed = sidebar.classList.toggle('collapsed');
+            if (collapsed) {
+                mainContent.classList.remove('md:ml-[268px]');
+                mainContent.classList.add('md:ml-[72px]');
+            } else {
+                mainContent.classList.remove('md:ml-[72px]');
+                mainContent.classList.add('md:ml-[268px]');
+            }
+            try { localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0'); } catch(e) {}
+        }
+        (function() {
+            try {
+                if (localStorage.getItem('sidebar-collapsed') === '1') {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.remove('md:ml-[268px]');
+                    mainContent.classList.add('md:ml-[72px]');
+                }
+            } catch(e) {}
+        })();
+        sidebarToggle?.addEventListener('click', toggleSidebar);
+
+        // PROFILE DROPDOWN
+        const profileBtn = document.getElementById('profileBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        profileBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (profileDropdown && !profileDropdown.classList.contains('hidden')) {
+                if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            }
+        });
+
+        // MOBILE MENU
+        const moreBtn = document.getElementById('moreBtn');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const mobileMenuPanel = document.getElementById('mobileMenuPanel');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+
+        function openMobileMenu() {
+            mobileMenuOverlay.classList.remove('hidden');
+            mobileMenuPanel.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => mobileMenuPanel.classList.remove('translate-y-full'), 10);
+        }
+        function closeMobileMenuFn() {
+            mobileMenuPanel.classList.add('translate-y-full');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                mobileMenuOverlay.classList.add('hidden');
+                mobileMenuPanel.classList.add('hidden');
+            }, 300);
+        }
+        moreBtn?.addEventListener('click', openMobileMenu);
+        mobileMenuOverlay?.addEventListener('click', closeMobileMenuFn);
+        closeMobileMenu?.addEventListener('click', closeMobileMenuFn);
+
+        // MESSAGES
+        document.addEventListener('click', (e) => {
+            const closeBtn = e.target.closest('.message-close-btn');
+            if (closeBtn) {
+                const el = document.querySelector(`[data-message-id="${closeBtn.dataset.messageId}"]`);
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transition = 'all 0.2s';
+                    setTimeout(() => el.remove(), 200);
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.message-alert').forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'all 0.2s';
+                    setTimeout(() => alert.remove(), 200);
+                }, 5000);
+            });
+        });
+
+        // CMD+K
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                document.querySelector('.search-input')?.focus();
+            }
+        });
+    </script>
+
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html>

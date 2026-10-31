@@ -1,0 +1,88 @@
+{% extends './base.html' %}
+{% block student %}
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 overflow-y-auto scrollbar-thin p-4 md:p-5 space-y-5">
+    <!-- Statistik kartochkalar -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="neo-card p-4 flex flex-col"><div class="flex justify-between"><span class="text-sm text-gray-500">Kurslar</span><i class="fas fa-graduation-cap text-primary"></i></div><span class="text-3xl font-bold mt-2">5</span><span class="text-xs text-green-500">2 faol</span></div>
+      <div class="neo-card p-4 flex flex-col"><div class="flex justify-between"><span class="text-sm text-gray-500">O'rtacha baho</span><i class="fas fa-star text-warm"></i></div><span class="text-3xl font-bold mt-2">4.8</span><span class="text-xs text-green-500">+0.3</span></div>
+      <div class="neo-card p-4 flex flex-col"><div class="flex justify-between"><span class="text-sm text-gray-500">Davomat</span><i class="fas fa-user-check text-green-500"></i></div><span class="text-3xl font-bold mt-2">96%</span><span class="text-xs text-green-500">Yuqori</span></div>
+      <div class="neo-card p-4 flex flex-col"><div class="flex justify-between"><span class="text-sm text-gray-500">Topshiriqlar</span><i class="fas fa-clipboard-list text-purple-500"></i></div><span class="text-3xl font-bold mt-2">8</span><span class="text-xs text-rose">2 kechikmoqda</span></div>
+    </div>
+
+    <!-- Chart + Tezkor ma'lumotlar -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 neo-card p-5">
+        <h3 class="font-bold text-lg mb-4">📈 Haftalik faollik</h3>
+        <div class="h-56"><canvas id="weeklyChart"></canvas></div>
+      </div>
+      <div class="neo-card p-5 flex flex-col">
+        <h3 class="font-bold text-lg mb-3">🎯 Baholar taqsimoti</h3>
+        <div class="h-44"><canvas id="gradeChart"></canvas></div>
+        <div class="flex justify-around text-sm mt-3">
+          <span class="text-green-600">A'lo 45%</span>
+          <span class="text-yellow-600">Yaxshi 35%</span>
+          <span class="text-blue-600">O'rtacha 20%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kurs progress + Yaqinlashayotgan darslar -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4">📚 Kurslar progressi</h3>
+        <div class="space-y-4">
+          <div><div class="flex justify-between text-sm mb-1"><span>React Frontend</span><span>78%</span></div><div class="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full"><div class="h-full bg-primary rounded-full" style="width:78%"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span>Node.js Backend</span><span>92%</span></div><div class="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full"><div class="h-full bg-green-500 rounded-full" style="width:92%"></div></div></div>
+          <div><div class="flex justify-between text-sm mb-1"><span>Flutter Mobile</span><span>45%</span></div><div class="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full"><div class="h-full bg-purple-500 rounded-full" style="width:45%"></div></div></div>
+        </div>
+      </div>
+      <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4">📅 Bugungi darslar</h3>
+        <div class="space-y-3">
+          <div class="flex items-center gap-4 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-primary"><i class="fas fa-code"></i></div>
+            <div><p class="font-medium text-sm">React Hooks</p><p class="text-xs text-gray-400">10:00 - 11:30 · 205-xona</p></div>
+          </div>
+          <div class="flex items-center gap-4 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition">
+            <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center text-green-600"><i class="fas fa-database"></i></div>
+            <div><p class="font-medium text-sm">MongoDB asoslari</p><p class="text-xs text-gray-400">12:00 - 13:30 · 102-xona</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Topshiriqlar timeline + Bildirishnomalar -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4">⏳ So'nggi topshiriqlar</h3>
+        <div class="space-y-4 relative timeline-item" style="position:relative;">
+          <div class="flex gap-4 items-start pl-10 relative">
+            <div class="timeline-dot"></div>
+            <div class="flex-1"><p class="font-medium text-sm">API loyihasi</p><p class="text-xs text-gray-400">Muddat: 12-aprel</p><span class="badge bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">Kechikkan</span></div>
+          </div>
+          <div class="flex gap-4 items-start pl-10 relative">
+            <div class="timeline-dot bg-yellow-500"></div>
+            <div class="flex-1"><p class="font-medium text-sm">UI dizayn topshirig'i</p><p class="text-xs text-gray-400">Muddat: 15-aprel</p><span class="badge bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300">Jarayonda</span></div>
+          </div>
+          <div class="flex gap-4 items-start pl-10 relative">
+            <div class="timeline-dot bg-green-500"></div>
+            <div class="flex-1"><p class="font-medium text-sm">Testlar to'plami</p><p class="text-xs text-gray-400">Topshirilgan</p><span class="badge bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">Bajarilgan</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4">🔔 So'nggi bildirishnomalar</h3>
+        <div class="space-y-3 max-h-64 overflow-y-auto scrollbar-thin">
+          <div class="flex gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition"><div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-primary"><i class="fas fa-calendar-plus"></i></div><div><p class="text-sm">Yangi dars qo'shildi</p><span class="text-xs text-gray-400">1 soat oldin</span></div></div>
+          <div class="flex gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition"><div class="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-purple-600"><i class="fas fa-star-half-alt"></i></div><div><p class="text-sm">Baholash yakunlandi</p><span class="text-xs text-gray-400">3 soat oldin</span></div></div>
+          <div class="flex gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition"><div class="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center text-green-600"><i class="fas fa-check-circle"></i></div><div><p class="text-sm">Topshiriq qabul qilindi</p><span class="text-xs text-gray-400">Kecha</span></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+{% endblock student %}

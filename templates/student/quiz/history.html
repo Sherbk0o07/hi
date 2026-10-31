@@ -1,0 +1,40 @@
+{% extends '../base.html' %}
+
+{% block student %}
+<div class="w-full max-w-2xl mx-auto px-4 py-6 md:py-10">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">Natijalar tarixi</h1>
+    <p class="text-gray-500 dark:text-gray-400 text-sm">Siz oldin topshirgan testlar shu yerda saqlanadi.</p>
+  </div>
+
+  {% if results %}
+  <div class="space-y-3">
+    {% for result in results %}
+    <a href="{% url 'quiz_result' result.quiz.id %}" class="neo-card flex items-center justify-between gap-4 p-4 hover:-translate-y-0.5 transition-transform duration-200">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black flex-shrink-0
+                    {% if result.percentage >= 80 %}bg-green-600{% elif result.percentage >= 50 %}bg-primary{% else %}bg-red-600{% endif %}">
+          {{ result.percentage }}%
+        </div>
+        <div class="min-w-0">
+          <p class="font-bold text-gray-900 dark:text-white truncate">{{ result.quiz.title }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">{{ result.taken_at|date:"d M Y, H:i" }}</p>
+        </div>
+      </div>
+      <div class="font-black flex-shrink-0
+                  {% if result.percentage >= 80 %}text-green-600{% elif result.percentage >= 50 %}text-primary{% else %}text-red-600{% endif %}">
+        {{ result.total_score }} ball
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="neo-card text-center py-16 text-gray-400">
+    <div class="text-4xl mb-3">🕓</div>
+    <p>Hali hech qanday test topshirmagansiz.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock student %}

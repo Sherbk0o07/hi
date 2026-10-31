@@ -1,0 +1,1507 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}👥 Guruhlar · DIGION{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --gl-primary: #06b6d4; --gl-primary-dark: #0891b2;
+    --gl-violet: #8b5cf6; --gl-emerald: #10b981;
+    --gl-amber: #f59e0b; --gl-rose: #f43f5e; --gl-pink: #ec4899;
+    --gl-indigo: #6366f1; --gl-slate: #64748b;
+    --gl-header-h: 4rem; --gl-max: 1400px;
+    --gl-radius: 1.25rem;
+}
+
+.gl-page { width: 100%; max-width: 100%; overflow-x: clip; margin: 0; padding: 0.5rem 0 3rem; position: relative; font-size: 14px; isolation: isolate; }
+.gl-page * { box-sizing: border-box; min-width: 0; }
+.gl-wrap { width: 100%; max-width: var(--gl-max); margin: 0 auto; padding: 0 0.75rem; }
+@media (min-width: 640px) { .gl-wrap { padding: 0 1rem; } }
+@media (min-width: 1024px) { .gl-wrap { padding: 0 1.5rem; } }
+
+.gl-glow { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.4; pointer-events: none; z-index: -1; }
+.gl-glow-1 { top: -200px; left: -200px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(6,182,212,0.4), transparent 70%); animation: glFloat 20s ease-in-out infinite; }
+.gl-glow-2 { top: 40%; right: -250px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(139,92,246,0.35), transparent 70%); animation: glFloat 25s ease-in-out infinite reverse; }
+.gl-glow-3 { bottom: -250px; left: 30%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(236,72,153,0.25), transparent 70%); animation: glFloat 30s ease-in-out infinite; }
+.dark .gl-glow { opacity: 0.15; }
+
+@keyframes glSlideUp { from { transform: translateY(30px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+@keyframes glSlideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes glSlideRight { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes glSlideLeft { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes glPopIn { 0% { transform: scale(0.7); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes glFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes glGradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes glFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -30px) scale(1.05); } 66% { transform: translate(-30px, 30px) scale(0.95); } }
+@keyframes glShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+@keyframes glBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes glSpin { to { transform: rotate(360deg); } }
+@keyframes glPulseRing { 0% { box-shadow: 0 0 0 0 currentColor; } 70% { box-shadow: 0 0 0 12px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@keyframes glWobble { 0%, 100% { transform: translateX(0); } 15% { transform: translateX(-6px) rotate(-2deg); } 30% { transform: translateX(5px) rotate(2deg); } 45% { transform: translateX(-4px) rotate(-1deg); } 60% { transform: translateX(3px) rotate(1deg); } 75% { transform: translateX(-2px) rotate(0deg); } }
+@keyframes glSearchPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4), 0 0 0 4px rgba(6, 182, 212, 0.1); } 50% { box-shadow: 0 0 0 8px rgba(6, 182, 212, 0), 0 0 0 4px rgba(6, 182, 212, 0.2); } }
+
+.anim-up { animation: glSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-right { animation: glSlideRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.d-1 { animation-delay: 0.05s; } .d-2 { animation-delay: 0.10s; }
+.d-3 { animation-delay: 0.15s; } .d-4 { animation-delay: 0.20s; }
+.d-5 { animation-delay: 0.25s; } .d-6 { animation-delay: 0.30s; }
+
+/* ═══ SEARCH LOADING ═══ */
+.gl-search-loading {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.85);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    border-radius: 0.75rem; display: none;
+    align-items: center; justify-content: center; gap: 0.5rem;
+    z-index: 10; font-size: 0.8rem; color: #06b6d4; font-weight: 700;
+}
+.dark .gl-search-loading { background: rgba(10,10,15,0.85); }
+.gl-search-loading.show { display: flex; animation: glFadeIn 0.2s ease; }
+.gl-search-spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(6, 182, 212, 0.2);
+    border-top-color: #06b6d4; border-radius: 50%;
+    animation: glSpin 0.7s linear infinite;
+}
+
+/* ═══ SEARCH INPUT ═══ */
+.gl-search input {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative; z-index: 5;
+}
+.gl-search input:focus {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 8px 24px -8px rgba(6, 182, 212, 0.4);
+    background: #fff; transform: translateY(-2px);
+    animation: glSearchPulse 2s ease-in-out infinite;
+}
+.dark .gl-search input:focus {
+    background: #0a0a0f;
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.25), 0 8px 24px -8px rgba(6, 182, 212, 0.5);
+}
+.gl-search input::placeholder { transition: opacity 0.3s; }
+.gl-search input:focus::placeholder { opacity: 0.5; }
+.gl-search i.search-icon { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.gl-search input:focus ~ i.search-icon,
+.gl-search input:focus + i.search-icon { color: #06b6d4; transform: translateY(-50%) scale(1.15); }
+
+.gl-search-clear {
+    position: absolute; right: 0.75rem; top: 50%;
+    transform: translateY(-50%);
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #f1f5f9; color: #64748b; border: none; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    font-size: 11px; transition: all 0.25s; z-index: 6;
+}
+.gl-search-clear.show { display: flex; animation: glPopIn 0.3s ease; }
+.gl-search-clear:hover { background: #fee2e2; color: #dc2626; transform: translateY(-50%) rotate(90deg) scale(1.1); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ⭐ SUGGEST DROPDOWN — flex layout, icon to'g'ri
+   ═══════════════════════════════════════════════════════════════ */
+.gl-search-suggest {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0; right: 0;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(6, 182, 212, 0.1);
+    z-index: 100;
+    display: none;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1.5px solid #e2e8f0;
+    padding: 0.5rem;
+}
+.dark .gl-search-suggest {
+    background: #0f172a;
+    border-color: #1e293b;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(6, 182, 212, 0.15);
+}
+.gl-search-suggest.show { display: block; animation: glSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+.gl-search-suggest::-webkit-scrollbar { width: 6px; }
+.gl-search-suggest::-webkit-scrollbar-track { background: transparent; }
+.gl-search-suggest::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #06b6d4, #8b5cf6); border-radius: 3px; }
+
+.gl-suggest-label {
+    padding: 0.5rem 0.75rem 0.4rem;
+    font-size: 0.68rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: #94a3b8;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.gl-suggest-label::before {
+    content: '';
+    width: 4px; height: 4px; border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+}
+
+/* ⭐ SUGGEST ITEM — flex layout */
+.gl-suggest-item {
+    display: flex !important;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 0.88rem;
+    color: #334155;
+    border: 1.5px solid transparent;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+.dark .gl-suggest-item { color: #cbd5e1; }
+
+.gl-suggest-item:hover,
+.gl-suggest-item.active {
+    background: linear-gradient(135deg, #ecfeff, #f0fdfa);
+    border-color: #67e8f9;
+    color: #0891b2;
+    transform: translateX(3px);
+    box-shadow: 0 4px 12px -4px rgba(6, 182, 212, 0.25);
+}
+.dark .gl-suggest-item:hover,
+.dark .gl-suggest-item.active {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(20, 184, 166, 0.08));
+    border-color: rgba(6, 182, 212, 0.4);
+    color: #67e8f9;
+}
+
+.gl-suggest-item.active::before {
+    content: '';
+    position: absolute; left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 60%;
+    border-radius: 0 3px 3px 0;
+    background: linear-gradient(180deg, #06b6d4, #8b5cf6);
+}
+
+/* ⭐ ICON — flex !important */
+.gl-suggest-item > i,
+.gl-suggest-item > i.fas,
+.gl-suggest-item > i.fa {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    color: #fff !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    box-shadow: 0 4px 10px -3px rgba(6, 182, 212, 0.4);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+.gl-suggest-item > i::before {
+    font-size: 14px !important;
+    line-height: 1 !important;
+}
+
+.gl-suggest-item:hover > i,
+.gl-suggest-item.active > i {
+    transform: scale(1.1) rotate(-6deg);
+    box-shadow: 0 6px 14px -3px rgba(6, 182, 212, 0.6);
+}
+
+/* ⭐ NAME */
+.gl-suggest-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ⭐ CODE */
+.gl-suggest-code {
+    flex-shrink: 0;
+    flex-grow: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.4rem;
+    background: #f1f5f9;
+    white-space: nowrap;
+    display: inline-block !important;
+    line-height: 1.3 !important;
+    margin: 0 0 0 auto !important;
+}
+.dark .gl-suggest-code { color: #94a3b8; background: #1e293b; }
+
+/* ⭐ MARK */
+.gl-suggest-item mark,
+.gl-search-suggest mark {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3));
+    color: #0891b2;
+    font-weight: 900;
+    padding: 0 0.15rem;
+    border-radius: 3px;
+    display: inline !important;
+    line-height: inherit;
+}
+.dark .gl-suggest-item mark,
+.dark .gl-search-suggest mark {
+    color: #67e8f9;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(139, 92, 246, 0.35));
+}
+
+/* ⭐ EMPTY */
+.gl-suggest-empty {
+    padding: 2rem 1.5rem; text-align: center;
+    color: #94a3b8; font-size: 0.85rem;
+}
+.gl-suggest-empty i {
+    font-size: 32px; opacity: 0.3;
+    display: block !important; margin: 0 auto 0.75rem !important;
+    color: #06b6d4;
+    width: auto !important; height: auto !important;
+    background: none !important; box-shadow: none !important;
+}
+.gl-suggest-empty-title {
+    font-weight: 800; color: #0f172a;
+    font-size: 0.95rem; margin-bottom: 0.25rem;
+}
+.dark .gl-suggest-empty-title { color: #f1f5f9; }
+.gl-suggest-empty-hint {
+    font-size: 0.75rem; color: #94a3b8;
+    margin-top: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.35rem;
+}
+.gl-suggest-empty-hint kbd {
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.35rem;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; font-weight: 700; color: #475569;
+}
+.dark .gl-suggest-empty-hint kbd {
+    background: #1e293b; border-color: #334155; color: #cbd5e1;
+}
+
+/* ═══ TOPBAR ═══ */
+.gl-topbar {
+    position: sticky; top: var(--gl-header-h); z-index: 40; height: 60px;
+    background: rgba(255,255,255,0.85);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.7);
+    margin: -0.5rem -0.75rem 1.25rem;
+    animation: glSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (min-width: 640px) { .gl-topbar { margin: -0.5rem -1rem 1.5rem; } }
+@media (min-width: 1024px) { .gl-topbar { margin-left: -1.5rem; margin-right: -1.5rem; } }
+.dark .gl-topbar { background: rgba(10,10,15,0.85); border-bottom-color: rgba(30,41,59,0.7); }
+.gl-topbar-inner { display: flex; align-items: center; gap: 0.5rem; height: 100%; padding: 0 0.75rem; max-width: var(--gl-max); margin: 0 auto; }
+@media (min-width: 640px) { .gl-topbar-inner { padding: 0 1rem; gap: 0.75rem; } }
+@media (min-width: 1024px) { .gl-topbar-inner { padding: 0 1.5rem; } }
+
+.gl-breadcrumb { display: flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; color: #94a3b8; margin-bottom: 0.15rem; }
+.gl-breadcrumb a { color: #64748b; text-decoration: none; transition: color 0.2s; }
+.gl-breadcrumb a:hover { color: #06b6d4; }
+
+.gl-ico {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #f1f5f9; color: #475569; font-size: 14px;
+    flex-shrink: 0; border: none; cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none; position: relative;
+}
+.dark .gl-ico { background: #1e293b; color: #94a3b8; }
+.gl-ico:hover { background: #e2e8f0; color: #06b6d4; transform: translateY(-3px) scale(1.08); box-shadow: 0 8px 18px -6px rgba(6, 182, 212, 0.4); }
+.dark .gl-ico:hover { background: #334155; color: #67e8f9; }
+.gl-ico.active { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; box-shadow: 0 6px 16px -4px rgba(6, 182, 212, 0.5); }
+.gl-ico:active { animation: glWobble 0.5s ease; }
+
+/* ═══ HERO ═══ */
+.gl-hero {
+    position: relative; border-radius: 1.5rem; overflow: hidden;
+    padding: 1.75rem 1.5rem; margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 35%, #8b5cf6 70%, #ec4899 100%);
+    background-size: 300% 300%;
+    animation: glGradientShift 12s ease infinite, glSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow: 0 25px 50px -15px rgba(6, 182, 212, 0.5);
+    isolation: isolate;
+}
+@media (min-width: 640px) { .gl-hero { padding: 2.5rem 2.5rem; border-radius: 1.75rem; } }
+@media (min-width: 1024px) { .gl-hero { padding: 3rem 3rem; } }
+.gl-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 15% 25%, rgba(255,255,255,0.25) 0%, transparent 40%), radial-gradient(circle at 85% 75%, rgba(255,255,255,0.15) 0%, transparent 40%); pointer-events: none; z-index: 1; }
+.gl-hero::after { content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 65%); animation: glFloat 10s ease-in-out infinite; pointer-events: none; z-index: 1; }
+.gl-hero-content { position: relative; z-index: 2; display: flex; align-items: flex-start; gap: 1.25rem; flex-wrap: wrap; }
+@media (min-width: 640px) { .gl-hero-content { gap: 2rem; flex-wrap: nowrap; } }
+
+.gl-hero-icon { width: 70px; height: 70px; border-radius: 20px; background: rgba(255, 255, 255, 0.25); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 2px solid rgba(255, 255, 255, 0.4); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #fff; flex-shrink: 0; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25); animation: glPopIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); transition: transform 0.5s; }
+@media (min-width: 640px) { .gl-hero-icon { width: 90px; height: 90px; border-radius: 24px; font-size: 40px; } }
+.gl-hero-icon:hover { transform: scale(1.1) rotate(-8deg); }
+.gl-hero-title { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 900; font-size: 1.6rem; line-height: 1.15; color: #fff; text-shadow: 0 3px 20px rgba(0, 0, 0, 0.2); margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+@media (min-width: 640px) { .gl-hero-title { font-size: 2.25rem; } }
+@media (min-width: 1024px) { .gl-hero-title { font-size: 2.6rem; } }
+.gl-hero-sub { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: rgba(255, 255, 255, 0.95); font-weight: 500; }
+.gl-hero-actions { display: flex; gap: 0.5rem; margin-top: 1.25rem; flex-wrap: wrap; }
+
+.gl-hero-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.7rem 1.2rem; border-radius: 0.875rem;
+    background: rgba(255,255,255,0.22);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    color: #fff; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+}
+.gl-hero-btn.primary { background: rgba(255,255,255,0.95); color: #0e7490; box-shadow: 0 8px 20px -6px rgba(0,0,0,0.3); }
+.gl-hero-btn:hover { background: rgba(255,255,255,0.35); transform: translateY(-3px); box-shadow: 0 10px 24px -8px rgba(0,0,0,0.3); }
+.gl-hero-btn.primary:hover { background: #fff; color: #0891b2; }
+
+/* ═══ STATS ═══ */
+.gl-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.875rem; margin-bottom: 1.5rem; }
+@media (min-width: 640px) { .gl-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .gl-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.75rem; } }
+
+.gl-stat {
+    position: relative; background: #fff; border: 1.5px solid #e2e8f0;
+    border-radius: var(--gl-radius); padding: 1rem;
+    display: flex; flex-direction: column; gap: 0.4rem;
+    overflow: hidden; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+.dark .gl-stat { background: #0f172a; border-color: #1e293b; }
+.gl-stat::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899); transform: scaleX(0); transform-origin: left; transition: transform 0.5s; }
+.gl-stat:hover::after { transform: scaleX(1); }
+.gl-stat:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px -15px rgba(6, 182, 212, 0.3); border-color: #67e8f9; }
+.gl-stat-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; transition: transform 0.4s; }
+.gl-stat:hover .gl-stat-icon { transform: scale(1.15) rotate(-8deg); }
+.gl-stat-icon.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+.gl-stat-icon.emerald { background: linear-gradient(135deg, #10b981, #059669); }
+.gl-stat-icon.amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.gl-stat-icon.violet { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.gl-stat-icon.rose { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+.gl-stat-icon.indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.gl-stat-value { font-size: 1.5rem; font-weight: 900; color: #0f172a; line-height: 1; font-family: 'Space Grotesk', sans-serif; }
+.dark .gl-stat-value { color: #f1f5f9; }
+.gl-stat-label { font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.dark .gl-stat-label { color: #94a3b8; }
+
+/* ═══ TOOLBAR ═══ */
+.gl-toolbar {
+    display: flex; gap: 0.75rem; align-items: center;
+    padding: 1rem 1.25rem; background: #fff;
+    border: 1.5px solid #e2e8f0; border-radius: var(--gl-radius);
+    margin-bottom: 1.25rem; flex-wrap: wrap; position: relative;
+}
+.dark .gl-toolbar { background: #0f172a; border-color: #1e293b; }
+.gl-search { flex: 1; min-width: 200px; position: relative; z-index: 60; }
+.gl-search input { width: 100%; padding: 0.75rem 2.5rem 0.75rem 2.75rem; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.9rem; color: #0f172a; outline: none; transition: all 0.3s; font-weight: 500; }
+.dark .gl-search input { background: #0a0a0f; border-color: #1e293b; color: #f1f5f9; }
+.gl-search i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; pointer-events: none; }
+
+.gl-select { padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.85rem; color: #475569; font-weight: 600; cursor: pointer; outline: none; min-height: 42px; transition: all 0.3s; }
+.dark .gl-select { background: #0a0a0f; border-color: #1e293b; color: #cbd5e1; }
+.gl-select:focus { border-color: #06b6d4; box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15); }
+
+.gl-view-switch { display: flex; gap: 0.25rem; padding: 0.25rem; background: #f1f5f9; border-radius: 0.75rem; }
+.dark .gl-view-switch { background: #1e293b; }
+.gl-view-btn { width: 34px; height: 34px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #64748b; cursor: pointer; transition: all 0.25s; }
+.gl-view-btn.active { background: #fff; color: #06b6d4; box-shadow: 0 2px 8px -2px rgba(0,0,0,0.15); }
+.dark .gl-view-btn.active { background: #0f172a; color: #67e8f9; }
+.gl-view-btn:hover:not(.active) { color: #06b6d4; }
+
+.gl-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.gl-chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.4rem 0.75rem; border-radius: 999px;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(139, 92, 246, 0.1));
+    color: #0891b2; font-size: 0.78rem; font-weight: 700;
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    animation: glPopIn 0.3s ease;
+}
+.gl-chip button { background: none; border: none; color: inherit; cursor: pointer; font-size: 12px; padding: 0; display: flex; align-items: center; transition: transform 0.2s; }
+.gl-chip button:hover { transform: scale(1.3) rotate(90deg); }
+
+/* ═══ BULK BAR ═══ */
+.gl-bulk-bar {
+    display: none; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: #fff; border-radius: 0.875rem; margin-bottom: 1rem;
+    animation: glSlideDown 0.3s ease;
+    box-shadow: 0 8px 20px -8px rgba(6, 182, 212, 0.5);
+    flex-wrap: wrap;
+}
+.gl-bulk-bar.show { display: flex; }
+.gl-bulk-count { font-weight: 800; font-size: 0.9rem; padding: 0.3rem 0.75rem; background: rgba(255,255,255,0.2); border-radius: 999px; }
+.gl-bulk-btn { padding: 0.4rem 0.85rem; border-radius: 0.5rem; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem; }
+.gl-bulk-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+.gl-bulk-btn.danger { background: rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.5); }
+
+/* ═══ GRID VIEW ═══ */
+.gl-grid { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1rem; }
+@media (min-width: 640px) { .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .gl-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .gl-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+mark.gl-highlight {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(139, 92, 246, 0.3));
+    color: #0891b2; font-weight: 900;
+    padding: 0.05rem 0.2rem; border-radius: 4px;
+}
+.dark mark.gl-highlight { color: #67e8f9; }
+
+/* ═══ CARD ═══ */
+.gl-card {
+    position: relative; background: #fff;
+    border: 1.5px solid #e2e8f0; border-radius: 1.25rem;
+    overflow: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: glSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dark .gl-card { background: #0f172a; border-color: #1e293b; }
+.gl-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -18px rgba(6, 182, 212, 0.35); border-color: #67e8f9; }
+.dark .gl-card:hover { border-color: rgba(6, 182, 212, 0.5); }
+
+.gl-card-head {
+    position: relative; padding: 1.25rem;
+    background: linear-gradient(135deg, var(--gl-color, #06b6d4), color-mix(in srgb, var(--gl-color, #06b6d4) 70%, #000));
+    color: #fff; display: flex; align-items: center; gap: 0.75rem;
+    overflow: hidden;
+}
+.gl-card-head::before { content: ''; position: absolute; top: -40%; right: -20%; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%); pointer-events: none; }
+.gl-card-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.25); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1.5px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.gl-card:hover .gl-card-icon { transform: scale(1.1) rotate(-8deg); }
+.gl-card-title { font-size: 1.05rem; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gl-card-code { font-size: 0.75rem; opacity: 0.9; margin-top: 0.1rem; font-family: 'JetBrains Mono', monospace; }
+.gl-card-status { padding: 0.3rem 0.7rem; border-radius: 999px; background: rgba(255,255,255,0.25); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.4); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; }
+
+.gl-card-body { padding: 1rem 1.25rem; }
+.gl-card-info { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.875rem; }
+.gl-card-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; gap: 0.5rem; }
+.gl-card-row-label { color: #64748b; display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+.dark .gl-card-row-label { color: #94a3b8; }
+.gl-card-row-label i { width: 20px; height: 20px; border-radius: 5px; background: rgba(6, 182, 212, 0.1); color: #06b6d4; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; }
+.gl-card-row-value { font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.dark .gl-card-row-value { color: #f1f5f9; }
+
+.gl-card-progress { margin-top: 0.75rem; }
+.gl-progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 700; margin-bottom: 0.4rem; color: #64748b; }
+.dark .gl-progress-label { color: #94a3b8; }
+.gl-progress { height: 8px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
+.dark .gl-progress { background: #1e293b; }
+.gl-progress-bar { height: 100%; background: linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899); background-size: 200% 100%; border-radius: 999px; animation: glGradientShift 4s ease infinite; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
+.gl-progress-bar::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: glShimmer 2s infinite; }
+
+.gl-card-foot { display: flex; gap: 0.5rem; padding: 0.875rem 1.25rem; border-top: 1px solid #f1f5f9; background: #fafbff; }
+.dark .gl-card-foot { background: #0a0a0f; border-color: #1e293b; }
+
+.gl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.55rem 0.9rem; border-radius: 0.6rem; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); text-decoration: none; white-space: nowrap; font-family: inherit; position: relative; overflow: hidden; }
+.gl-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transform: translateX(-100%); transition: transform 0.6s; }
+.gl-btn:hover::before { transform: translateX(100%); }
+.gl-btn:active { transform: scale(0.96); }
+.gl-btn-primary { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; box-shadow: 0 6px 16px -4px rgba(6, 182, 212, 0.5); }
+.gl-btn-primary:hover { transform: translateY(-2px); }
+.gl-btn-secondary { background: #fff; color: #475569; border: 1.5px solid #e2e8f0; }
+.gl-btn-secondary:hover { background: #f8fafc; border-color: #06b6d4; color: #06b6d4; }
+.dark .gl-btn-secondary { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+.dark .gl-btn-secondary:hover { background: #334155; color: #67e8f9; }
+.gl-btn-danger { background: #fee2e2; color: #dc2626; border: 1.5px solid #fecaca; }
+.gl-btn-danger:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+.gl-btn-sm { padding: 0.4rem 0.7rem; font-size: 0.72rem; }
+.gl-btn-icon { width: 34px; height: 34px; padding: 0; }
+.gl-btn-flex-1 { flex: 1; }
+
+/* ═══ LIST VIEW ═══ */
+.gl-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.gl-list-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 1rem; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); animation: glSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.dark .gl-list-item { background: #0f172a; border-color: #1e293b; }
+.gl-list-item:hover { transform: translateX(5px); border-color: #67e8f9; box-shadow: 0 10px 24px -10px rgba(6, 182, 212, 0.3); }
+.gl-list-icon { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; flex-shrink: 0; transition: transform 0.3s; }
+.gl-list-item:hover .gl-list-icon { transform: scale(1.1) rotate(-6deg); }
+.gl-list-info { flex: 1; min-width: 0; }
+.gl-list-title { font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 0.15rem; }
+.dark .gl-list-title { color: #f1f5f9; }
+.gl-list-meta { font-size: 0.75rem; color: #64748b; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.dark .gl-list-meta { color: #94a3b8; }
+.gl-list-stats { display: flex; gap: 0.5rem; }
+.gl-badge { padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.7rem; font-weight: 800; background: #f1f5f9; color: #475569; }
+.dark .gl-badge { background: #1e293b; color: #cbd5e1; }
+.gl-badge.active { background: rgba(16, 185, 129, 0.15); color: #059669; }
+.gl-badge.paused { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+.gl-badge.finished { background: rgba(99, 102, 241, 0.15); color: #4f46e5; }
+.gl-badge.archived { background: rgba(148, 163, 184, 0.15); color: #64748b; }
+
+/* ═══ TABLE VIEW ═══ */
+.gl-table-wrap { overflow-x: auto; background: #fff; border: 1.5px solid #e2e8f0; border-radius: var(--gl-radius); }
+.dark .gl-table-wrap { background: #0f172a; border-color: #1e293b; }
+.gl-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.gl-table thead th { position: sticky; top: 0; z-index: 5; padding: 0.85rem 1rem; text-align: left; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; border-bottom: 1.5px solid #f1f5f9; background: #fafbff; white-space: nowrap; }
+.dark .gl-table thead th { background: #0a0a0f; border-color: #1e293b; color: #94a3b8; }
+.gl-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+.dark .gl-table tbody tr { border-color: #1e293b; }
+.gl-table tbody tr:hover { background: linear-gradient(135deg, #ecfeff, #f0fdfa); }
+.dark .gl-table tbody tr:hover { background: rgba(6, 182, 212, 0.08); }
+.gl-table tbody td { padding: 0.85rem 1rem; color: #0f172a; vertical-align: middle; }
+.dark .gl-table tbody td { color: #e2e8f0; }
+.gl-table .gl-cell-group { display: flex; align-items: center; gap: 0.75rem; }
+.gl-table .gl-avatar-sm { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #fff; flex-shrink: 0; }
+.gl-table .gl-group-name { font-weight: 800; }
+.gl-table .gl-group-code { font-size: 0.72rem; color: #64748b; font-family: 'JetBrains Mono', monospace; }
+.dark .gl-table .gl-group-code { color: #94a3b8; }
+.gl-checkbox { width: 18px; height: 18px; border-radius: 5px; cursor: pointer; accent-color: #06b6d4; }
+
+/* ═══ PAGINATION ═══ */
+.gl-pagination { display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.gl-page-btn { min-width: 38px; height: 38px; padding: 0 0.75rem; border-radius: 0.6rem; border: 1.5px solid #e2e8f0; background: #fff; color: #475569; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s; text-decoration: none; }
+.dark .gl-page-btn { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+.gl-page-btn:hover { background: #f1f5f9; border-color: #06b6d4; color: #06b6d4; transform: translateY(-2px); }
+.gl-page-btn.active { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; border-color: transparent; box-shadow: 0 6px 16px -4px rgba(6, 182, 212, 0.5); }
+.gl-page-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+/* ═══ EMPTY ═══ */
+.gl-empty { padding: 3rem 1.5rem; text-align: center; color: #94a3b8; background: #fff; border: 1.5px solid #e2e8f0; border-radius: var(--gl-radius); }
+.dark .gl-empty { background: #0f172a; border-color: #1e293b; }
+.gl-empty-icon { width: 80px; height: 80px; margin: 0 auto 1rem; border-radius: 50%; background: linear-gradient(135deg, #ecfeff, #cffafe); display: flex; align-items: center; justify-content: center; color: #06b6d4; font-size: 32px; animation: glBounce 2s ease-in-out infinite; }
+.dark .gl-empty-icon { background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(20, 184, 166, 0.1)); }
+.gl-empty-title { font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 0.35rem; }
+.dark .gl-empty-title { color: #f1f5f9; }
+.gl-empty-text { font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem; max-width: 400px; margin-left: auto; margin-right: auto; }
+.dark .gl-empty-text { color: #94a3b8; }
+
+/* ═══ TOAST ═══ */
+.gl-toasts { position: fixed; top: 5rem; right: 1rem; z-index: 99999; display: flex; flex-direction: column; gap: 0.625rem; pointer-events: none; max-width: 24rem; }
+@media (max-width: 640px) { .gl-toasts { left: 0.625rem; right: 0.625rem; max-width: none; } }
+.gl-toast { padding: 1rem 1.15rem; border-radius: 1rem; color: #fff; font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4); pointer-events: auto; animation: glSlideRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.gl-toast i { font-size: 18px; }
+
+@media print {
+    .gl-topbar, .gl-toolbar, .gl-bulk-bar, .gl-toasts, .gl-pagination { display: none !important; }
+    .gl-glow { display: none; }
+    .gl-page { padding: 0; }
+    .gl-card { break-inside: avoid; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="gl-page">
+<div class="gl-glow gl-glow-1"></div>
+<div class="gl-glow gl-glow-2"></div>
+<div class="gl-glow gl-glow-3"></div>
+
+<div class="gl-wrap">
+
+<!-- TOPBAR -->
+<div class="gl-topbar">
+    <div class="gl-topbar-inner">
+        <a href="{% url 'home_page_view' %}" class="gl-ico" title="Bosh sahifa">
+            <i class="fas fa-home"></i>
+        </a>
+        <div class="flex-1 gl-mw0">
+            <div class="gl-breadcrumb">
+                <a href="{% url 'courses_admin:list' %}">Kurslar</a>
+                <i class="fas fa-chevron-right" style="font-size: 8px;"></i>
+                <span>Guruhlar</span>
+            </div>
+            <div class="text-xs font-bold text-slate-900 dark:text-white">Guruhlar ro'yxati</div>
+        </div>
+        <button type="button" class="gl-ico" onclick="window.location.reload()" title="Yangilash">
+            <i class="fas fa-rotate"></i>
+        </button>
+        <button type="button" class="gl-ico" onclick="glExportCSV()" title="CSV eksport">
+            <i class="fas fa-download"></i>
+        </button>
+        <button type="button" class="gl-ico" onclick="window.print()" title="Chop etish">
+            <i class="fas fa-print"></i>
+        </button>
+        <a href="{% url 'courses_admin:group_create' %}" class="gl-ico" title="Yangi guruh">
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+</div>
+
+<!-- HERO -->
+<div class="gl-hero">
+    <div class="gl-hero-content">
+        <div class="gl-hero-icon"><i class="fas fa-users-rectangle"></i></div>
+        <div class="flex-1 gl-mw0">
+            <h1 class="gl-hero-title">Guruhlar</h1>
+            <div class="gl-hero-sub">
+                <i class="fas fa-circle-info"></i>
+                <span>Barcha guruhlarni boshqaring — talabalar, darslar, jadval</span>
+            </div>
+            <div class="gl-hero-actions">
+                <a href="{% url 'courses_admin:group_create' %}" class="gl-hero-btn primary">
+                    <i class="fas fa-plus"></i> <span>Yangi guruh</span>
+                </a>
+                <button type="button" class="gl-hero-btn" onclick="glExportCSV()">
+                    <i class="fas fa-download"></i> <span>Eksport</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="gl-stats">
+    <div class="gl-stat anim-up d-1">
+        <div class="gl-stat-icon cyan"><i class="fas fa-users-rectangle"></i></div>
+        <div class="gl-stat-value" data-count="{{ stats.total }}">0</div>
+        <div class="gl-stat-label">Jami</div>
+    </div>
+    <div class="gl-stat anim-up d-2">
+        <div class="gl-stat-icon emerald"><i class="fas fa-play-circle"></i></div>
+        <div class="gl-stat-value" data-count="{{ stats.active }}">0</div>
+        <div class="gl-stat-label">Aktiv</div>
+    </div>
+    <div class="gl-stat anim-up d-3">
+        <div class="gl-stat-icon amber"><i class="fas fa-pause-circle"></i></div>
+        <div class="gl-stat-value" data-count="{{ stats.paused }}">0</div>
+        <div class="gl-stat-label">To'xtatilgan</div>
+    </div>
+    <div class="gl-stat anim-up d-4">
+        <div class="gl-stat-icon violet"><i class="fas fa-check-circle"></i></div>
+        <div class="gl-stat-value" data-count="{{ stats.finished }}">0</div>
+        <div class="gl-stat-label">Tugagan</div>
+    </div>
+    <div class="gl-stat anim-up d-5">
+        <div class="gl-stat-icon rose"><i class="fas fa-user-graduate"></i></div>
+        <div class="gl-stat-value" data-count="{{ stats.total_students|default:0 }}">0</div>
+        <div class="gl-stat-label">Talabalar</div>
+    </div>
+    <div class="gl-stat anim-up d-6">
+        <div class="gl-stat-icon indigo"><i class="fas fa-book-open"></i></div>
+        <div class="gl-stat-value" data-count="{{ stats.total_lessons|default:0 }}">0</div>
+        <div class="gl-stat-label">Darslar</div>
+    </div>
+</div>
+
+<!-- TOOLBAR -->
+<form method="get" id="glFilterForm" class="gl-toolbar" autocomplete="off">
+    <div class="gl-search">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" name="q" id="glSearchInput" value="{{ search }}"
+               placeholder="Guruh nomi, kod yoki o'qituvchi..."
+               autocomplete="off" spellcheck="false">
+        <button type="button" class="gl-search-clear" id="glSearchClear" onclick="glClearSearch()" title="Tozalash">
+            <i class="fas fa-xmark"></i>
+        </button>
+        <div class="gl-search-loading" id="glSearchLoading">
+            <span class="gl-search-spinner"></span>
+            <span>Qidirilmoqda...</span>
+        </div>
+        <div class="gl-search-suggest" id="glSearchSuggest"></div>
+    </div>
+
+    <select name="status" class="gl-select" onchange="document.getElementById('glFilterForm').submit()">
+        <option value="">Barcha holatlar</option>
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="course" class="gl-select" onchange="document.getElementById('glFilterForm').submit()">
+        <option value="">Barcha kurslar</option>
+        {% for c in courses %}
+        <option value="{{ c.pk }}" {% if course_filter == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.title|truncatechars:30 }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="teacher" class="gl-select" onchange="document.getElementById('glFilterForm').submit()">
+        <option value="">Barcha o'qituvchilar</option>
+        {% for t in teachers %}
+        <option value="{{ t.pk }}" {% if teacher_filter == t.pk|stringformat:"s" %}selected{% endif %}>{{ t.get_full_name|default:t.phone_number|truncatechars:25 }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="sort" class="gl-select" onchange="document.getElementById('glFilterForm').submit()">
+        <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Eng yangi</option>
+        <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Eng eski</option>
+        <option value="name" {% if sort == 'name' %}selected{% endif %}>Nomi (A-Z)</option>
+        <option value="-name" {% if sort == '-name' %}selected{% endif %}>Nomi (Z-A)</option>
+        <option value="-students_count_annot" {% if sort == '-students_count_annot' %}selected{% endif %}>Talabalar ↓</option>
+        <option value="-lessons_count_annot" {% if sort == '-lessons_count_annot' %}selected{% endif %}>Darslar ↓</option>
+    </select>
+
+    <div class="gl-view-switch">
+        <button type="button" class="gl-view-btn active" data-view="grid" onclick="glSetView('grid')" title="Grid">
+            <i class="fas fa-th-large"></i>
+        </button>
+        <button type="button" class="gl-view-btn" data-view="list" onclick="glSetView('list')" title="List">
+            <i class="fas fa-list"></i>
+        </button>
+        <button type="button" class="gl-view-btn" data-view="table" onclick="glSetView('table')" title="Jadval">
+            <i class="fas fa-table"></i>
+        </button>
+    </div>
+
+    {% if search or status_filter or course_filter or teacher_filter %}
+    <a href="{% url 'courses_admin:group_list' %}" class="gl-btn gl-btn-secondary gl-btn-sm">
+        <i class="fas fa-xmark"></i> Tozalash
+    </a>
+    {% endif %}
+</form>
+
+<!-- Faol filtrlar chips -->
+{% if search or status_filter or course_filter or teacher_filter %}
+<div class="gl-chips">
+    {% if search %}<span class="gl-chip"><i class="fas fa-search"></i> "{{ search }}" <button onclick="glClearFilter('q')"><i class="fas fa-xmark"></i></button></span>{% endif %}
+    {% if status_filter %}<span class="gl-chip">{{ status_filter }} <button onclick="glClearFilter('status')"><i class="fas fa-xmark"></i></button></span>{% endif %}
+    {% if course_filter %}<span class="gl-chip">Kurs #{{ course_filter }} <button onclick="glClearFilter('course')"><i class="fas fa-xmark"></i></button></span>{% endif %}
+    {% if teacher_filter %}<span class="gl-chip">O'qituvchi #{{ teacher_filter }} <button onclick="glClearFilter('teacher')"><i class="fas fa-xmark"></i></button></span>{% endif %}
+</div>
+{% endif %}
+
+<!-- BULK BAR -->
+<div class="gl-bulk-bar" id="glBulkBar">
+    <span class="gl-bulk-count"><span id="glBulkCount">0</span> ta tanlandi</span>
+    <button type="button" class="gl-bulk-btn" onclick="glBulkAction('activate')">
+        <i class="fas fa-play"></i> Aktivlashtirish
+    </button>
+    <button type="button" class="gl-bulk-btn" onclick="glBulkAction('archive')">
+        <i class="fas fa-archive"></i> Arxivlash
+    </button>
+    <button type="button" class="gl-bulk-btn danger" onclick="glBulkDelete()">
+        <i class="fas fa-trash"></i> O'chirish
+    </button>
+    <button type="button" class="gl-bulk-btn" onclick="glBulkClear()">
+        <i class="fas fa-xmark"></i> Bekor
+    </button>
+</div>
+
+<!-- ═══ GROUPS — GRID VIEW ═══ -->
+<div class="gl-grid" id="glGroupsGrid">
+    {% for group in groups %}
+    <div class="gl-card" data-group-id="{{ group.pk }}" data-status="{{ group.status }}"
+         data-name="{{ group.name|lower }}"
+         data-code="{{ group.code|default:''|lower }}"
+         data-search="{{ group.name|lower }} {{ group.code|default:''|lower }} {% if group.course %}{{ group.course.title|lower }}{% endif %} {% if group.teacher %}{{ group.teacher.get_full_name|lower|default:group.teacher.phone_number }}{% endif %}"
+         style="--gl-color: {{ group.color|default:'#06b6d4' }}; animation-delay: {{ forloop.counter0 }}0ms;">
+        <div class="gl-card-head">
+            <div class="gl-card-icon" style="background: linear-gradient(135deg, {{ group.color|default:'#06b6d4' }}, {{ group.color|default:'#06b6d4' }}cc);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="flex-1 gl-mw0">
+                <div class="gl-card-title">{{ group.name }}</div>
+                {% if group.code %}<div class="gl-card-code">#{{ group.code }}</div>{% endif %}
+            </div>
+            <span class="gl-card-status">{{ group.get_status_display }}</span>
+        </div>
+
+        <div class="gl-card-body">
+            <div class="gl-card-info">
+                <div class="gl-card-row">
+                    <span class="gl-card-row-label"><i class="fas fa-book"></i> Kurs</span>
+                    <span class="gl-card-row-value">{% if group.course %}{{ group.course.title|truncatechars:22 }}{% else %}—{% endif %}</span>
+                </div>
+                <div class="gl-card-row">
+                    <span class="gl-card-row-label"><i class="fas fa-user-tie"></i> O'qituvchi</span>
+                    <span class="gl-card-row-value">{% if group.teacher %}{{ group.teacher.get_full_name|default:group.teacher.phone_number|truncatechars:20 }}{% else %}—{% endif %}</span>
+                </div>
+                <div class="gl-card-row">
+                    <span class="gl-card-row-label"><i class="fas fa-clock"></i> Jadval</span>
+                    <span class="gl-card-row-value">{% if group.schedule %}{{ group.schedule_display|truncatechars:25 }}{% else %}Belgilanmagan{% endif %}</span>
+                </div>
+                {% if group.room %}
+                <div class="gl-card-row">
+                    <span class="gl-card-row-label"><i class="fas fa-door-open"></i> Xona</span>
+                    <span class="gl-card-row-value">{{ group.room }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="gl-card-progress">
+                <div class="gl-progress-label">
+                    <span><i class="fas fa-users"></i> {{ group.students_count|default:0 }} / {{ group.max_students }}</span>
+                    <span>{{ group.capacity_percent|default:0 }}%</span>
+                </div>
+                <div class="gl-progress">
+                    <div class="gl-progress-bar" style="width: 0;" data-width="{{ group.capacity_percent|default:0 }}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gl-card-foot">
+            <a href="{% url 'courses_admin:group_detail' pk=group.pk %}" class="gl-btn gl-btn-primary gl-btn-sm gl-btn-flex-1">
+                <i class="fas fa-eye"></i> Ko'rish
+            </a>
+            <a href="{% url 'courses_admin:group_edit' pk=group.pk %}" class="gl-btn gl-btn-secondary gl-btn-sm gl-btn-icon" title="Tahrirlash">
+                <i class="fas fa-pen"></i>
+            </a>
+            <button type="button" class="gl-btn gl-btn-danger gl-btn-sm gl-btn-icon" onclick="glDeleteGroup({{ group.pk }}, '{{ group.name|escapejs }}')" title="O'chirish">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+    {% empty %}
+    <div class="gl-empty" style="grid-column: 1 / -1;">
+        <div class="gl-empty-icon"><i class="fas fa-users-rectangle"></i></div>
+        <div class="gl-empty-title">Guruhlar yo'q</div>
+        <div class="gl-empty-text">Birinchi guruhni yarating va talabalarni qo'shishni boshlang</div>
+        <a href="{% url 'courses_admin:group_create' %}" class="gl-btn gl-btn-primary">
+            <i class="fas fa-plus"></i> Birinchi guruhni yaratish
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══ GROUPS — LIST VIEW (hidden) ═══ -->
+<div class="gl-list" id="glGroupsList" style="display: none;">
+    {% for group in groups %}
+    <div class="gl-list-item" data-group-id="{{ group.pk }}" data-status="{{ group.status }}">
+        <div class="gl-list-icon" style="background: linear-gradient(135deg, {{ group.color|default:'#06b6d4' }}, {{ group.color|default:'#06b6d4' }}cc);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="gl-list-info">
+            <div class="gl-list-title">{{ group.name }}</div>
+            <div class="gl-list-meta">
+                {% if group.code %}<span>#{{ group.code }}</span>{% endif %}
+                {% if group.course %}<span><i class="fas fa-book"></i> {{ group.course.title|truncatechars:20 }}</span>{% endif %}
+                {% if group.teacher %}<span><i class="fas fa-user-tie"></i> {{ group.teacher.get_full_name|default:group.teacher.phone_number|truncatechars:15 }}</span>{% endif %}
+            </div>
+        </div>
+        <div class="gl-list-stats">
+            <span class="gl-badge {{ group.status }}">{{ group.get_status_display }}</span>
+            <span class="gl-badge"><i class="fas fa-users"></i> {{ group.students_count|default:0 }}</span>
+            <span class="gl-badge"><i class="fas fa-book-open"></i> {{ group.total_lessons|default:0 }}</span>
+        </div>
+        <a href="{% url 'courses_admin:group_detail' pk=group.pk %}" class="gl-btn gl-btn-primary gl-btn-sm">
+            <i class="fas fa-eye"></i>
+        </a>
+        <a href="{% url 'courses_admin:group_edit' pk=group.pk %}" class="gl-btn gl-btn-secondary gl-btn-sm gl-btn-icon">
+            <i class="fas fa-pen"></i>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══ GROUPS — TABLE VIEW (hidden) ═══ -->
+<div id="glGroupsTable" style="display: none;">
+    {% if groups %}
+    <div class="gl-table-wrap">
+        <table class="gl-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;"><input type="checkbox" class="gl-checkbox" id="glSelectAll" onchange="glToggleSelectAll(this)"></th>
+                    <th>Guruh</th>
+                    <th>Kurs</th>
+                    <th>O'qituvchi</th>
+                    <th>Talabalar</th>
+                    <th>Holat</th>
+                    <th>Jadval</th>
+                    <th style="width: 120px;">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for group in groups %}
+                <tr data-group-id="{{ group.pk }}">
+                    <td><input type="checkbox" class="gl-checkbox gl-row-check" value="{{ group.pk }}" onchange="glUpdateBulk()"></td>
+                    <td>
+                        <div class="gl-cell-group">
+                            <div class="gl-avatar-sm" style="background: linear-gradient(135deg, {{ group.color|default:'#06b6d4' }}, {{ group.color|default:'#06b6d4' }}cc);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <div class="gl-group-name">{{ group.name }}</div>
+                                {% if group.code %}<div class="gl-group-code">#{{ group.code }}</div>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{% if group.course %}{{ group.course.title|truncatechars:25 }}{% else %}—{% endif %}</td>
+                    <td>{% if group.teacher %}{{ group.teacher.get_full_name|default:group.teacher.phone_number|truncatechars:20 }}{% else %}—{% endif %}</td>
+                    <td><span class="gl-badge">{{ group.students_count|default:0 }} / {{ group.max_students }}</span></td>
+                    <td><span class="gl-badge {{ group.status }}">{{ group.get_status_display }}</span></td>
+                    <td>{% if group.schedule %}<span class="gl-badge"><i class="fas fa-clock"></i> {{ group.schedule|length }} kun</span>{% else %}—{% endif %}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.25rem;">
+                            <a href="{% url 'courses_admin:group_detail' pk=group.pk %}" class="gl-btn gl-btn-primary gl-btn-sm gl-btn-icon" title="Ko'rish"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'courses_admin:group_edit' pk=group.pk %}" class="gl-btn gl-btn-secondary gl-btn-sm gl-btn-icon" title="Tahrirlash"><i class="fas fa-pen"></i></a>
+                            <button type="button" class="gl-btn gl-btn-danger gl-btn-sm gl-btn-icon" onclick="glDeleteGroup({{ group.pk }}, '{{ group.name|escapejs }}')" title="O'chirish"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ═══ PAGINATION ═══ -->
+{% if page_obj.has_other_pages %}
+<div class="gl-pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page=1{% if search %}&q={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if teacher_filter %}&teacher={{ teacher_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="gl-page-btn" title="Birinchi">
+        <i class="fas fa-angles-left"></i>
+    </a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if teacher_filter %}&teacher={{ teacher_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="gl-page-btn">
+        <i class="fas fa-angle-left"></i>
+    </a>
+    {% else %}
+    <span class="gl-page-btn disabled"><i class="fas fa-angles-left"></i></span>
+    <span class="gl-page-btn disabled"><i class="fas fa-angle-left"></i></span>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <span class="gl-page-btn active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}{% if search %}&q={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if teacher_filter %}&teacher={{ teacher_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="gl-page-btn">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if teacher_filter %}&teacher={{ teacher_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="gl-page-btn">
+        <i class="fas fa-angle-right"></i>
+    </a>
+    <a href="?page={{ page_obj.paginator.num_pages }}{% if search %}&q={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if teacher_filter %}&teacher={{ teacher_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="gl-page-btn" title="Oxirgi">
+        <i class="fas fa-angles-right"></i>
+    </a>
+    {% else %}
+    <span class="gl-page-btn disabled"><i class="fas fa-angle-right"></i></span>
+    <span class="gl-page-btn disabled"><i class="fas fa-angles-right"></i></span>
+    {% endif %}
+</div>
+{% endif %}
+
+<div style="text-align: center; font-size: 0.8rem; color: #94a3b8; margin-top: 1rem;">
+    <i class="fas fa-info-circle"></i> Jami: {{ stats.total }} ta guruh
+    {% if search %}· Qidiruv: "<strong>{{ search }}</strong>"{% endif %}
+</div>
+
+</div>
+
+<div id="glToastWrap" class="gl-toasts"></div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+function glCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+function glEscapeHtml(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function glToast(message, type = 'success') {
+    const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+    const bgs = {
+        success: 'linear-gradient(135deg,#059669,#10b981)',
+        error: 'linear-gradient(135deg,#e11d48,#f43f5e)',
+        info: 'linear-gradient(135deg,#06b6d4,#0891b2)'
+    };
+    const el = document.createElement('div');
+    el.className = 'gl-toast';
+    el.style.background = bgs[type] || bgs.info;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span class="flex-1">${message}</span>`;
+    document.getElementById('glToastWrap').appendChild(el);
+    setTimeout(() => {
+        el.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(40px)';
+        setTimeout(() => el.remove(), 400);
+    }, 3000);
+}
+window.glToast = glToast;
+
+/* ═══ LIVE SEARCH ═══ */
+let glSearchInput = null;
+let glSearchForm = null;
+let glSearchSuggest = null;
+
+function glInitLiveSearch() {
+    glSearchInput = document.getElementById('glSearchInput');
+    glSearchForm = document.getElementById('glFilterForm');
+    glSearchSuggest = document.getElementById('glSearchSuggest');
+    if (!glSearchInput) return;
+
+    glSearchInput.addEventListener('input', function() {
+        const val = this.value;
+        const clearBtn = document.getElementById('glSearchClear');
+        if (clearBtn) clearBtn.classList.toggle('show', val.length > 0);
+
+        glFilterCardsClientSide(val);
+        glShowSuggest(val);
+    });
+
+    glSearchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            document.getElementById('glSearchClear')?.classList.remove('show');
+            glSearchSuggest?.classList.remove('show');
+            glFilterCardsClientSide('');
+            return;
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const activeSuggest = glSearchSuggest?.querySelector('.gl-suggest-item.active');
+            if (activeSuggest) { activeSuggest.click(); return; }
+            glSearchSuggest?.classList.remove('show');
+            const loading = document.getElementById('glSearchLoading');
+            if (loading) loading.classList.add('show');
+            glSearchForm.submit();
+            return;
+        }
+        if (e.key === 'ArrowDown' && glSearchSuggest?.classList.contains('show')) {
+            e.preventDefault();
+            glNavigateSuggest(1);
+        }
+        if (e.key === 'ArrowUp' && glSearchSuggest?.classList.contains('show')) {
+            e.preventDefault();
+            glNavigateSuggest(-1);
+        }
+    });
+
+    glSearchInput.addEventListener('blur', function() {
+        setTimeout(() => glSearchSuggest?.classList.remove('show'), 250);
+    });
+
+    glSearchInput.addEventListener('focus', function() {
+        if (this.value.length > 0) glShowSuggest(this.value);
+    });
+
+    glSearchForm.addEventListener('submit', function() {
+        const loading = document.getElementById('glSearchLoading');
+        if (loading) loading.classList.add('show');
+    });
+}
+
+function glFilterCardsClientSide(query) {
+    query = (query || '').toLowerCase().trim();
+
+    document.querySelectorAll('mark.gl-highlight').forEach(m => {
+        const parent = m.parentNode;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
+        parent.normalize();
+    });
+
+    const cards = document.querySelectorAll('.gl-card');
+    let visibleGrid = 0;
+    cards.forEach(card => {
+        const searchData = (card.dataset.search || '').toLowerCase();
+        const name = (card.querySelector('.gl-card-title')?.textContent || '').toLowerCase();
+        const code = (card.querySelector('.gl-card-code')?.textContent || '').toLowerCase();
+        const haystack = searchData + ' ' + name + ' ' + code;
+
+        const match = !query || haystack.includes(query);
+        card.style.display = match ? '' : 'none';
+        if (match) visibleGrid++;
+
+        if (match && query) {
+            glHighlightElement(card.querySelector('.gl-card-title'), query);
+            glHighlightElement(card.querySelector('.gl-card-code'), query);
+        }
+    });
+
+    const listItems = document.querySelectorAll('.gl-list-item');
+    let visibleList = 0;
+    listItems.forEach(item => {
+        const title = (item.querySelector('.gl-list-title')?.textContent || '').toLowerCase();
+        const meta = (item.querySelector('.gl-list-meta')?.textContent || '').toLowerCase();
+        const match = !query || (title + ' ' + meta).includes(query);
+        item.style.display = match ? '' : 'none';
+        if (match) visibleList++;
+    });
+
+    const tableRows = document.querySelectorAll('#glGroupsTable tbody tr');
+    let visibleTable = 0;
+    tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const match = !query || text.includes(query);
+        row.style.display = match ? '' : 'none';
+        if (match) visibleTable++;
+    });
+
+    glToggleNoResults('glGroupsGrid', visibleGrid, query, 'grid');
+    glToggleNoResults('glGroupsList', visibleList, query, 'list');
+    glToggleNoResults('glGroupsTable', visibleTable, query, 'table');
+
+    glUpdateResultCount(query, visibleGrid);
+}
+
+function glHighlightElement(el, query) {
+    if (!el) return;
+    const text = el.textContent;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    if (text.toLowerCase().includes(query.toLowerCase())) {
+        el.innerHTML = text.replace(regex, '<mark class="gl-highlight">$1</mark>');
+    }
+}
+
+function glToggleNoResults(containerId, visibleCount, query, viewType) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const existing = container.querySelector('.gl-no-results');
+    if (existing) existing.remove();
+
+    if (query && visibleCount === 0) {
+        if (viewType === 'table') {
+            const tbody = container.querySelector('tbody');
+            if (tbody) {
+                const row = document.createElement('tr');
+                row.className = 'gl-no-results';
+                row.innerHTML = `<td colspan="10" style="text-align: center; padding: 3rem 1rem; color: #94a3b8;">
+                    <i class="fas fa-search" style="font-size: 32px; opacity: 0.3; display: block; margin-bottom: 0.75rem;"></i>
+                    "<strong>${glEscapeHtml(query)}</strong>" bo'yicha hech narsa topilmadi
+                    <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 0.5rem;">Enter bosing — serverdan qidiriladi</div>
+                </td>`;
+                tbody.appendChild(row);
+            }
+        } else {
+            const el = document.createElement('div');
+            el.className = 'gl-no-results';
+            el.style.cssText = 'grid-column: 1 / -1; padding: 3rem 1.5rem; text-align: center; color: #94a3b8; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 1.25rem;';
+            el.innerHTML = `
+                <div style="width: 80px; height: 80px; margin: 0 auto 1rem; border-radius: 50%; background: linear-gradient(135deg, #ecfeff, #cffafe); display: flex; align-items: center; justify-content: center; color: #06b6d4; font-size: 32px;">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 0.35rem;">Hech narsa topilmadi</div>
+                <div style="font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem;">
+                    "<strong>${glEscapeHtml(query)}</strong>" bo'yicha natija yo'q. <br>
+                    <span style="font-size: 0.78rem; color: #94a3b8;">Enter bilan serverdan qidirib ko'ring</span>
+                </div>
+                <button type="button" onclick="glClearSearch()" class="gl-btn gl-btn-secondary gl-btn-sm">
+                    <i class="fas fa-xmark"></i> Qidiruvni tozalash
+                </button>`;
+            container.appendChild(el);
+        }
+    }
+}
+
+function glUpdateResultCount(query, count) {
+    let counter = document.getElementById('glResultCount');
+    if (!counter) {
+        counter = document.createElement('div');
+        counter.id = 'glResultCount';
+        counter.style.cssText = 'text-align: center; font-size: 0.85rem; color: #06b6d4; font-weight: 700; margin-top: 0.5rem;';
+        const infoBar = document.querySelector('.gl-wrap > div:last-child');
+        if (infoBar && infoBar.parentNode) {
+            infoBar.parentNode.insertBefore(counter, infoBar.nextSibling);
+        }
+    }
+    if (counter) {
+        counter.innerHTML = (query && count > 0)
+            ? `<i class="fas fa-filter"></i> Joriy sahifada <strong>${count}</strong> ta mos guruh`
+            : '';
+    }
+}
+
+function glClearSearch() {
+    const input = document.getElementById('glSearchInput');
+    if (input) {
+        input.value = '';
+        input.focus();
+        document.getElementById('glSearchClear')?.classList.remove('show');
+        glFilterCardsClientSide('');
+        glSearchSuggest?.classList.remove('show');
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('q')) {
+            url.searchParams.delete('q');
+            window.location.href = url.toString();
+        }
+    }
+}
+window.glClearSearch = glClearSearch;
+
+/* ⭐ SUGGEST DROPDOWN */
+function glShowSuggest(query) {
+    if (!glSearchSuggest) return;
+    query = (query || '').trim();
+
+    if (!query) {
+        glSearchSuggest.classList.remove('show');
+        return;
+    }
+
+    const cards = document.querySelectorAll('.gl-card');
+    const matches = [];
+    const q = query.toLowerCase();
+
+    cards.forEach(card => {
+        const name = card.querySelector('.gl-card-title')?.textContent.trim() || '';
+        const code = card.querySelector('.gl-card-code')?.textContent.replace('#', '').trim() || '';
+        const searchData = (card.dataset.search || '').toLowerCase();
+
+        if (name.toLowerCase().includes(q) ||
+            code.toLowerCase().includes(q) ||
+            searchData.includes(q)) {
+            matches.push({
+                name,
+                code,
+                id: card.dataset.groupId,
+                color: (card.style.getPropertyValue('--gl-color') || '#06b6d4').trim()
+            });
+        }
+    });
+
+    if (!matches.length) {
+        glSearchSuggest.innerHTML = `
+            <div class="gl-suggest-empty">
+                <i class="fas fa-magnifying-glass"></i>
+                <div class="gl-suggest-empty-title">Topilmadi</div>
+                <div>"${glEscapeHtml(query)}" bo'yicha guruh yo'q</div>
+                <div class="gl-suggest-empty-hint">
+                    <kbd>Enter</kbd> — serverdan qidirish
+                </div>
+            </div>
+        `;
+        glSearchSuggest.classList.add('show');
+        return;
+    }
+
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+
+    glSearchSuggest.innerHTML = `
+        <div class="gl-suggest-label">Topilgan guruhlar · ${matches.length}</div>
+        ${matches.slice(0, 10).map((m, idx) => {
+            const escapedName = glEscapeHtml(m.name);
+            const highlightedName = escapedName.replace(regex, '<mark>$1</mark>');
+
+            const escapedCode = glEscapeHtml(m.code);
+            const highlightedCode = m.code ? escapedCode.replace(regex, '<mark>$1</mark>') : '';
+
+            return `<div class="gl-suggest-item ${idx === 0 ? 'active' : ''}" onclick="glGoToGroup(${m.id})">
+                <i class="fas fa-users" style="background: linear-gradient(135deg, ${m.color}, ${m.color}cc);"></i>
+                <span class="gl-suggest-name">${highlightedName}</span>
+                ${m.code ? `<span class="gl-suggest-code">#${highlightedCode}</span>` : ''}
+            </div>`;
+        }).join('')}
+    `;
+    glSearchSuggest.classList.add('show');
+}
+
+function glNavigateSuggest(dir) {
+    if (!glSearchSuggest) return;
+    const items = glSearchSuggest.querySelectorAll('.gl-suggest-item');
+    if (!items.length) return;
+
+    let current = glSearchSuggest.querySelector('.gl-suggest-item.active');
+    let idx = current ? Array.from(items).indexOf(current) : -1;
+    idx = (idx + dir + items.length) % items.length;
+
+    items.forEach(i => i.classList.remove('active'));
+    items[idx].classList.add('active');
+    items[idx].scrollIntoView({ block: 'nearest' });
+}
+
+function glGoToGroup(id) {
+    window.location.href = `/boshqaruv/kurslar/groups/${id}/`;
+}
+window.glGoToGroup = glGoToGroup;
+
+function glClearFilter(key) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(key);
+    window.location.href = url.toString();
+}
+window.glClearFilter = glClearFilter;
+
+/* ═══ ANIMATIONS ═══ */
+function glAnimateCounters() {
+    document.querySelectorAll('[data-count]').forEach(el => {
+        const target = parseInt(el.dataset.count, 10) || 0;
+        if (target === 0) { el.textContent = '0'; return; }
+        const duration = 1200;
+        const startTime = performance.now();
+        function tick(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(target * eased);
+            if (progress < 1) requestAnimationFrame(tick);
+            else el.textContent = target;
+        }
+        requestAnimationFrame(tick);
+    });
+}
+function glAnimateProgressBars() {
+    document.querySelectorAll('.gl-progress-bar[data-width]').forEach(bar => {
+        setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 300);
+    });
+}
+
+/* ═══ VIEW SWITCH ═══ */
+function glSetView(view) {
+    ['grid', 'list', 'table'].forEach(v => {
+        const el = document.getElementById('glGroups' + v.charAt(0).toUpperCase() + v.slice(1));
+        if (el) el.style.display = v === view ? '' : 'none';
+    });
+    document.querySelectorAll('.gl-view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    try { localStorage.setItem('gl_view', view); } catch (e) {}
+    const q = document.getElementById('glSearchInput')?.value;
+    if (q) glFilterCardsClientSide(q);
+}
+window.glSetView = glSetView;
+
+/* ═══ BULK ═══ */
+function glToggleSelectAll(cb) {
+    document.querySelectorAll('.gl-row-check').forEach(c => { c.checked = cb.checked; });
+    glUpdateBulk();
+}
+function glUpdateBulk() {
+    const checked = document.querySelectorAll('.gl-row-check:checked');
+    document.getElementById('glBulkCount').textContent = checked.length;
+    document.getElementById('glBulkBar').classList.toggle('show', checked.length > 0);
+}
+function glBulkClear() {
+    document.querySelectorAll('.gl-row-check').forEach(c => c.checked = false);
+    const sa = document.getElementById('glSelectAll'); if (sa) sa.checked = false;
+    glUpdateBulk();
+}
+function glBulkAction(action) {
+    const checked = document.querySelectorAll('.gl-row-check:checked');
+    if (!checked.length) return;
+    glToast(`${checked.length} ta guruh — ${action} (tez orada)`, 'info');
+}
+function glBulkDelete() {
+    const checked = document.querySelectorAll('.gl-row-check:checked');
+    if (!checked.length) return;
+    if (!confirm(`${checked.length} ta guruhni o'chirasizmi?`)) return;
+    let done = 0, ok = 0;
+    const ids = Array.from(checked).map(c => parseInt(c.value));
+    glToast("O'chirilmoqda...", 'info');
+    function next() {
+        if (done >= ids.length) {
+            glToast(`${ok} ta o'chirildi`, ok > 0 ? 'success' : 'error');
+            if (ok > 0) setTimeout(() => window.location.reload(), 800);
+            return;
+        }
+        const id = ids[done]; done++;
+        fetch(`/boshqaruv/kurslar/groups/${id}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': glCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+        }).then(r => r.json()).then(d => { if (d.success) ok++; next(); }).catch(() => next());
+    }
+    next();
+}
+window.glToggleSelectAll = glToggleSelectAll;
+window.glUpdateBulk = glUpdateBulk;
+window.glBulkClear = glBulkClear;
+window.glBulkAction = glBulkAction;
+window.glBulkDelete = glBulkDelete;
+
+/* ═══ DELETE ═══ */
+function glDeleteGroup(pk, name) {
+    if (!confirm(`"${name}" guruhini o'chirasizmi?`)) return;
+    fetch(`/boshqaruv/kurslar/groups/${pk}/delete/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': glCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            glToast(data.message || "O'chirildi", 'success');
+            const el = document.querySelector(`[data-group-id="${pk}"]`);
+            if (el) { el.style.transition = 'all 0.4s'; el.style.opacity = '0'; el.style.transform = 'scale(0.9)'; }
+            setTimeout(() => window.location.reload(), 500);
+        } else {
+            if (data.requires_confirm && confirm(data.error + "\n\nBaribir o'chirasizmi?")) {
+                fetch(`/boshqaruv/kurslar/groups/${pk}/delete/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': glCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new URLSearchParams({ 'force': '1' }),
+                }).then(r => r.json()).then(d => {
+                    if (d.success) { glToast(d.message, 'success'); setTimeout(() => window.location.reload(), 700); }
+                    else glToast(d.error || "Xato", 'error');
+                });
+            } else glToast(data.error || "Xato", 'error');
+        }
+    }).catch(() => glToast("Tarmoq xatosi", 'error'));
+}
+window.glDeleteGroup = glDeleteGroup;
+
+/* ═══ CSV ═══ */
+function glExportCSV() {
+    const rows = document.querySelectorAll('.gl-card:not([style*="display: none"])');
+    if (!rows.length) { glToast("Guruhlar yo'q", 'error'); return; }
+
+    let csv = "Nomi,Kod,Kurs,O'qituvchi,Talabalar,Holat\n";
+    rows.forEach(card => {
+        const name = card.querySelector('.gl-card-title')?.textContent.trim() || '';
+        const code = card.querySelector('.gl-card-code')?.textContent.replace('#', '').trim() || '';
+        const bodyRows = card.querySelectorAll('.gl-card-row');
+        let course = '', teacher = '';
+        bodyRows.forEach(r => {
+            const label = r.querySelector('.gl-card-row-label')?.textContent.toLowerCase() || '';
+            const val = r.querySelector('.gl-card-row-value')?.textContent.trim() || '';
+            if (label.includes('kurs')) course = val;
+            if (label.includes("o'qituvchi") || label.includes('oqituvchi')) teacher = val;
+        });
+        const students = card.querySelector('.gl-progress-label')?.textContent.trim() || '';
+        const status = card.querySelector('.gl-card-status')?.textContent.trim() || '';
+        csv += `"${name}","${code}","${course}","${teacher}","${students}","${status}"\n`;
+    });
+
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `guruhlar-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    glToast("CSV yuklandi ✅", 'success');
+}
+window.glExportCSV = glExportCSV;
+
+/* ═══ KEYBOARD ═══ */
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const inp = document.getElementById('glSearchInput');
+        if (inp) { inp.focus(); inp.select(); }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        window.location.href = "{% url 'courses_admin:group_create' %}";
+    }
+});
+
+/* ═══ INIT ═══ */
+document.addEventListener('DOMContentLoaded', function() {
+    glInitLiveSearch();
+    setTimeout(() => {
+        glAnimateCounters();
+        glAnimateProgressBars();
+    }, 200);
+    try {
+        const saved = localStorage.getItem('gl_view');
+        if (saved && ['grid', 'list', 'table'].includes(saved)) glSetView(saved);
+    } catch (e) {}
+    const searchVal = "{{ search|escapejs }}";
+    const input = document.getElementById('glSearchInput');
+    if (input && searchVal) {
+        input.value = searchVal;
+        document.getElementById('glSearchClear')?.classList.add('show');
+        setTimeout(() => glFilterCardsClientSide(searchVal), 300);
+    }
+});
+</script>
+{% endblock %}

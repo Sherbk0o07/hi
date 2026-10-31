@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="uz" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+  <title>{% block title %}DIGION{% endblock %}</title>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TELEGRAM WEBAPP SDK
+       ═══════════════════════════════════════════════════════════ -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TAILWIND CSS
+       ═══════════════════════════════════════════════════════════ -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FONT AWESOME 6
+       ═══════════════════════════════════════════════════════════ -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       GOOGLE FONTS — INTER
+       ═══════════════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    // TAILWIND CONFIG
+    // ═══════════════════════════════════════════════════════════
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4F46E5',
+            secondary: '#7C3AED',
+            accent: '#06B6D4',
+            warm: '#F59E0B',
+            rose: '#F43F5E',
+            success: '#10B981',
+            danger: '#EF4444',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'slide-up': 'slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            'slide-down': 'slideDown 0.3s ease-out',
+            'slide-in-left': 'slideInLeft 0.4s ease-out',
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'scale-in': 'scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            'pulse-soft': 'pulseSoft 2s infinite',
+            'pulse-glow': 'pulseGlow 2s infinite',
+            'bounce-tap': 'bounceTap 0.35s ease',
+            'spin-slow': 'spin 3s linear infinite',
+            'float': 'float 3s ease-in-out infinite',
+            'shake': 'shake 0.5s ease-in-out',
+            'heart': 'heart 0.6s ease',
+          },
+          keyframes: {
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideDown: {
+              '0%': { opacity: '0', transform: 'translateY(-10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-20px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            scaleIn: {
+              '0%': { transform: 'scale(0.9)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' }
+            },
+            pulseSoft: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.7' }
+            },
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 20px rgba(79, 70, 229, 0.3)' },
+              '50%': { boxShadow: '0 0 30px rgba(79, 70, 229, 0.6)' }
+            },
+            bounceTap: {
+              '0%': { transform: 'scale(1)' },
+              '35%': { transform: 'scale(0.92)' },
+              '70%': { transform: 'scale(1.05)' },
+              '100%': { transform: 'scale(1)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' }
+            },
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '25%': { transform: 'translateX(-8px)' },
+              '75%': { transform: 'translateX(8px)' }
+            },
+            heart: {
+              '0%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.3)' },
+              '100%': { transform: 'scale(1)' }
+            },
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       GLOBAL STYLES
+       ═══════════════════════════════════════════════════════════ -->
+  <style>
+    :root {
+      /* Telegram theme colors (light mode default) */
+      --tg-bg: #f5f7fb;
+      --tg-card: #ffffff;
+      --tg-text: #1a1a1a;
+      --tg-hint: #6b7280;
+      --tg-line: #e5e7eb;
+      --tg-link: #4F46E5;
+      --tg-button: #4F46E5;
+      --tg-button-text: #ffffff;
+      --tg-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      --tg-overlay: rgba(0, 0, 0, 0.4);
+    }
+
+    html.dark {
+      --tg-bg: #0f172a;
+      --tg-card: #1e293b;
+      --tg-text: #f1f5f9;
+      --tg-hint: #94a3b8;
+      --tg-line: #334155;
+      --tg-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      --tg-overlay: rgba(0, 0, 0, 0.6);
+    }
+
+    /* ═══ RESET ═══ */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overscroll-behavior-y: none;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+      margin: 0;
+      min-height: 100vh;
+      color: var(--tg-text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html.dark body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      background-attachment: fixed;
+    }
+
+    /* ═══ SCROLLBAR ═══ */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.6);
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    /* ═══ CARDS ═══ */
+    .card {
+      background: var(--tg-card);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--tg-shadow);
+      border: 1px solid var(--tg-line);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-hover {
+      cursor: pointer;
+    }
+
+    .card-hover:active {
+      transform: scale(0.98);
+    }
+
+    .card-gradient {
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-gradient::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+      animation: float 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .card-gradient > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ═══ GLASS ═══ */
+    .glass {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    html.dark .glass {
+      background: rgba(30, 41, 59, 0.85);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* ═══ BUTTONS ═══ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.2;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-decoration: none;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      color: white;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: scale(0.97);
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--tg-line);
+      color: var(--tg-text);
+    }
+
+    .btn-secondary:active:not(:disabled) {
+      transform: scale(0.97);
+      opacity: 0.8;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #EF4444, #F43F5E);
+      color: white;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10B981, #06B6D4);
+      color: white;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-sm {
+      padding: 10px 16px;
+      font-size: 13px;
+      border-radius: 10px;
+      width: auto;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--tg-text);
+      border: 1px solid var(--tg-line);
+    }
+
+    .btn-ghost:active:not(:disabled) {
+      background: var(--tg-line);
+    }
+
+    /* ═══ INPUTS ═══ */
+    .input,
+    .textarea,
+    .select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.4;
+      background: var(--tg-bg);
+      color: var(--tg-text);
+      border: 1.5px solid var(--tg-line);
+      transition: all 0.25s ease;
+      outline: none;
+    }
+
+    .input:focus,
+    .textarea:focus,
+    .select:focus {
+      border-color: #4F46E5;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .input::placeholder,
+    .textarea::placeholder {
+      color: var(--tg-hint);
+    }
+
+    .input-error {
+      border-color: #EF4444 !important;
+    }
+
+    .input-error:focus {
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    /* ═══ ALERTS ═══ */
+    .alert {
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .alert-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .alert-error { background: #fee2e2; color: #991b1b; }
+    .alert-success { background: #d1fae5; color: #065f46; }
+    .alert-warning { background: #fef3c7; color: #92400e; }
+    .alert-info { background: #dbeafe; color: #1e40af; }
+
+    html.dark .alert-error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+    html.dark .alert-success { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+    html.dark .alert-warning { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+    html.dark .alert-info { background: rgba(79, 70, 229, 0.15); color: #a5b4fc; }
+
+    /* ═══ LOADING SPINNER ═══ */
+    .loading-spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .loading-spinner-dark {
+      border-color: rgba(79, 70, 229, 0.2);
+      border-top-color: #4F46E5;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ═══ SKELETON LOADER ═══ */
+    .skeleton {
+      background: linear-gradient(90deg,
+        var(--tg-line) 25%,
+        rgba(200, 200, 200, 0.4) 50%,
+        var(--tg-line) 75%
+      );
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-text {
+      height: 14px;
+      margin-bottom: 8px;
+    }
+
+    .skeleton-title {
+      height: 24px;
+      width: 60%;
+      margin-bottom: 12px;
+    }
+
+    /* ═══ BADGE ═══ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .badge-primary { background: rgba(79, 70, 229, 0.15); color: #4F46E5; }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #059669; }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #D97706; }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #DC2626; }
+    .badge-gray { background: var(--tg-line); color: var(--tg-hint); }
+
+    /* ═══ MODAL ═══ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--tg-overlay);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-content {
+      background: var(--tg-card);
+      border-radius: 24px;
+      padding: 24px;
+      max-width: 420px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ═══ BOTTOM SHEET ═══ */
+    .bottom-sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--tg-overlay);
+      z-index: 9999;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--tg-card);
+      border-radius: 24px 24px 0 0;
+      padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 10000;
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .bottom-sheet-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--tg-line);
+      border-radius: 4px;
+      margin: 0 auto 16px;
+    }
+
+    /* ═══ TOAST ═══ */
+    .toast-container {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      pointer-events: none;
+      width: calc(100% - 32px);
+      max-width: 420px;
+    }
+
+    .toast {
+      background: var(--tg-card);
+      color: var(--tg-text);
+      padding: 14px 18px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      animation: slideDown 0.3s ease-out;
+      pointer-events: auto;
+      border: 1px solid var(--tg-line);
+    }
+
+    .toast-success { border-left: 4px solid #10B981; }
+    .toast-error { border-left: 4px solid #EF4444; }
+    .toast-warning { border-left: 4px solid #F59E0B; }
+    .toast-info { border-left: 4px solid #4F46E5; }
+
+    .toast-fade-out {
+      animation: fadeOut 0.3s ease-out forwards;
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateY(-10px); }
+    }
+
+    /* ═══ PROGRESS BAR ═══ */
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: var(--tg-line);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #4F46E5, #7C3AED);
+      border-radius: 999px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ═══ AVATAR ═══ */
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
+    .avatar-lg { width: 64px; height: 64px; font-size: 22px; }
+
+    /* ═══ DIVIDER ═══ */
+    .divider {
+      height: 1px;
+      background: var(--tg-line);
+      margin: 16px 0;
+    }
+
+    /* ═══ PULSE ICON ═══ */
+    .pulse-icon {
+      animation: pulseSoft 2s infinite;
+    }
+
+    .float-icon {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* ═══ SAFE AREA ═══ */
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 0);
+    }
+
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    /* ═══ RIPPLE EFFECT ═══ */
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+
+    /* ═══ TEXT GRADIENT ═══ */
+    .text-gradient {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ═══ PULL TO REFRESH ═══ */
+    .pull-indicator {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 16px;
+      background: var(--tg-card);
+      border-radius: 0 0 14px 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    /* ═══ EMPTY STATE ═══ */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-state-icon {
+      font-size: 72px;
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+
+    /* ═══ NOSCRIPT ═══ */
+    noscript {
+      display: block;
+      padding: 20px;
+      background: #fee2e2;
+      color: #991b1b;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       NOSCRIPT
+       ═══════════════════════════════════════════════════════════ -->
+  <noscript>
+    ⚠️ JavaScript o'chirilgan. Iltimos, brauzeringizda JavaScript ni yoqing.
+  </noscript>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TOAST CONTAINER (dinamik)
+       ═══════════════════════════════════════════════════════════ -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LOADING OVERLAY (dinamik)
+       ═══════════════════════════════════════════════════════════ -->
+  <div id="loadingOverlay"
+       class="hidden fixed inset-0 z-[99999] flex items-center justify-center"
+       style="background: var(--tg-overlay); backdrop-filter: blur(4px);">
+    <div class="flex flex-col items-center gap-4 p-8 rounded-3xl"
+         style="background: var(--tg-card);">
+      <div class="loading-spinner loading-spinner-dark"
+           style="width: 40px; height: 40px; border-width: 4px;"></div>
+      <p id="loadingText" class="text-sm font-medium">Yuklanmoqda...</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       ASOSIY KONTENT
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="flex-1 p-4 pb-8 safe-bottom">
+    <div class="max-w-xl mx-auto">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       FIXED BOTTOM (ixtiyoriy)
+       ═══════════════════════════════════════════════════════════ -->
+  {% block fixed_bottom %}{% endblock %}
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════════════════ -->
+  <script>
+    // ═══════════════════════════════════════════════════════════
+    // TELEGRAM WEBAPP INIT
+    // ═══════════════════════════════════════════════════════════
+    const tg = window.Telegram?.WebApp;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+
+      try { tg.setHeaderColor?.('secondary_bg_color'); } catch(e) {}
+      try { tg.setBackgroundColor?.('secondary_bg_color'); } catch(e) {}
+      try { tg.enableClosingConfirmation?.(); } catch(e) {}
+      try { tg.disableVerticalSwipes?.(); } catch(e) {}
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // THEME INIT
+    // ═══════════════════════════════════════════════════════════
+    (function initTheme() {
+      const isDark = tg?.colorScheme === 'dark'
+        || localStorage.getItem('theme') === 'dark'
+        || window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (isDark) document.documentElement.classList.add('dark');
+    })();
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS: INIT DATA
+    // ═══════════════════════════════════════════════════════════
+    function getInitData() {
+      return tg?.initData || '';
+    }
+
+    function getTgUser() {
+      try {
+        return tg?.initDataUnsafe?.user || null;
+      } catch(e) { return null; }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS: ALERTS (Telegram native)
+    // ═══════════════════════════════════════════════════════════
+    function showAlert(message, callback) {
+      if (tg?.showAlert) {
+        tg.showAlert(message, callback);
+      } else {
+        alert(message);
+        if (callback) callback();
+      }
+    }
+
+    function showConfirm(message) {
+      return new Promise((resolve) => {
+        if (tg?.showConfirm) {
+          tg.showConfirm(message, (ok) => resolve(ok));
+        } else {
+          resolve(confirm(message));
+        }
+      });
+    }
+
+    function showPopup(params) {
+      return new Promise((resolve) => {
+        if (tg?.showPopup) {
+          tg.showPopup(params, (id) => resolve(id));
+        } else {
+          const ok = confirm(params.message || params.title || '');
+          resolve(ok ? 'ok' : 'cancel');
+        }
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS: HAPTIC FEEDBACK
+    // ═══════════════════════════════════════════════════════════
+    function haptic(type = 'light') {
+      try {
+        tg?.HapticFeedback?.impactOccurred(type);
+      } catch(e) {}
+    }
+
+    function hapticNotify(type = 'success') {
+      try {
+        tg?.HapticFeedback?.notificationOccurred(type);
+      } catch(e) {}
+    }
+
+    function hapticSelect() {
+      try {
+        tg?.HapticFeedback?.selectionChanged();
+      } catch(e) {}
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS: CLOUD STORAGE
+    // ═══════════════════════════════════════════════════════════
+    const CloudStorage = {
+      get(key) {
+        return new Promise((resolve) => {
+          if (!tg?.CloudStorage) return resolve(null);
+          try {
+            tg.CloudStorage.getItem(key, (err, value) => {
+              resolve(err ? null : value);
+            });
+          } catch(e) { resolve(null); }
+        });
+      },
+      set(key, value) {
+        return new Promise((resolve) => {
+          if (!tg?.CloudStorage) return resolve(false);
+          try {
+            tg.CloudStorage.setItem(key, String(value), (err) => {
+              resolve(!err);
+            });
+          } catch(e) { resolve(false); }
+        });
+      },
+      remove(key) {
+        return new Promise((resolve) => {
+          if (!tg?.CloudStorage) return resolve(false);
+          try {
+            tg.CloudStorage.removeItem(key, (err) => {
+              resolve(!err);
+            });
+          } catch(e) { resolve(false); }
+        });
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS: SHARE
+    // ═══════════════════════════════════════════════════════════
+    function shareUrl(url, text = '') {
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(shareUrl);
+      } else {
+        window.open(shareUrl, '_blank');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS: LINKS
+    // ═══════════════════════════════════════════════════════════
+    function openTelegramLink(url) {
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    }
+
+    function openLink(url, tryInstantView = false) {
+      if (tryInstantView && tg?.openLink) {
+        tg.openLink(url, { try_instant_view: true });
+      } else if (tg?.openLink) {
+        tg.openLink(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPERS: MAIN BUTTON
+    // ═══════════════════════════════════════════════════════════
+    const MainButton = {
+      show(text, onClick) {
+        if (!tg?.MainButton) return;
+        tg.MainButton.setText(text);
+        tg.MainButton.onClick(onClick);
+        tg.MainButton.show();
+      },
+      hide() {
+        try { tg?.MainButton?.hide(); } catch(e) {}
+      },
+      setLoading(loading) {
+        try {
+          loading ? tg.MainButton.showProgress() : tg.MainButton.hideProgress();
+        } catch(e) {}
+      },
+      setText(text) {
+        try { tg?.MainButton?.setText(text); } catch(e) {}
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // TOAST NOTIFICATIONS
+    // ═══════════════════════════════════════════════════════════
+    function showToast(message, type = 'info', duration = 3000) {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle',
+      };
+
+      const colors = {
+        success: '#10B981',
+        error: '#EF4444',
+        warning: '#F59E0B',
+        info: '#4F46E5',
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i class="fas ${icons[type] || icons.info}"
+           style="color: ${colors[type] || colors.info}; font-size: 20px;"></i>
+        <span style="flex: 1;">${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('toast-fade-out');
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // LOADING OVERLAY
+    // ═══════════════════════════════════════════════════════════
+    function showLoading(text = 'Yuklanmoqda...') {
+      const overlay = document.getElementById('loadingOverlay');
+      const textEl = document.getElementById('loadingText');
+      if (overlay) overlay.classList.remove('hidden');
+      if (textEl) textEl.textContent = text;
+    }
+
+    function hideLoading() {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // MODAL SYSTEM
+    // ═══════════════════════════════════════════════════════════
+    function openModal(html, options = {}) {
+      closeModal();
+      const overlay = document.createElement('div');
+      overlay.id = 'dynamicModal';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-content" onclick="event.stopPropagation()">
+          ${options.title ? `
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold">${options.title}</h3>
+              <button onclick="closeModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          ` : ''}
+          ${html}
+        </div>
+      `;
+      overlay.addEventListener('click', closeModal);
+      document.body.appendChild(overlay);
+
+      if (options.onOpen) options.onOpen();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('dynamicModal');
+      if (modal) modal.remove();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // BOTTOM SHEET
+    // ═══════════════════════════════════════════════════════════
+    function openBottomSheet(html, options = {}) {
+      closeBottomSheet();
+      const overlay = document.createElement('div');
+      overlay.id = 'dynamicSheetOverlay';
+      overlay.className = 'bottom-sheet-overlay';
+      overlay.addEventListener('click', closeBottomSheet);
+
+      const sheet = document.createElement('div');
+      sheet.id = 'dynamicSheet';
+      sheet.className = 'bottom-sheet';
+      sheet.innerHTML = `
+        <div class="bottom-sheet-handle"></div>
+        ${options.title ? `<h3 class="text-lg font-bold mb-4">${options.title}</h3>` : ''}
+        ${html}
+      `;
+      sheet.addEventListener('click', e => e.stopPropagation());
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(sheet);
+
+      if (options.onOpen) options.onOpen();
+    }
+
+    function closeBottomSheet() {
+      document.getElementById('dynamicSheet')?.remove();
+      document.getElementById('dynamicSheetOverlay')?.remove();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // FETCH WRAPPER (auto initData + error handling)
+    // ═══════════════════════════════════════════════════════════
+    async function tgFetch(url, options = {}) {
+      const initData = getInitData();
+
+      const headers = {
+        'X-Telegram-Init-Data': initData,
+        'X-Requested-With': 'XMLHttpRequest',
+        ...(options.headers || {}),
+      };
+
+      // POST uchun JSON yoki FormData
+      if (options.body && !(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+        if (typeof options.body === 'object') {
+          options.body = JSON.stringify(options.body);
+        }
+      }
+
+      // CSRF token
+      const csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
+      if (csrfMatch) {
+        headers['X-CSRFToken'] = csrfMatch[1];
+      }
+
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
+
+      return response;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILS: COPY TO CLIPBOARD
+    // ═══════════════════════════════════════════════════════════
+    function copyToClipboard(text) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Nusxa olindi', 'success', 1500);
+          hapticNotify('success');
+        });
+      } else {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast('Nusxa olindi', 'success', 1500);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILS: FORMAT DATE
+    // ═══════════════════════════════════════════════════════════
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('uz-UZ', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILS: FORMAT FILE SIZE
+    // ═══════════════════════════════════════════════════════════
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILS: DEBOUNCE
+    // ═══════════════════════════════════════════════════════════
+    function debounce(fn, delay = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILS: SCROLL TO
+    // ═══════════════════════════════════════════════════════════
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // VIEWPORT HEIGHT FIX (mobile browsers)
+    // ═══════════════════════════════════════════════════════════
+    function setVH() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+
+    // ═══════════════════════════════════════════════════════════
+    // PULL TO REFRESH
+    // ═══════════════════════════════════════════════════════════
+    (function initPullToRefresh() {
+      let startY = 0;
+      let currentY = 0;
+      let pulling = false;
+      const threshold = 80;
+
+      document.addEventListener('touchstart', (e) => {
+        if (window.scrollY === 0) {
+          startY = e.touches[0].pageY;
+          pulling = true;
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!pulling) return;
+        currentY = e.touches[0].pageY;
+        const distance = currentY - startY;
+        if (distance > 0 && distance < 200) {
+          // Faqat scroll eng yuqorida bo'lsa
+          if (window.scrollY === 0) {
+            // Indicator ko'rsatish
+            if (distance > threshold) {
+              // Haptic
+              haptic('light');
+            }
+          }
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchend', () => {
+        if (!pulling) return;
+        const distance = currentY - startY;
+        if (distance > threshold && window.scrollY === 0) {
+          hapticNotify('success');
+          location.reload();
+        }
+        pulling = false;
+        startY = 0;
+        currentY = 0;
+      }, { passive: true });
+    })();
+
+    // ═══════════════════════════════════════════════════════════
+    // VIEWPORT RESIZE (Telegram WebApp)
+    // ═══════════════════════════════════════════════════════════
+    if (tg) {
+      tg.onEvent?.('viewportChanged', () => {
+        setVH();
+      });
+
+      tg.onEvent?.('themeChanged', () => {
+        const isDark = tg.colorScheme === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // LOG
+    // ═══════════════════════════════════════════════════════════
+    console.log('🚀 Telegram WebApp ready', {
+      hasTg: !!tg,
+      version: tg?.version,
+      platform: tg?.platform,
+      colorScheme: tg?.colorScheme,
+      user: getTgUser(),
+      hasInitData: !!getInitData(),
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // BLOCK: EXTRA JS (har bir sahifa qo'shadi)
+    // ═══════════════════════════════════════════════════════════
+    {% block extra_js %}{% endblock %}
+  </script>
+
+</body>
+</html>

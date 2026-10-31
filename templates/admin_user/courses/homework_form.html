@@ -1,0 +1,2867 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}{% if homework %}Tahrirlash{% else %}Yangi{% endif %} · Uyga vazifa{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DIGION LMS — Homework Form (Clean & Production)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 1. TOKENS ─── */
+:root {
+    --c-primary:   #f59e0b;
+    --c-primary-2: #f97316;
+    --c-indigo:    #6366f1;
+    --c-violet:    #8b5cf6;
+    --c-emerald:   #10b981;
+    --c-rose:      #f43f5e;
+    --c-pink:      #ec4899;
+    --c-cyan:      #06b6d4;
+
+    --bg:        #f8fafc;
+    --card:      #ffffff;
+    --sunken:    #f1f5f9;
+    --input:     #ffffff;
+
+    --bd:        #e2e8f0;
+    --bd-2:      #cbd5e1;
+
+    --tx:        #0f172a;
+    --tx-2:      #475569;
+    --tx-3:      #64748b;
+    --tx-m:      #94a3b8;
+
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    --sh-sm: 0 1px 2px 0 rgba(15,23,42,.06);
+    --sh-md: 0 4px 12px -2px rgba(15,23,42,.08);
+    --sh-lg: 0 12px 28px -8px rgba(15,23,42,.14);
+    --sh-glow: 0 8px 24px -6px rgba(245,158,11,.4);
+
+    --ease: cubic-bezier(.16,1,.3,1);
+    --spring: cubic-bezier(.34,1.56,.64,1);
+
+    --max-w: 1280px;
+}
+
+.dark {
+    --bg:      #080d1a;
+    --card:    #0d1424;
+    --sunken:  #050912;
+    --input:   #0a1020;
+    --bd:      #16202e;
+    --bd-2:    #1e293b;
+    --tx:      #f1f5f9;
+    --tx-2:    #cbd5e1;
+    --tx-3:    #94a3b8;
+    --tx-m:    #64748b;
+    --sh-sm: 0 1px 2px 0 rgba(0,0,0,.4);
+    --sh-md: 0 4px 12px -2px rgba(0,0,0,.5);
+    --sh-lg: 0 12px 28px -8px rgba(0,0,0,.7);
+}
+
+/* ─── 2. RESET & BASE ─── */
+.hwf *,
+.hwf *::before,
+.hwf *::after { box-sizing: border-box; min-width: 0; }
+
+.hwf {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--tx);
+    background: var(--bg);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.hwf ::selection { background: var(--c-primary); color: #fff; }
+
+.hwf ::-webkit-scrollbar { width: 8px; height: 8px; }
+.hwf ::-webkit-scrollbar-track { background: transparent; }
+.hwf ::-webkit-scrollbar-thumb {
+    background: var(--bd-2);
+    border-radius: var(--r-full);
+}
+
+/* ─── 3. ANIMATIONS ─── */
+@keyframes hwf-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hwf-slide-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hwf-slide-down {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hwf-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+@keyframes hwf-spin { to { transform: rotate(360deg); } }
+@keyframes hwf-gradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+@keyframes hwf-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.06); opacity: .85; }
+}
+@keyframes hwf-check {
+    0% { transform: scale(0) rotate(-45deg); }
+    50% { transform: scale(1.2) rotate(0); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+/* ─── 4. CONTAINER ─── */
+.hwf-wrap {
+    width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 16px;
+}
+@media (min-width: 640px) { .hwf-wrap { padding: 0 20px; } }
+@media (min-width: 1024px) { .hwf-wrap { padding: 0 28px; } }
+
+/* ─── 5. HEADER ─── */
+.hwf-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--bd);
+    padding: 20px 0;
+    margin-bottom: 24px;
+}
+.hwf-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.hwf-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+.hwf-back-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--r-lg);
+    background: var(--sunken);
+    color: var(--tx-2);
+    border: 1px solid var(--bd);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all .25s var(--spring);
+}
+.hwf-back-btn:hover {
+    background: var(--c-primary);
+    color: #fff;
+    border-color: transparent;
+    transform: translateX(-3px);
+    box-shadow: var(--sh-glow);
+}
+.hwf-title-block { flex: 1; min-width: 0; }
+.hwf-eyebrow {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--tx-m);
+    line-height: 1;
+    margin-bottom: 5px;
+}
+.hwf-title {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--tx);
+    line-height: 1.25;
+    margin: 0;
+    letter-spacing: -.015em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (min-width: 640px) { .hwf-title { font-size: 22px; } }
+
+.hwf-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.hwf-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-lg);
+    background: var(--sunken);
+    color: var(--tx-3);
+    border: 1px solid var(--bd);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .25s var(--spring);
+    position: relative;
+}
+.hwf-icon-btn:hover {
+    background: var(--card);
+    color: var(--c-primary);
+    border-color: var(--c-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--sh-md);
+}
+.hwf-icon-btn:active { transform: translateY(0) scale(.95); }
+
+/* Save status */
+.hwf-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: var(--r-full);
+    font-size: 11px;
+    font-weight: 800;
+    background: rgba(16,185,129,.12);
+    color: #059669;
+    border: 1px solid rgba(16,185,129,.2);
+    white-space: nowrap;
+}
+.hwf-status i { font-size: 11px; }
+.hwf-status.is-unsaved {
+    background: rgba(244,63,94,.12);
+    color: #e11d48;
+    border-color: rgba(244,63,94,.2);
+}
+.hwf-status.is-saving {
+    background: rgba(245,158,11,.12);
+    color: #d97706;
+    border-color: rgba(245,158,11,.2);
+}
+.hwf-status.is-saving i { animation: hwf-spin 1s linear infinite; }
+.dark .hwf-status { color: #6ee7b7; }
+.dark .hwf-status.is-unsaved { color: #fda4af; }
+.dark .hwf-status.is-saving { color: #fcd34d; }
+
+/* ─── 6. TABS ─── */
+.hwf-tabs {
+    background: var(--card);
+    border-bottom: 1px solid var(--bd);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-bottom: 24px;
+}
+.hwf-tabs::-webkit-scrollbar { display: none; }
+.hwf-tabs-inner {
+    display: inline-flex;
+    gap: 6px;
+    padding: 10px 16px;
+    min-width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto;
+}
+@media (min-width: 640px) { .hwf-tabs-inner { padding: 10px 20px; } }
+@media (min-width: 1024px) { .hwf-tabs-inner { padding: 10px 28px; } }
+
+.hwf-tab {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--r-lg);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--tx-3);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+    transition: all .25s var(--spring);
+}
+.hwf-tab i { font-size: 13px; }
+.hwf-tab:hover {
+    color: var(--c-primary);
+    background: rgba(245,158,11,.08);
+    border-color: rgba(245,158,11,.2);
+    transform: translateY(-1px);
+}
+.hwf-tab.active {
+    background: linear-gradient(135deg, var(--c-primary), var(--c-primary-2));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 16px -4px rgba(245,158,11,.5);
+}
+.hwf-tab-badge {
+    padding: 2px 7px;
+    border-radius: var(--r-full);
+    background: rgba(255,255,255,.25);
+    font-size: 9.5px;
+    font-weight: 800;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.4;
+}
+.hwf-tab:not(.active) .hwf-tab-badge {
+    background: var(--sunken);
+    color: var(--tx-3);
+}
+.hwf-tab-badge:empty,
+.hwf-tab-badge[data-empty="1"] { display: none; }
+
+/* ─── 7. LAYOUT ─── */
+.hwf-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-bottom: 120px;
+}
+@media (min-width: 1024px) {
+    .hwf-layout {
+        grid-template-columns: minmax(0, 1fr) 340px;
+        align-items: start;
+    }
+}
+.hwf-main { min-width: 0; }
+.hwf-side { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+@media (min-width: 1024px) {
+    .hwf-side { position: sticky; top: 24px; }
+}
+
+/* ─── 8. PANELS ─── */
+.hwf-panel { display: none; }
+.hwf-panel.active { display: block; }
+.hwf-panel.active > * { animation: hwf-slide-up .35s var(--ease) backwards; }
+.hwf-panel.active > *:nth-child(1) { animation-delay: .03s; }
+.hwf-panel.active > *:nth-child(2) { animation-delay: .06s; }
+.hwf-panel.active > *:nth-child(3) { animation-delay: .09s; }
+
+/* ─── 9. CARDS ─── */
+.hwf-card {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: var(--r-xl);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--sh-sm);
+    transition: box-shadow .25s, border-color .25s, transform .25s;
+    position: relative;
+    overflow: hidden;
+}
+@media (min-width: 768px) { .hwf-card { padding: 24px; } }
+.hwf-card:hover {
+    box-shadow: var(--sh-md);
+    border-color: var(--bd-2);
+}
+.hwf-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--bd);
+}
+.hwf-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px -3px rgba(0,0,0,.25);
+    transition: transform .3s var(--spring);
+}
+.hwf-card:hover .hwf-card-icon { transform: scale(1.08) rotate(-5deg); }
+.hwf-card-icon.amber   { background: linear-gradient(135deg, #f59e0b, #f97316); }
+.hwf-card-icon.indigo  { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+.hwf-card-icon.emerald { background: linear-gradient(135deg, #10b981, #14b8a6); }
+.hwf-card-icon.pink    { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+.hwf-card-icon.slate   { background: linear-gradient(135deg, #64748b, #475569); }
+.hwf-card-icon.cyan    { background: linear-gradient(135deg, #06b6d4, #3b82f6); }
+.hwf-card-icon.violet  { background: linear-gradient(135deg, #8b5cf6, #a855f7); }
+.hwf-card-icon.rose    { background: linear-gradient(135deg, #e11d48, #f43f5e); }
+.hwf-card-icon.sm { width: 32px; height: 32px; font-size: 13px; border-radius: var(--r-md); }
+
+.hwf-card-title-block { flex: 1; min-width: 0; }
+.hwf-card-title {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--tx);
+    line-height: 1.2;
+    letter-spacing: -.01em;
+}
+.hwf-card-sub {
+    font-size: 11.5px;
+    color: var(--tx-3);
+    margin-top: 3px;
+    line-height: 1.4;
+}
+
+/* ─── 10. FORM FIELDS ─── */
+.hwf-field { margin-bottom: 18px; }
+.hwf-field:last-child { margin-bottom: 0; }
+
+.hwf-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--tx-2);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    line-height: 1.3;
+}
+.hwf-label i { color: var(--c-primary); font-size: 10px; }
+.hwf-label .req { color: var(--c-rose); font-size: 14px; line-height: 1; }
+.hwf-label .hint {
+    color: var(--tx-m);
+    font-size: 9.5px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: auto;
+}
+.hwf-label .opt {
+    padding: 2px 7px;
+    border-radius: var(--r-sm);
+    background: var(--sunken);
+    color: var(--tx-m);
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+
+/* Universal input styles */
+.hwf-field input[type="text"],
+.hwf-field input[type="number"],
+.hwf-field input[type="email"],
+.hwf-field input[type="url"],
+.hwf-field input[type="date"],
+.hwf-field input[type="tel"],
+.hwf-field input[type="password"],
+.hwf-field select,
+.hwf-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--r-lg);
+    background: var(--input);
+    border: 1.5px solid var(--bd-2);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--tx);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+    line-height: 1.5;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.hwf-field input:focus,
+.hwf-field select:focus,
+.hwf-field textarea:focus {
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 4px rgba(245,158,11,.15);
+    background: var(--card);
+}
+.hwf-field input:hover:not(:focus),
+.hwf-field select:hover:not(:focus),
+.hwf-field textarea:hover:not(:focus) {
+    border-color: var(--tx-m);
+}
+.hwf-field input::placeholder,
+.hwf-field textarea::placeholder {
+    color: var(--tx-m);
+    font-weight: 500;
+}
+.hwf-field input:disabled,
+.hwf-field select:disabled,
+.hwf-field textarea:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    background: var(--sunken);
+}
+
+/* Select arrow */
+.hwf-field select {
+    padding-right: 38px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+.dark .hwf-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+/* Textarea */
+.hwf-field textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.6;
+}
+/* Code textarea */
+.hwf-field textarea.code-input,
+.hwf-field textarea[id*="code"] {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    min-height: 200px;
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #1e293b !important;
+    tab-size: 4;
+}
+.hwf-field textarea.code-input:focus,
+.hwf-field textarea[id*="code"]:focus {
+    border-color: var(--c-primary) !important;
+    box-shadow: 0 0 0 4px rgba(245,158,11,.2);
+}
+
+/* File input */
+.hwf-field input[type="file"] {
+    padding: 14px 16px;
+    border: 2px dashed var(--bd-2);
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--tx-3);
+}
+.hwf-field input[type="file"]:hover {
+    border-color: var(--c-primary);
+    background: rgba(245,158,11,.04);
+    color: var(--c-primary);
+}
+.hwf-field input[type="file"]::file-selector-button {
+    padding: 8px 14px;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, var(--c-primary), var(--c-primary-2));
+    color: #fff;
+    border: none;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-right: 12px;
+    font-family: inherit;
+    transition: transform .2s;
+}
+.hwf-field input[type="file"]::file-selector-button:hover {
+    transform: translateY(-1px);
+}
+
+/* Checkbox */
+.hwf-field input[type="checkbox"]:not(.hwf-quiz-cb) {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--c-primary);
+    cursor: pointer;
+}
+
+/* Errors */
+.hwf-field .errorlist,
+.hwf-errors {
+    list-style: none;
+    padding: 10px 14px;
+    margin-top: 8px;
+    background: rgba(244,63,94,.1);
+    border-left: 3px solid var(--c-rose);
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    color: #be123c;
+    font-weight: 700;
+    animation: hwf-shake .4s ease;
+    line-height: 1.5;
+}
+.dark .hwf-field .errorlist,
+.dark .hwf-errors {
+    color: #fda4af;
+}
+.hwf-field .errorlist li,
+.hwf-errors li { margin-bottom: 3px; }
+.hwf-field .errorlist li:last-child,
+.hwf-errors li:last-child { margin-bottom: 0; }
+
+/* Help text */
+.hwf-field .helptext {
+    display: block;
+    font-size: 11px;
+    color: var(--tx-m);
+    margin-top: 6px;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+/* Char counter */
+.hwf-cc {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 10.5px;
+    color: var(--tx-m);
+    margin-top: 6px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.hwf-cc.warn { color: var(--c-primary); }
+.hwf-cc.danger { color: var(--c-rose); animation: hwf-shake .4s ease; }
+
+/* Grids */
+.hwf-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.hwf-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+@media (max-width: 700px) {
+    .hwf-grid-2, .hwf-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ─── 11. QUIZ GRID ─── */
+.hwf-quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 12px;
+    background: var(--sunken);
+    border-radius: var(--r-lg);
+    border: 1.5px solid var(--bd);
+}
+.hwf-quiz-grid::-webkit-scrollbar { width: 5px; }
+.hwf-quiz-grid::-webkit-scrollbar-thumb {
+    background: var(--bd-2);
+    border-radius: var(--r-full);
+}
+.hwf-quiz-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--r-lg);
+    background: var(--card);
+    border: 1.5px solid var(--bd);
+    cursor: pointer;
+    transition: all .25s var(--spring);
+    position: relative;
+    user-select: none;
+}
+.hwf-quiz-item:hover {
+    border-color: var(--c-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--sh-md);
+}
+.hwf-quiz-item.checked {
+    border-color: var(--c-primary);
+    background: rgba(245,158,11,.06);
+    box-shadow: var(--sh-md);
+}
+.hwf-quiz-item.checked::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c-primary), var(--c-primary-2));
+    color: #fff;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: hwf-check .4s var(--spring);
+}
+.hwf-quiz-cb { display: none; }
+.hwf-quiz-body { flex: 1; min-width: 0; }
+.hwf-quiz-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--tx);
+    line-height: 1.3;
+    margin-bottom: 6px;
+    padding-right: 24px;
+}
+.hwf-quiz-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 10.5px;
+    color: var(--tx-3);
+    font-weight: 700;
+}
+.hwf-quiz-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.hwf-quiz-meta i { color: var(--c-primary); font-size: 9px; }
+
+/* ─── 12. LIST EDITOR ─── */
+.hwf-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.hwf-list-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    border-radius: var(--r-lg);
+    background: var(--sunken);
+    border: 1.5px solid var(--bd);
+    animation: hwf-slide-up .35s var(--ease) backwards;
+    transition: all .2s;
+}
+.hwf-list-item:hover {
+    border-color: var(--bd-2);
+    box-shadow: var(--sh-sm);
+}
+.hwf-list-handle {
+    width: 26px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tx-m);
+    cursor: grab;
+    font-size: 13px;
+    border-radius: var(--r-md);
+}
+.hwf-list-handle:hover {
+    color: var(--c-primary);
+    background: rgba(245,158,11,.1);
+}
+.hwf-list-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.hwf-list-remove {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-md);
+    background: rgba(244,63,94,.1);
+    color: var(--c-rose);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    transition: all .25s var(--spring);
+}
+.hwf-list-remove:hover {
+    background: var(--c-rose);
+    color: #fff;
+    transform: scale(1.1) rotate(90deg);
+}
+.hwf-list-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: var(--r-lg);
+    background: transparent;
+    color: var(--tx-2);
+    border: 2px dashed var(--bd-2);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 800;
+    font-family: inherit;
+    transition: all .25s var(--spring);
+    width: 100%;
+    margin-top: 12px;
+}
+.hwf-list-add:hover {
+    border-color: var(--c-primary);
+    color: var(--c-primary);
+    background: rgba(245,158,11,.05);
+    transform: translateY(-2px);
+}
+.hwf-list-empty {
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--tx-m);
+    font-size: 12.5px;
+    font-weight: 600;
+    background: var(--sunken);
+    border-radius: var(--r-lg);
+    border: 2px dashed var(--bd-2);
+    line-height: 1.5;
+}
+.hwf-list-empty i {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: .4;
+    color: var(--c-primary);
+}
+
+/* Mini inputs (inside list editor) */
+.hwf-mini-input,
+.hwf-mini-select,
+.hwf-mini-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    background: var(--card);
+    border: 1.5px solid var(--bd-2);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--tx);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+.hwf-mini-input:focus,
+.hwf-mini-select:focus,
+.hwf-mini-textarea:focus {
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+}
+.hwf-mini-textarea { min-height: 70px; resize: vertical; line-height: 1.55; }
+.hwf-mini-row { display: flex; gap: 8px; }
+.hwf-mini-row > * { flex: 1; }
+.hwf-mini-row > .hwf-mini-select { flex: 0 0 130px; }
+
+/* ─── 13. TOGGLE ─── */
+.hwf-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--r-lg);
+    background: var(--sunken);
+    border: 1.5px solid var(--bd);
+    cursor: pointer;
+    transition: all .25s var(--spring);
+    user-select: none;
+}
+.hwf-toggle:hover {
+    border-color: var(--c-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--sh-md);
+}
+.hwf-toggle-info { flex: 1; min-width: 0; }
+.hwf-toggle-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--tx);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hwf-toggle-title i { color: var(--c-primary); font-size: 12px; }
+.hwf-toggle-desc {
+    font-size: 11.5px;
+    color: var(--tx-3);
+    margin-top: 4px;
+    line-height: 1.45;
+}
+.hwf-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+.hwf-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.hwf-switch-slider {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--r-full);
+    background: var(--bd-2);
+    cursor: pointer;
+    transition: all .3s var(--spring);
+}
+.hwf-switch-slider::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: all .3s var(--spring);
+    box-shadow: 0 2px 5px rgba(0,0,0,.2);
+}
+.hwf-switch input:checked + .hwf-switch-slider {
+    background: linear-gradient(135deg, var(--c-primary), var(--c-primary-2));
+}
+.hwf-switch input:checked + .hwf-switch-slider::before {
+    transform: translateX(22px);
+}
+
+/* ─── 14. BUTTONS ─── */
+.hwf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: var(--r-lg);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: .01em;
+    transition: all .25s var(--spring);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    min-height: 46px;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+}
+.hwf-btn:active { transform: scale(.97); }
+.hwf-btn i { font-size: 12px; }
+
+.hwf-btn-primary {
+    background: linear-gradient(135deg, var(--c-primary), var(--c-primary-2));
+    color: #fff;
+    box-shadow: 0 6px 16px -5px rgba(245,158,11,.55);
+}
+.hwf-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px -6px rgba(245,158,11,.7);
+}
+.hwf-btn-primary:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.hwf-btn-secondary {
+    background: var(--sunken);
+    color: var(--tx-2);
+    border-color: var(--bd);
+}
+.hwf-btn-secondary:hover {
+    background: var(--card);
+    color: var(--tx);
+    border-color: var(--bd-2);
+    transform: translateY(-2px);
+}
+
+.hwf-btn-ghost {
+    background: transparent;
+    color: var(--tx-3);
+    border-color: var(--bd-2);
+}
+.hwf-btn-ghost:hover {
+    color: var(--c-primary);
+    border-color: var(--c-primary);
+    background: rgba(245,158,11,.06);
+}
+
+.hwf-btn-sm {
+    padding: 8px 14px;
+    min-height: 36px;
+    font-size: 11.5px;
+}
+
+/* ─── 15. ACTION BAR ─── */
+.hwf-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--card);
+    border-top: 1px solid var(--bd);
+    box-shadow: 0 -8px 24px -12px rgba(0,0,0,.15);
+}
+@media (min-width: 640px) { .hwf-actions { padding: 14px 20px; padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); } }
+@media (min-width: 1024px) {
+    .hwf-actions {
+        padding: 16px 28px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+}
+.hwf-actions-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: var(--max-w);
+    margin: 0 auto;
+}
+.hwf-actions-right {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+/* ─── 16. SIDEBAR CARDS ─── */
+.hwf-side-card {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    border-radius: var(--r-xl);
+    padding: 20px;
+    box-shadow: var(--sh-sm);
+    animation: hwf-slide-up .5s var(--ease) backwards;
+}
+.hwf-side-card:nth-child(1) { animation-delay: .04s; }
+.hwf-side-card:nth-child(2) { animation-delay: .08s; }
+.hwf-side-card:nth-child(3) { animation-delay: .12s; }
+.hwf-side-card:nth-child(4) { animation-delay: .16s; }
+
+.hwf-side-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.hwf-side-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--tx);
+}
+
+/* Progress ring */
+.hwf-ring-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.hwf-ring {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    flex-shrink: 0;
+}
+.hwf-ring svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+.hwf-ring circle {
+    fill: none;
+    stroke-width: 7;
+    stroke-linecap: round;
+}
+.hwf-ring .ring-bg { stroke: var(--bd); }
+.hwf-ring .ring-fg {
+    stroke: var(--c-primary);
+    transition: stroke-dashoffset .5s var(--ease);
+}
+.hwf-ring-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--tx);
+    font-variant-numeric: tabular-nums;
+}
+.hwf-ring-info { flex: 1; min-width: 0; }
+.hwf-ring-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--tx);
+    margin-bottom: 4px;
+}
+.hwf-ring-desc {
+    font-size: 11px;
+    color: var(--tx-3);
+    line-height: 1.5;
+}
+
+/* Mini preview */
+.hwf-mini-preview {
+    padding: 16px;
+    border-radius: var(--r-lg);
+    background: linear-gradient(135deg, rgba(245,158,11,.12), rgba(249,115,22,.06));
+    border: 1.5px solid rgba(245,158,11,.25);
+    position: relative;
+    overflow: hidden;
+}
+.hwf-mini-preview::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--c-primary), var(--c-pink), var(--c-indigo));
+    background-size: 200% 100%;
+    animation: hwf-gradient 3s ease infinite;
+}
+.hwf-mini-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--tx);
+    margin-bottom: 6px;
+    line-height: 1.3;
+    word-break: break-word;
+}
+.hwf-mini-desc {
+    font-size: 11px;
+    color: var(--tx-3);
+    line-height: 1.55;
+    margin-bottom: 10px;
+    word-break: break-word;
+}
+.hwf-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.hwf-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: var(--r-full);
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.hwf-tag i { font-size: 9px; }
+.hwf-tag.amber   { background: rgba(245,158,11,.15); color: #92400e; }
+.hwf-tag.emerald { background: rgba(16,185,129,.15); color: #065f46; }
+.hwf-tag.indigo  { background: rgba(99,102,241,.15); color: #3730a3; }
+.hwf-tag.pink    { background: rgba(236,72,153,.15); color: #9d174d; }
+.dark .hwf-tag.amber   { color: #fcd34d; }
+.dark .hwf-tag.emerald { color: #6ee7b7; }
+.dark .hwf-tag.indigo  { color: #a5b4fc; }
+.dark .hwf-tag.pink    { color: #f9a8d4; }
+
+/* Info grid */
+.hwf-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.hwf-info-mini {
+    padding: 12px 8px;
+    border-radius: var(--r-lg);
+    text-align: center;
+    transition: transform .25s var(--spring);
+}
+.hwf-info-mini:hover { transform: translateY(-2px) scale(1.03); }
+.hwf-info-mini-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+.hwf-info-mini-lbl {
+    font-size: 9px;
+    margin-top: 4px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--tx-3);
+}
+
+/* Tips */
+.hwf-tips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.hwf-tips li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    font-size: 11.5px;
+    color: var(--tx-3);
+    line-height: 1.5;
+    border-bottom: 1px solid var(--bd);
+    font-weight: 500;
+}
+.hwf-tips li:last-child { border-bottom: none; padding-bottom: 0; }
+.hwf-tips i {
+    color: var(--c-primary);
+    font-size: 11px;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+.hwf-tips li > span:not(.hwf-kbd) { flex: 1; min-width: 0; }
+
+.hwf-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: var(--r-sm);
+    background: var(--card);
+    border: 1px solid var(--bd-2);
+    border-bottom-width: 2px;
+    font-family: ui-monospace, monospace;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--tx-2);
+}
+
+/* ─── 17. MODAL ─── */
+.hwf-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(15,23,42,.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: hwf-fade-in .2s ease;
+}
+.hwf-modal.open { display: flex; }
+.hwf-modal-box {
+    width: 100%;
+    max-width: 720px;
+    max-height: 88vh;
+    background: var(--card);
+    border-radius: var(--r-xl);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: hwf-slide-up .35s var(--ease);
+    box-shadow: 0 24px 64px -20px rgba(0,0,0,.4);
+    border: 1px solid var(--bd);
+}
+.hwf-modal-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--bd);
+    flex-shrink: 0;
+}
+.hwf-modal-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--tx);
+    flex: 1;
+}
+.hwf-modal-close {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r-md);
+    background: var(--sunken);
+    color: var(--tx-3);
+    border: 1px solid var(--bd);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: all .25s var(--spring);
+}
+.hwf-modal-close:hover {
+    background: rgba(244,63,94,.1);
+    color: var(--c-rose);
+    border-color: var(--c-rose);
+    transform: rotate(90deg);
+}
+.hwf-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Templates grid */
+.hwf-templates {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+.hwf-template {
+    padding: 16px;
+    border-radius: var(--r-lg);
+    background: var(--card);
+    border: 1.5px solid var(--bd);
+    cursor: pointer;
+    transition: all .25s var(--spring);
+    text-align: left;
+    font-family: inherit;
+}
+.hwf-template:hover {
+    border-color: var(--c-primary);
+    transform: translateY(-3px);
+    box-shadow: var(--sh-lg);
+}
+.hwf-template-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+.hwf-template-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--tx);
+    margin-bottom: 4px;
+}
+.hwf-template-desc {
+    font-size: 11px;
+    color: var(--tx-3);
+    line-height: 1.5;
+}
+
+/* Preview */
+.hwf-preview {
+    padding: 20px;
+    border-radius: var(--r-lg);
+    background: var(--sunken);
+    border: 1px solid var(--bd);
+}
+.hwf-preview h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--tx);
+    margin: 0 0 12px;
+}
+.hwf-preview p {
+    font-size: 13px;
+    color: var(--tx-2);
+    line-height: 1.7;
+    margin: 0 0 12px;
+}
+
+/* ─── 18. TOASTS ─── */
+.hwf-toasts {
+    position: fixed;
+    bottom: 90px;
+    right: 16px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    max-width: 380px;
+}
+@media (max-width: 640px) {
+    .hwf-toasts { left: 16px; right: 16px; bottom: 90px; }
+}
+.hwf-toast {
+    padding: 14px 18px;
+    border-radius: var(--r-lg);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--sh-lg);
+    pointer-events: auto;
+    animation: hwf-slide-up .35s var(--ease);
+    line-height: 1.4;
+}
+.hwf-toast i { font-size: 16px; flex-shrink: 0; }
+
+/* ─── 19. UTILITIES ─── */
+.hwf-flex { display: flex; }
+.hwf-flex-center { display: flex; align-items: center; justify-content: center; }
+.hwf-gap-2 { gap: 8px; }
+.hwf-gap-3 { gap: 12px; }
+.hwf-ml-auto { margin-left: auto; }
+.hwf-mb-3 { margin-bottom: 12px; }
+.hwf-mb-4 { margin-bottom: 16px; }
+.hwf-hidden { display: none !important; }
+.hwf-clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Focus visible */
+.hwf *:focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .hwf *, .hwf *::before, .hwf *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+    }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="hwf" id="hwfPage">
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<header class="hwf-header">
+    <div class="hwf-wrap">
+        <div class="hwf-header-inner">
+
+            <div class="hwf-header-left">
+                <a href="{% url 'courses_admin:lesson_detail' pk=lesson.pk %}" class="hwf-back-btn" title="Orqaga">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="hwf-title-block">
+                    <div class="hwf-eyebrow">Uyga vazifa</div>
+                    <h1 class="hwf-title">
+                        {% if homework %}{{ homework.title }}{% else %}Yangi uyga vazifa{% endif %}
+                    </h1>
+                </div>
+            </div>
+
+            <div class="hwf-header-right">
+                <div class="hwf-status" id="saveStatus">
+                    <i class="fas fa-cloud-check"></i>
+                    <span id="saveStatusText">Saqlangan</span>
+                </div>
+                <button type="button" class="hwf-icon-btn" onclick="hwfOpenModal('modalTemplates')" title="Shablonlar (T)">
+                    <i class="fas fa-file-lines"></i>
+                </button>
+                <button type="button" class="hwf-icon-btn" onclick="hwfOpenModal('modalPreview')" title="Ko'rish (P)">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button type="button" class="hwf-icon-btn" onclick="hwfOpenModal('modalHelp')" title="Yordam (F1)">
+                    <i class="fas fa-circle-question"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TABS
+     ═══════════════════════════════════════════════════════════ -->
+<nav class="hwf-tabs">
+    <div class="hwf-tabs-inner">
+        <button type="button" class="hwf-tab active" data-tab="basic">
+            <i class="fas fa-info-circle"></i><span>Asosiy</span>
+        </button>
+        <button type="button" class="hwf-tab" data-tab="content">
+            <i class="fas fa-align-left"></i><span>Kontent</span>
+        </button>
+        <button type="button" class="hwf-tab" data-tab="code">
+            <i class="fas fa-code"></i><span>Kod</span>
+            <span class="hwf-tab-badge" data-badge="code" data-empty="1">0</span>
+        </button>
+        <button type="button" class="hwf-tab" data-tab="tests">
+            <i class="fas fa-circle-question"></i><span>Testlar</span>
+            <span class="hwf-tab-badge" data-badge="tests" data-empty="1">0</span>
+        </button>
+        <button type="button" class="hwf-tab" data-tab="links">
+            <i class="fas fa-link"></i><span>Havolalar</span>
+            <span class="hwf-tab-badge" data-badge="links" data-empty="1">0</span>
+        </button>
+        <button type="button" class="hwf-tab" data-tab="files">
+            <i class="fas fa-paperclip"></i><span>Fayllar</span>
+        </button>
+        <button type="button" class="hwf-tab" data-tab="advanced">
+            <i class="fas fa-gear"></i><span>Sozlamalar</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN LAYOUT
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hwf-wrap">
+    <div class="hwf-layout">
+
+        <!-- ═══ MAIN ═══ -->
+        <div class="hwf-main">
+
+            <form method="post" enctype="multipart/form-data"
+                  action="{% url 'courses_admin:homework_form' lesson_pk=lesson.pk %}"
+                  id="hwfForm" novalidate>
+                {% csrf_token %}
+
+                {# Hidden JSON fields — fallback if form doesn't have them #}
+                {% if form.extra_links_json %}{{ form.extra_links_json }}{% else %}<input type="hidden" name="extra_links_json" id="id_extra_links_json" value="[]">{% endif %}
+                {% if form.extra_sections_json %}{{ form.extra_sections_json }}{% else %}<input type="hidden" name="extra_sections_json" id="id_extra_sections_json" value="[]">{% endif %}
+
+                {% if form.non_field_errors %}
+                <div class="hwf-card" style="border-color: rgba(244,63,94,.3); background: rgba(244,63,94,.04);">
+                    <ul class="hwf-errors" style="margin: 0;">
+                        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- ═══ PANEL: ASOSIY ═══ -->
+                <div class="hwf-panel active" data-panel="basic">
+
+                    <!-- Title + short desc -->
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon amber"><i class="fas fa-star"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Asosiy ma'lumotlar</div>
+                                <div class="hwf-card-sub">Sarlavha va qisqa tavsif</div>
+                            </div>
+                        </div>
+
+                        <div class="hwf-field">
+                            <label for="{{ form.title.id_for_label }}" class="hwf-label">
+                                <i class="fas fa-heading"></i>
+                                Sarlavha <span class="req">*</span>
+                                <span class="hint">3-255 belgi</span>
+                            </label>
+                            {{ form.title }}
+                            <div class="hwf-cc" data-cc="title">0 / 255</div>
+                            {% if form.title.errors %}
+                            <ul class="hwf-errors">{% for e in form.title.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="hwf-field">
+                            <label for="{{ form.short_description.id_for_label }}" class="hwf-label">
+                                <i class="fas fa-quote-left"></i>
+                                Qisqa tavsif
+                                <span class="opt">Ixtiyoriy</span>
+                            </label>
+                            {{ form.short_description }}
+                            <div class="hwf-cc" data-cc="short_description">0 / 300</div>
+                        </div>
+                    </div>
+
+                    <!-- Type + difficulty -->
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon indigo"><i class="fas fa-shapes"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Tur va qiyinlik</div>
+                                <div class="hwf-card-sub">Vazifa turi va darajasi</div>
+                            </div>
+                        </div>
+
+                        <div class="hwf-grid-3">
+                            <div class="hwf-field">
+                                <label for="{{ form.homework_type.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-tag"></i> Turi
+                                </label>
+                                {{ form.homework_type }}
+                            </div>
+                            <div class="hwf-field">
+                                <label for="{{ form.difficulty.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-signal"></i> Qiyinlik
+                                </label>
+                                {{ form.difficulty }}
+                            </div>
+                            <div class="hwf-field">
+                                <label for="{{ form.estimated_minutes.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-hourglass-half"></i> Vaqt (daq)
+                                </label>
+                                {{ form.estimated_minutes }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deadline + score -->
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon emerald"><i class="fas fa-trophy"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Muddat va mukofot</div>
+                                <div class="hwf-card-sub">Deadline, ball, coin, XP</div>
+                            </div>
+                        </div>
+
+                        <div class="hwf-grid-2">
+                            <div class="hwf-field">
+                                <label for="{{ form.deadline_days.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-clock"></i> Muddat (kun) <span class="req">*</span>
+                                </label>
+                                {{ form.deadline_days }}
+                            </div>
+                            <div class="hwf-field">
+                                <label for="{{ form.max_score.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-award"></i> Maksimal ball <span class="req">*</span>
+                                </label>
+                                {{ form.max_score }}
+                            </div>
+                        </div>
+
+                        <div class="hwf-grid-2">
+                            <div class="hwf-field">
+                                <label for="{{ form.coins_reward.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-coins"></i> Coin mukofoti
+                                </label>
+                                {{ form.coins_reward }}
+                            </div>
+                            <div class="hwf-field">
+                                <label for="{{ form.xp_reward.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-bolt"></i> XP mukofoti
+                                </label>
+                                {{ form.xp_reward }}
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /panel basic -->
+
+                <!-- ═══ PANEL: KONTENT ═══ -->
+                <div class="hwf-panel" data-panel="content">
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon amber"><i class="fas fa-align-left"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Batafsil tavsif</div>
+                                <div class="hwf-card-sub">Markdown qo'llab-quvvatlanadi</div>
+                            </div>
+                            <button type="button" class="hwf-btn hwf-btn-ghost hwf-btn-sm" onclick="hwfInsertMarkdown('description')">
+                                <i class="fas fa-code"></i> Markdown
+                            </button>
+                        </div>
+                        {{ form.description }}
+                        <div class="hwf-cc" data-cc="description">0 belgi</div>
+                        {% if form.description.errors %}
+                        <ul class="hwf-errors">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon emerald"><i class="fas fa-list-check"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Ko'rsatmalar</div>
+                                <div class="hwf-card-sub">Qadam-baqadam topshiriq</div>
+                            </div>
+                            <button type="button" class="hwf-btn hwf-btn-ghost hwf-btn-sm" onclick="hwfInsertNumberedList('instructions')">
+                                <i class="fas fa-list-ol"></i> Ro'yxat
+                            </button>
+                        </div>
+                        {{ form.instructions }}
+                        {% if form.instructions.errors %}
+                        <ul class="hwf-errors">{% for e in form.instructions.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ═══ PANEL: KOD ═══ -->
+                <div class="hwf-panel" data-panel="code">
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon slate"><i class="fas fa-play"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Boshlang'ich kod</div>
+                                <div class="hwf-card-sub">Talaba ko'radigan asos</div>
+                            </div>
+                        </div>
+                        {{ form.starter_code }}
+                    </div>
+
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon rose"><i class="fas fa-key"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Namuna yechim</div>
+                                <div class="hwf-card-sub">Faqat o'qituvchi ko'radi</div>
+                            </div>
+                        </div>
+                        {{ form.solution_code }}
+                    </div>
+                </div>
+
+                <!-- ═══ PANEL: TESTLAR ═══ -->
+                <div class="hwf-panel" data-panel="tests">
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon pink"><i class="fas fa-star"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Asosiy test</div>
+                                <div class="hwf-card-sub">Bitta asosiy test tanlang</div>
+                            </div>
+                        </div>
+                        <div class="hwf-field">
+                            {{ form.quiz }}
+                        </div>
+                    </div>
+
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon violet"><i class="fas fa-layer-group"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Qo'shimcha testlar</div>
+                                <div class="hwf-card-sub">Bir nechta tanlash mumkin</div>
+                            </div>
+                            <span class="hwf-tag indigo" id="quizCount">0 ta</span>
+                        </div>
+
+                        {% if quizzes %}
+                        <div class="hwf-quiz-grid" id="quizGrid">
+                            {% for q in quizzes %}
+                            <label class="hwf-quiz-item" data-quiz-id="{{ q.pk }}">
+                                <input type="checkbox" name="extra_quizzes" value="{{ q.pk }}"
+                                       class="hwf-quiz-cb"
+                                       {% if homework and q in homework.extra_quizzes.all %}checked{% endif %}>
+                                <div class="hwf-quiz-body">
+                                    <div class="hwf-quiz-title">{{ q.title }}</div>
+                                    <div class="hwf-quiz-meta">
+                                        <span><i class="fas fa-list-ol"></i> {{ q.total_questions }} savol</span>
+                                        <span><i class="fas fa-clock"></i> {{ q.duration_minutes }} daq</span>
+                                        <span><i class="fas fa-trophy"></i> {{ q.passing_score }}%</span>
+                                    </div>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="hwf-list-empty">
+                            <i class="fas fa-info-circle"></i>
+                            Kursda hali testlar yo'q
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ═══ PANEL: HAVOLALAR ═══ -->
+                <div class="hwf-panel" data-panel="links">
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon cyan"><i class="fas fa-link"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Foydali havolalar</div>
+                                <div class="hwf-card-sub">Hujjat, video, maqola, kitob</div>
+                            </div>
+                            <span class="hwf-tag amber" id="linkCount">0 ta</span>
+                        </div>
+                        <div class="hwf-list" id="linksEditor"></div>
+                        <button type="button" class="hwf-list-add" onclick="hwfAddLink()">
+                            <i class="fas fa-plus"></i> Havola qo'shish
+                        </button>
+                    </div>
+
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon violet"><i class="fas fa-note-sticky"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Qo'shimcha bo'limlar</div>
+                                <div class="hwf-card-sub">Eslatma, ogohlantirish, maslahat</div>
+                            </div>
+                            <span class="hwf-tag indigo" id="sectionCount">0 ta</span>
+                        </div>
+                        <div class="hwf-list" id="sectionsEditor"></div>
+                        <button type="button" class="hwf-list-add" onclick="hwfAddSection()">
+                            <i class="fas fa-plus"></i> Bo'lim qo'shish
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ═══ PANEL: FAYLLAR ═══ -->
+                <div class="hwf-panel" data-panel="files">
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon emerald"><i class="fas fa-file-arrow-up"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Vazifa fayli</div>
+                                <div class="hwf-card-sub">PDF, DOC, ZIP — max 50 MB</div>
+                            </div>
+                        </div>
+
+                        <div class="hwf-field">
+                            {{ form.task_file }}
+                        </div>
+
+                        {% if homework and homework.task_file %}
+                        <div style="padding: 14px; background: rgba(16,185,129,.08); border-radius: var(--r-lg); border: 1px solid rgba(16,185,129,.2); margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+                            <i class="fas fa-file-check" style="font-size: 20px; color: #059669;"></i>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 12px; font-weight: 800; color: #065f46; margin-bottom: 3px;">Mavjud fayl</div>
+                                <a href="{{ homework.task_file.url }}" target="_blank"
+                                   style="color: #059669; text-decoration: underline; font-size: 11.5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    {{ homework.task_file.name|truncatechars:60 }}
+                                </a>
+                            </div>
+                            <a href="{{ homework.task_file.url }}" download class="hwf-btn hwf-btn-ghost hwf-btn-sm">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ═══ PANEL: SOZLAMALAR ═══ -->
+                <div class="hwf-panel" data-panel="advanced">
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon indigo"><i class="fas fa-users"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Guruh ishi</div>
+                                <div class="hwf-card-sub">Jamoaviy vazifa sozlamalari</div>
+                            </div>
+                        </div>
+
+                        <label class="hwf-toggle" for="{{ form.is_group_work.id_for_label }}">
+                            <div class="hwf-toggle-info">
+                                <div class="hwf-toggle-title">
+                                    <i class="fas fa-people-group"></i>
+                                    Guruh ishi sifatida belgilash
+                                </div>
+                                <div class="hwf-toggle-desc">
+                                    Talabalar kichik guruhlarda bajarishlari mumkin
+                                </div>
+                            </div>
+                            <div class="hwf-switch">
+                                {{ form.is_group_work }}
+                                <span class="hwf-switch-slider"></span>
+                            </div>
+                        </label>
+
+                        <div id="groupFields" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--bd);">
+                            <div class="hwf-grid-2">
+                                <div class="hwf-field">
+                                    <label for="{{ form.min_group_size.id_for_label }}" class="hwf-label">
+                                        <i class="fas fa-user-group"></i> Min. hajm
+                                    </label>
+                                    {{ form.min_group_size }}
+                                </div>
+                                <div class="hwf-field">
+                                    <label for="{{ form.max_group_size.id_for_label }}" class="hwf-label">
+                                        <i class="fas fa-users"></i> Maks. hajm
+                                    </label>
+                                    {{ form.max_group_size }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hwf-card">
+                        <div class="hwf-card-head">
+                            <div class="hwf-card-icon rose"><i class="fas fa-hourglass-end"></i></div>
+                            <div class="hwf-card-title-block">
+                                <div class="hwf-card-title">Kech topshirish</div>
+                                <div class="hwf-card-sub">Muddat o'tgandan keyingi qoidalar</div>
+                            </div>
+                        </div>
+
+                        <label class="hwf-toggle" for="{{ form.allow_late_submission.id_for_label }}">
+                            <div class="hwf-toggle-info">
+                                <div class="hwf-toggle-title">
+                                    <i class="fas fa-clock-rotate-left"></i>
+                                    Kech topshirishga ruxsat
+                                </div>
+                                <div class="hwf-toggle-desc">
+                                    Talaba muddatdan keyin ham yuborishi mumkin
+                                </div>
+                            </div>
+                            <div class="hwf-switch">
+                                {{ form.allow_late_submission }}
+                                <span class="hwf-switch-slider"></span>
+                            </div>
+                        </label>
+
+                        <div id="lateFields" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--bd);">
+                            <div class="hwf-field" style="margin: 0;">
+                                <label for="{{ form.late_penalty_percent.id_for_label }}" class="hwf-label">
+                                    <i class="fas fa-percent"></i> Kechikish jarimasi (%)
+                                </label>
+                                {{ form.late_penalty_percent }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+        </div><!-- /hwf-main -->
+
+
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="hwf-side">
+
+            <!-- Progress ring -->
+            <div class="hwf-side-card">
+                <div class="hwf-ring-wrap">
+                    <div class="hwf-ring">
+                        <svg viewBox="0 0 80 80">
+                            <circle class="ring-bg" cx="40" cy="40" r="32"/>
+                            <circle class="ring-fg" cx="40" cy="40" r="32"
+                                    stroke-dasharray="201"
+                                    stroke-dashoffset="201"
+                                    id="ringCircle"/>
+                        </svg>
+                        <div class="hwf-ring-num" id="ringPercent">0%</div>
+                    </div>
+                    <div class="hwf-ring-info">
+                        <div class="hwf-ring-title">Tayyorlik</div>
+                        <div class="hwf-ring-desc" id="ringDesc">Maydonlarni to'ldiring</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live preview -->
+            <div class="hwf-side-card">
+                <div class="hwf-side-head">
+                    <div class="hwf-card-icon pink sm"><i class="fas fa-eye"></i></div>
+                    <div class="hwf-side-title">Ko'rinish</div>
+                </div>
+                <div class="hwf-mini-preview">
+                    <div class="hwf-mini-title" id="miniTitle">Vazifa sarlavhasi</div>
+                    <div class="hwf-mini-desc" id="miniDesc">Qisqa tavsif bu yerda ko'rinadi...</div>
+                    <div class="hwf-tags">
+                        <span class="hwf-tag amber" id="miniDeadline">
+                            <i class="fas fa-clock"></i> 3 kun
+                        </span>
+                        <span class="hwf-tag emerald" id="miniScore">
+                            <i class="fas fa-star"></i> 100
+                        </span>
+                        <span class="hwf-tag indigo" id="miniCoins">
+                            <i class="fas fa-coins"></i> 10
+                        </span>
+                        <span class="hwf-tag pink" id="miniDiff" style="display: none;">
+                            <i class="fas fa-signal"></i>
+                            <span id="miniDiffLabel">O'rta</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            {% if homework %}
+            <div class="hwf-side-card">
+                <div class="hwf-side-head">
+                    <div class="hwf-card-icon cyan sm"><i class="fas fa-chart-simple"></i></div>
+                    <div class="hwf-side-title">Statistika</div>
+                </div>
+                <div class="hwf-info-grid">
+                    <div class="hwf-info-mini" style="background: rgba(245,158,11,.1);">
+                        <div class="hwf-info-mini-val" style="color: #92400e;">{{ homework.submissions_count|default:0 }}</div>
+                        <div class="hwf-info-mini-lbl">Topshirdi</div>
+                    </div>
+                    <div class="hwf-info-mini" style="background: rgba(16,185,129,.1);">
+                        <div class="hwf-info-mini-val" style="color: #065f46;">{{ homework.views_count|default:0 }}</div>
+                        <div class="hwf-info-mini-lbl">Ko'rdi</div>
+                    </div>
+                    <div class="hwf-info-mini" style="background: rgba(99,102,241,.1);">
+                        <div class="hwf-info-mini-val" style="color: #3730a3;">{{ homework.avg_score|floatformat:0 }}</div>
+                        <div class="hwf-info-mini-lbl">O'rtacha</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tips -->
+            <div class="hwf-side-card">
+                <div class="hwf-side-head">
+                    <div class="hwf-card-icon amber sm"><i class="fas fa-lightbulb"></i></div>
+                    <div class="hwf-side-title">Maslahatlar</div>
+                </div>
+                <ul class="hwf-tips">
+                    <li><i class="fas fa-check"></i><span>Sarlavha qisqa va aniq bo'lsin</span></li>
+                    <li><i class="fas fa-check"></i><span>Ko'rsatmalar qadam-baqadam</span></li>
+                    <li><i class="fas fa-check"></i><span>Boshlang'ich kod yordam beradi</span></li>
+                    <li><i class="fas fa-check"></i><span>Foydali havolalar qo'shing</span></li>
+                </ul>
+            </div>
+
+            <!-- Keyboard -->
+            <div class="hwf-side-card">
+                <div class="hwf-side-head">
+                    <div class="hwf-card-icon slate sm"><i class="fas fa-keyboard"></i></div>
+                    <div class="hwf-side-title">Klaviatura</div>
+                </div>
+                <ul class="hwf-tips">
+                    <li><span class="hwf-kbd">Ctrl</span><span class="hwf-kbd">S</span><span style="margin-left:auto;">Saqlash</span></li>
+                    <li><span class="hwf-kbd">P</span><span style="margin-left:auto;">Ko'rish</span></li>
+                    <li><span class="hwf-kbd">T</span><span style="margin-left:auto;">Shablonlar</span></li>
+                    <li><span class="hwf-kbd">Esc</span><span style="margin-left:auto;">Orqaga</span></li>
+                </ul>
+            </div>
+
+        </aside>
+
+    </div><!-- /hwf-layout -->
+</div><!-- /hwf-wrap -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     ACTION BAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hwf-actions">
+    <div class="hwf-actions-inner">
+        <a href="{% url 'courses_admin:lesson_detail' pk=lesson.pk %}" class="hwf-btn hwf-btn-secondary">
+            <i class="fas fa-times"></i> Bekor
+        </a>
+        <div class="hwf-actions-right">
+            <button type="submit" form="hwfForm" name="action" value="draft" class="hwf-btn hwf-btn-ghost">
+                <i class="fas fa-file-pen"></i> Qoralama
+            </button>
+            <button type="submit" form="hwfForm" name="action" value="save" class="hwf-btn hwf-btn-primary" id="saveBtn">
+                <i class="fas fa-floppy-disk"></i>
+                {% if homework %}Yangilash{% else %}Saqlash{% endif %}
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: TEMPLATES
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hwf-modal" id="modalTemplates" onclick="if(event.target===this)hwfCloseModal('modalTemplates')">
+    <div class="hwf-modal-box">
+        <div class="hwf-modal-head">
+            <div class="hwf-card-icon amber sm"><i class="fas fa-file-lines"></i></div>
+            <div class="hwf-modal-title">Shablonlar kutubxonasi</div>
+            <button type="button" class="hwf-modal-close" onclick="hwfCloseModal('modalTemplates')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="hwf-modal-body">
+            <div class="hwf-templates">
+                <button type="button" class="hwf-template" onclick="hwfApplyTemplate('code_algo')">
+                    <div class="hwf-template-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="fas fa-code"></i></div>
+                    <div class="hwf-template-title">Algoritm masalasi</div>
+                    <div class="hwf-template-desc">Kod yozish uchun shablon</div>
+                </button>
+                <button type="button" class="hwf-template" onclick="hwfApplyTemplate('essay')">
+                    <div class="hwf-template-icon" style="background: linear-gradient(135deg, #ec4899, #f43f5e);"><i class="fas fa-pen-fancy"></i></div>
+                    <div class="hwf-template-title">Insho / esse</div>
+                    <div class="hwf-template-desc">Yozma ish uchun</div>
+                </button>
+                <button type="button" class="hwf-template" onclick="hwfApplyTemplate('project')">
+                    <div class="hwf-template-icon" style="background: linear-gradient(135deg, #10b981, #14b8a6);"><i class="fas fa-diagram-project"></i></div>
+                    <div class="hwf-template-title">Loyiha ishi</div>
+                    <div class="hwf-template-desc">Katta loyiha uchun</div>
+                </button>
+                <button type="button" class="hwf-template" onclick="hwfApplyTemplate('quiz')">
+                    <div class="hwf-template-icon" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);"><i class="fas fa-circle-question"></i></div>
+                    <div class="hwf-template-title">Test topshirig'i</div>
+                    <div class="hwf-template-desc">Bilimni tekshirish</div>
+                </button>
+                <button type="button" class="hwf-template" onclick="hwfApplyTemplate('reading')">
+                    <div class="hwf-template-icon" style="background: linear-gradient(135deg, #f59e0b, #f97316);"><i class="fas fa-book-open"></i></div>
+                    <div class="hwf-template-title">O'qish topshirig'i</div>
+                    <div class="hwf-template-desc">Kitob yoki maqola</div>
+                </button>
+                <button type="button" class="hwf-template" onclick="hwfApplyTemplate('practice')">
+                    <div class="hwf-template-icon" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);"><i class="fas fa-flask"></i></div>
+                    <div class="hwf-template-title">Amaliy mashq</div>
+                    <div class="hwf-template-desc">Kichik topshiriq</div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: PREVIEW
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hwf-modal" id="modalPreview" onclick="if(event.target===this)hwfCloseModal('modalPreview')">
+    <div class="hwf-modal-box">
+        <div class="hwf-modal-head">
+            <div class="hwf-card-icon pink sm"><i class="fas fa-eye"></i></div>
+            <div class="hwf-modal-title">Talaba ko'rinishi</div>
+            <button type="button" class="hwf-modal-close" onclick="hwfCloseModal('modalPreview')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="hwf-modal-body">
+            <div class="hwf-preview">
+                <h3 id="pvTitle">Vazifa sarlavhasi</h3>
+                <p id="pvShortDesc" style="color: var(--tx-3); font-size: 12.5px;">Qisqa tavsif</p>
+                <p id="pvDesc" style="white-space: pre-wrap;">Batafsil tavsif...</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;">
+                    <span class="hwf-tag amber" id="pvDeadline"><i class="fas fa-clock"></i> 3 kun</span>
+                    <span class="hwf-tag emerald" id="pvScore"><i class="fas fa-star"></i> 100 ball</span>
+                    <span class="hwf-tag indigo" id="pvCoins"><i class="fas fa-coins"></i> 10 coin</span>
+                    <span class="hwf-tag pink" id="pvXP"><i class="fas fa-bolt"></i> 50 XP</span>
+                </div>
+                <div id="pvLinks" style="margin-top: 16px; display: none;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--tx-3); margin-bottom: 8px;">
+                        <i class="fas fa-link"></i> Foydali havolalar
+                    </div>
+                    <div id="pvLinksList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+                </div>
+                <div id="pvSections" style="margin-top: 16px; display: none;">
+                    <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--tx-3); margin-bottom: 8px;">
+                        <i class="fas fa-note-sticky"></i> Qo'shimcha ma'lumot
+                    </div>
+                    <div id="pvSectionsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: HELP
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hwf-modal" id="modalHelp" onclick="if(event.target===this)hwfCloseModal('modalHelp')">
+    <div class="hwf-modal-box" style="max-width: 560px;">
+        <div class="hwf-modal-head">
+            <div class="hwf-card-icon indigo sm"><i class="fas fa-circle-question"></i></div>
+            <div class="hwf-modal-title">Yordam</div>
+            <button type="button" class="hwf-modal-close" onclick="hwfCloseModal('modalHelp')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="hwf-modal-body">
+            <p style="font-size: 12.5px; color: var(--tx-2); line-height: 1.7; margin: 0 0 16px;">
+                Bu forma orqali siz uyga vazifani to'liq professional darajada yaratishingiz mumkin —
+                testlar, kod, havolalar, fayllar va boshqalar.
+            </p>
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--tx-m); margin-bottom: 10px;">
+                Klaviatura yorliqlari
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--sunken); border-radius: var(--r-md); font-size: 12px;">
+                    <span style="color: var(--tx-2);">Saqlash</span>
+                    <span><span class="hwf-kbd">Ctrl</span> + <span class="hwf-kbd">S</span></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--sunken); border-radius: var(--r-md); font-size: 12px;">
+                    <span style="color: var(--tx-2);">Ko'rish</span>
+                    <span class="hwf-kbd">P</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--sunken); border-radius: var(--r-md); font-size: 12px;">
+                    <span style="color: var(--tx-2);">Shablonlar</span>
+                    <span class="hwf-kbd">T</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--sunken); border-radius: var(--r-md); font-size: 12px;">
+                    <span style="color: var(--tx-2);">Orqaga</span>
+                    <span class="hwf-kbd">Esc</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══ TOASTS ═══ -->
+<div class="hwf-toasts" id="hwfToasts"></div>
+
+</div><!-- /hwf -->
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const HWF = {
+    lessonId: {{ lesson.pk }},
+    dirty: false,
+    autoSaveTimer: null,
+    links: {{ homework.extra_links|default:"[]"|safe }},
+    sections: {{ homework.extra_sections|default:"[]"|safe }},
+};
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function hwfEsc(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function hwfToast(msg, type = 'success') {
+    const colors = {
+        success: 'linear-gradient(135deg, #059669, #10b981)',
+        error:   'linear-gradient(135deg, #e11d48, #f43f5e)',
+        warning: 'linear-gradient(135deg, #f59e0b, #f97316)',
+        info:    'linear-gradient(135deg, #4f46e5, #6366f1)',
+    };
+    const icons = {
+        success: 'fa-circle-check',
+        error:   'fa-circle-xmark',
+        warning: 'fa-triangle-exclamation',
+        info:    'fa-circle-info',
+    };
+    const wrap = document.getElementById('hwfToasts');
+    if (!wrap) return;
+    const el = document.createElement('div');
+    el.className = 'hwf-toast';
+    el.style.background = colors[type] || colors.info;
+    el.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span style="flex:1">' + msg + '</span>';
+    wrap.appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(16px) scale(.9)';
+        el.style.transition = 'all .3s ease';
+        setTimeout(() => el.remove(), 300);
+    }, 3000);
+}
+
+function hwfMarkDirty() {
+    if (!HWF.dirty) {
+        HWF.dirty = true;
+        hwfSetStatus('unsaved', 'Saqlanmagan');
+    }
+    clearTimeout(HWF.autoSaveTimer);
+    HWF.autoSaveTimer = setTimeout(hwfSaveDraft, 3000);
+}
+
+function hwfSetStatus(status, text) {
+    const el = document.getElementById('saveStatus');
+    if (!el) return;
+    el.className = 'hwf-status' + (status === 'saved' ? '' : ' is-' + status);
+    const icons = { saved: 'fa-cloud-check', saving: 'fa-spinner', unsaved: 'fa-circle-exclamation' };
+    el.querySelector('i').className = 'fas ' + (icons[status] || 'fa-cloud');
+    document.getElementById('saveStatusText').textContent = text || status;
+}
+
+function hwfSaveDraft() {
+    try {
+        const form = document.getElementById('hwfForm');
+        const data = {};
+        form.querySelectorAll('input:not([type=file]):not([type=hidden]), textarea, select').forEach(el => {
+            if (!el.name || el.name === 'csrfmiddlewaretoken') return;
+            if (el.type === 'checkbox') {
+                if (el.checked) data[el.name] = (data[el.name] || []).concat(el.value);
+            } else {
+                data[el.name] = el.value;
+            }
+        });
+        data._links = HWF.links;
+        data._sections = HWF.sections;
+        data._ts = Date.now();
+        localStorage.setItem('hwf-draft-' + HWF.lessonId, JSON.stringify(data));
+        hwfSetStatus('saved', 'Qoralama saqlandi');
+    } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.hwf-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        document.querySelectorAll('.hwf-tab').forEach(t => t.classList.toggle('active', t === tab));
+        document.querySelectorAll('.hwf-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+        try { history.replaceState(null, '', '?tab=' + target); } catch(e) {}
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════════
+function hwfOpenModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (id === 'modalPreview') hwfUpdatePreview();
+}
+function hwfCloseModal(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('open');
+    document.body.style.overflow = '';
+}
+window.hwfOpenModal = hwfOpenModal;
+window.hwfCloseModal = hwfCloseModal;
+
+// ═══════════════════════════════════════════════════════════════
+// LINKS EDITOR
+// ═══════════════════════════════════════════════════════════════
+const HWF_LINK_TYPES = [
+    { value: 'docs',    label: '📄 Hujjat' },
+    { value: 'video',   label: '🎬 Video' },
+    { value: 'article', label: '📰 Maqola' },
+    { value: 'book',    label: '📚 Kitob' },
+    { value: 'link',    label: '🔗 Boshqa' },
+];
+
+function hwfRenderLinks() {
+    const editor = document.getElementById('linksEditor');
+    if (!editor) return;
+    const count = document.getElementById('linkCount');
+    if (count) count.textContent = HWF.links.length + ' ta';
+    const badge = document.querySelector('[data-badge="links"]');
+    if (badge) {
+        badge.textContent = HWF.links.length;
+        badge.dataset.empty = HWF.links.length === 0 ? '1' : '0';
+    }
+
+    if (!HWF.links.length) {
+        editor.innerHTML = '<div class="hwf-list-empty"><i class="fas fa-link"></i>Hali havolalar yo\'q — pastdagi tugma bilan qo\'shing</div>';
+        return;
+    }
+
+    editor.innerHTML = HWF.links.map((link, i) => {
+        const opts = HWF_LINK_TYPES.map(t =>
+            '<option value="' + t.value + '"' + (link.type === t.value ? ' selected' : '') + '>' + t.label + '</option>'
+        ).join('');
+        return '<div class="hwf-list-item">' +
+            '<div class="hwf-list-handle"><i class="fas fa-grip-vertical"></i></div>' +
+            '<div class="hwf-list-body">' +
+                '<div class="hwf-mini-row">' +
+                    '<select class="hwf-mini-select" onchange="hwfUpdateLink(' + i + ', \'type\', this.value)">' + opts + '</select>' +
+                    '<input type="text" class="hwf-mini-input" placeholder="Sarlavha" value="' + hwfEsc(link.title || '') + '" oninput="hwfUpdateLink(' + i + ', \'title\', this.value)">' +
+                '</div>' +
+                '<input type="url" class="hwf-mini-input" placeholder="https://..." value="' + hwfEsc(link.url || '') + '" oninput="hwfUpdateLink(' + i + ', \'url\', this.value)">' +
+            '</div>' +
+            '<button type="button" class="hwf-list-remove" onclick="hwfRemoveLink(' + i + ')"><i class="fas fa-times"></i></button>' +
+        '</div>';
+    }).join('');
+}
+
+function hwfAddLink() {
+    HWF.links.push({ type: 'link', title: '', url: '' });
+    hwfRenderLinks();
+    hwfSyncJson();
+    hwfMarkDirty();
+}
+function hwfRemoveLink(i) {
+    HWF.links.splice(i, 1);
+    hwfRenderLinks();
+    hwfSyncJson();
+    hwfMarkDirty();
+}
+function hwfUpdateLink(i, k, v) {
+    HWF.links[i][k] = v;
+    hwfSyncJson();
+    hwfMarkDirty();
+}
+window.hwfAddLink = hwfAddLink;
+window.hwfRemoveLink = hwfRemoveLink;
+window.hwfUpdateLink = hwfUpdateLink;
+
+// ═══════════════════════════════════════════════════════════════
+// SECTIONS EDITOR
+// ═══════════════════════════════════════════════════════════════
+const HWF_SECTION_TYPES = [
+    { value: 'note',    label: '📝 Eslatma' },
+    { value: 'warning', label: '⚠️ Ogohlantirish' },
+    { value: 'tip',     label: '💡 Maslahat' },
+    { value: 'info',    label: 'ℹ️ Ma\'lumot' },
+];
+
+function hwfRenderSections() {
+    const editor = document.getElementById('sectionsEditor');
+    if (!editor) return;
+    const count = document.getElementById('sectionCount');
+    if (count) count.textContent = HWF.sections.length + ' ta';
+
+    if (!HWF.sections.length) {
+        editor.innerHTML = '<div class="hwf-list-empty"><i class="fas fa-note-sticky"></i>Hali bo\'limlar yo\'q — pastdagi tugma bilan qo\'shing</div>';
+        return;
+    }
+
+    editor.innerHTML = HWF.sections.map((sec, i) => {
+        const opts = HWF_SECTION_TYPES.map(t =>
+            '<option value="' + t.value + '"' + (sec.type === t.value ? ' selected' : '') + '>' + t.label + '</option>'
+        ).join('');
+        return '<div class="hwf-list-item">' +
+            '<div class="hwf-list-handle"><i class="fas fa-grip-vertical"></i></div>' +
+            '<div class="hwf-list-body">' +
+                '<div class="hwf-mini-row">' +
+                    '<select class="hwf-mini-select" onchange="hwfUpdateSection(' + i + ', \'type\', this.value)">' + opts + '</select>' +
+                    '<input type="text" class="hwf-mini-input" placeholder="Sarlavha" value="' + hwfEsc(sec.title || '') + '" oninput="hwfUpdateSection(' + i + ', \'title\', this.value)">' +
+                '</div>' +
+                '<textarea class="hwf-mini-textarea" rows="3" placeholder="Matn..." oninput="hwfUpdateSection(' + i + ', \'text\', this.value)">' + hwfEsc(sec.text || '') + '</textarea>' +
+            '</div>' +
+            '<button type="button" class="hwf-list-remove" onclick="hwfRemoveSection(' + i + ')"><i class="fas fa-times"></i></button>' +
+        '</div>';
+    }).join('');
+}
+
+function hwfAddSection() {
+    HWF.sections.push({ type: 'note', title: '', text: '' });
+    hwfRenderSections();
+    hwfSyncJson();
+    hwfMarkDirty();
+}
+function hwfRemoveSection(i) {
+    HWF.sections.splice(i, 1);
+    hwfRenderSections();
+    hwfSyncJson();
+    hwfMarkDirty();
+}
+function hwfUpdateSection(i, k, v) {
+    HWF.sections[i][k] = v;
+    hwfSyncJson();
+    hwfMarkDirty();
+}
+window.hwfAddSection = hwfAddSection;
+window.hwfRemoveSection = hwfRemoveSection;
+window.hwfUpdateSection = hwfUpdateSection;
+
+function hwfSyncJson() {
+    const l = document.getElementById('id_extra_links_json');
+    const s = document.getElementById('id_extra_sections_json');
+    if (l) l.value = JSON.stringify(HWF.links);
+    if (s) s.value = JSON.stringify(HWF.sections);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE PREVIEW
+// ═══════════════════════════════════════════════════════════════
+function hwfUpdatePreview() {
+    const gv = id => (document.getElementById('id_' + id) || {}).value || '';
+
+    const mt = document.getElementById('miniTitle');
+    const md = document.getElementById('miniDesc');
+    const mdd = document.getElementById('miniDeadline');
+    const msc = document.getElementById('miniScore');
+    const mcn = document.getElementById('miniCoins');
+    const mdf = document.getElementById('miniDiff');
+    const mdfl = document.getElementById('miniDiffLabel');
+
+    if (mt) mt.textContent = gv('title') || 'Vazifa sarlavhasi';
+    if (md) md.textContent = gv('short_description') || 'Qisqa tavsif bu yerda ko\'rinadi...';
+    if (mdd) mdd.innerHTML = '<i class="fas fa-clock"></i> ' + (gv('deadline_days') || '3') + ' kun';
+    if (msc) msc.innerHTML = '<i class="fas fa-star"></i> ' + (gv('max_score') || '100');
+    if (mcn) mcn.innerHTML = '<i class="fas fa-coins"></i> ' + (gv('coins_reward') || '10');
+
+    if (mdf && mdfl) {
+        const v = gv('difficulty');
+        const labels = { easy: 'Oson', medium: "O'rta", hard: 'Qiyin' };
+        if (labels[v]) {
+            mdfl.textContent = labels[v];
+            mdf.style.display = '';
+        } else {
+            mdf.style.display = 'none';
+        }
+    }
+}
+
+function hwfUpdatePreviewModal() {
+    const gv = id => (document.getElementById('id_' + id) || {}).value || '';
+    document.getElementById('pvTitle').textContent = gv('title') || 'Vazifa sarlavhasi';
+    document.getElementById('pvShortDesc').textContent = gv('short_description') || '';
+    document.getElementById('pvDesc').textContent = gv('description') || '';
+    document.getElementById('pvDeadline').innerHTML = '<i class="fas fa-clock"></i> ' + (gv('deadline_days') || '3') + ' kun';
+    document.getElementById('pvScore').innerHTML = '<i class="fas fa-star"></i> ' + (gv('max_score') || '100') + ' ball';
+    document.getElementById('pvCoins').innerHTML = '<i class="fas fa-coins"></i> ' + (gv('coins_reward') || '10') + ' coin';
+    document.getElementById('pvXP').innerHTML = '<i class="fas fa-bolt"></i> ' + (gv('xp_reward') || '50') + ' XP';
+
+    // Links
+    const lb = document.getElementById('pvLinks');
+    const ll = document.getElementById('pvLinksList');
+    if (HWF.links.length) {
+        lb.style.display = 'block';
+        ll.innerHTML = HWF.links.map(l =>
+            '<a href="' + hwfEsc(l.url) + '" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--card); border-radius: var(--r-md); font-size: 11.5px; color: var(--tx-2); text-decoration: none; border: 1px solid var(--bd);">' +
+                '<i class="fas fa-external-link-alt" style="font-size: 10px; color: var(--c-primary);"></i>' +
+                '<span style="flex: 1;">' + hwfEsc(l.title || l.url) + '</span>' +
+            '</a>'
+        ).join('');
+    } else {
+        lb.style.display = 'none';
+    }
+
+    // Sections
+    const sb = document.getElementById('pvSections');
+    const sl = document.getElementById('pvSectionsList');
+    if (HWF.sections.length) {
+        sb.style.display = 'block';
+        const colors = {
+            note:    { bg: 'rgba(59,130,246,.1)',  border: '#3b82f6', icon: 'fa-note-sticky' },
+            warning: { bg: 'rgba(245,158,11,.1)',  border: '#f59e0b', icon: 'fa-triangle-exclamation' },
+            tip:     { bg: 'rgba(16,185,129,.1)',  border: '#10b981', icon: 'fa-lightbulb' },
+            info:    { bg: 'rgba(99,102,241,.1)',  border: '#6366f1', icon: 'fa-circle-info' },
+        };
+        sl.innerHTML = HWF.sections.map(s => {
+            const c = colors[s.type] || colors.note;
+            return '<div style="padding: 12px; background: ' + c.bg + '; border-left: 3px solid ' + c.border + '; border-radius: var(--r-md);">' +
+                '<div style="font-size: 11.5px; font-weight: 800; color: var(--tx); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">' +
+                    '<i class="fas ' + c.icon + '" style="font-size: 10px;"></i>' + hwfEsc(s.title || 'Eslatma') +
+                '</div>' +
+                '<div style="font-size: 11px; color: var(--tx-2); line-height: 1.5; white-space: pre-wrap;">' + hwfEsc(s.text) + '</div>' +
+            '</div>';
+        }).join('');
+    } else {
+        sb.style.display = 'none';
+    }
+}
+
+// Modal ochilganda preview yangilash
+const _origOpen = hwfOpenModal;
+window.hwfOpenModal = function(id) {
+    _origOpen(id);
+    if (id === 'modalPreview') hwfUpdatePreviewModal();
+};
+
+// ═══════════════════════════════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════════════════════════════
+function hwfUpdateProgress() {
+    const required = ['title', 'description', 'deadline_days', 'max_score'];
+    let done = 0;
+    required.forEach(id => {
+        const el = document.getElementById('id_' + id);
+        const v = (el && el.value || '').trim();
+        if (v && v !== '0') done++;
+    });
+    const extras = [
+        (document.getElementById('id_starter_code') || {}).value,
+        (document.getElementById('id_instructions') || {}).value,
+        HWF.links.length > 0 ? '1' : '',
+        HWF.sections.length > 0 ? '1' : '',
+    ];
+    const bonusDone = extras.filter(x => x && String(x).trim()).length;
+    const total = required.length + extras.length;
+    const pct = Math.round(((done + bonusDone) / total) * 100);
+
+    const circle = document.getElementById('ringCircle');
+    const num = document.getElementById('ringPercent');
+    const desc = document.getElementById('ringDesc');
+    if (circle) {
+        const offset = 201 * (1 - pct / 100);
+        circle.style.strokeDashoffset = offset;
+    }
+    if (num) num.textContent = pct + '%';
+    if (desc) {
+        if (pct === 100) desc.textContent = 'Tayyor! Saqlashingiz mumkin';
+        else if (pct >= 70) desc.textContent = 'Yaxshi — yakunlang';
+        else if (pct >= 40) desc.textContent = 'Davom eting';
+        else desc.textContent = 'Asosiy maydonlarni to\'ldiring';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHAR COUNTERS
+// ═══════════════════════════════════════════════════════════════
+const HWF_COUNTERS = {
+    title:             { max: 255 },
+    short_description: { max: 300 },
+    description:       { max: 0 },
+};
+Object.keys(HWF_COUNTERS).forEach(name => {
+    const input = document.getElementById('id_' + name);
+    const display = document.querySelector('[data-cc="' + name + '"]');
+    if (!input || !display) return;
+    function update() {
+        const len = (input.value || '').length;
+        const max = HWF_COUNTERS[name].max;
+        if (max > 0) {
+            display.textContent = len + ' / ' + max;
+            display.classList.toggle('warn', len > max * 0.85 && len < max);
+            display.classList.toggle('danger', len >= max);
+        } else {
+            display.textContent = len + ' belgi';
+        }
+    }
+    input.addEventListener('input', update);
+    update();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// QUIZ CHECKBOXES
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('input[name="extra_quizzes"]').forEach(cb => {
+    cb.addEventListener('change', function() {
+        const item = this.closest('.hwf-quiz-item');
+        if (item) item.classList.toggle('checked', this.checked);
+        const count = document.querySelectorAll('input[name="extra_quizzes"]:checked').length;
+        const display = document.getElementById('quizCount');
+        if (display) display.textContent = count + ' ta';
+        const badge = document.querySelector('[data-badge="tests"]');
+        if (badge) {
+            badge.textContent = count;
+            badge.dataset.empty = count === 0 ? '1' : '0';
+        }
+    });
+    if (cb.checked) cb.closest('.hwf-quiz-item').classList.add('checked');
+});
+// Trigger initial
+document.querySelectorAll('input[name="extra_quizzes"]').forEach(cb => {
+    if (cb.checked) cb.dispatchEvent(new Event('change'));
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TOGGLES
+// ═══════════════════════════════════════════════════════════════
+(function() {
+    const g = document.getElementById('id_is_group_work');
+    const gf = document.getElementById('groupFields');
+    if (g && gf) {
+        function sync() { gf.style.display = g.checked ? 'block' : 'none'; }
+        g.addEventListener('change', sync);
+        sync();
+    }
+    const l = document.getElementById('id_allow_late_submission');
+    const lf = document.getElementById('lateFields');
+    if (l && lf) {
+        function sync() { lf.style.display = l.checked ? 'block' : 'none'; }
+        l.addEventListener('change', sync);
+        sync();
+    }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// MARKDOWN HELPERS
+// ═══════════════════════════════════════════════════════════════
+function hwfInsertMarkdown(id) {
+    const el = document.getElementById('id_' + id);
+    if (!el) return;
+    const t = '\n## Sarlavha\n\n**Qalin** va *kursiv*.\n\n- Element 1\n- Element 2\n';
+    const s = el.selectionStart;
+    el.value = el.value.substring(0, s) + t + el.value.substring(el.selectionEnd);
+    el.focus();
+    el.selectionStart = el.selectionEnd = s + t.length;
+    hwfMarkDirty();
+}
+window.hwfInsertMarkdown = hwfInsertMarkdown;
+
+function hwfInsertNumberedList(id) {
+    const el = document.getElementById('id_' + id);
+    if (!el) return;
+    const t = '\n1. Birinchi qadam\n2. Ikkinchi qadam\n3. Uchinchi qadam\n';
+    const s = el.selectionStart;
+    el.value = el.value.substring(0, s) + t + el.value.substring(el.selectionEnd);
+    el.focus();
+    el.selectionStart = el.selectionEnd = s + t.length;
+    hwfMarkDirty();
+}
+window.hwfInsertNumberedList = hwfInsertNumberedList;
+
+// ═══════════════════════════════════════════════════════════════
+// TEMPLATES
+// ═══════════════════════════════════════════════════════════════
+const HWF_TEMPLATES = {
+    code_algo: {
+        title: 'Algoritm masalasi — [Mavzu]',
+        short_description: "Algoritm tuzish va kod yozish bo'yicha amaliy topshiriq",
+        description: "## Vazifa tavsifi\n\nBerilgan masalani hal qiluvchi algoritm tuzing va Python'da amalga oshiring.\n\n**Talablar:**\n- Kod toza va o'qilishi oson\n- Funksiyalar docstring bilan\n- Edge case'lar hisobga olinsin",
+        instructions: "1. Masalani diqqat bilan o'qing\n2. Algoritmni qog'ozda chizing\n3. Kodni yozing\n4. Test qiling\n5. Yechimni topshiring",
+        starter_code: 'def solve(data):\n    """\n    TODO: implement\n    """\n    pass\n\n\nif __name__ == "__main__":\n    print(solve([]))\n',
+        solution_code: 'def solve(data):\n    return sorted(data)',
+        homework_type: 'coding',
+        difficulty: 'medium',
+        estimated_minutes: 60,
+        deadline_days: 5,
+        max_score: 100,
+        coins_reward: 15,
+        xp_reward: 75,
+    },
+    essay: {
+        title: 'Insho — [Mavzu]',
+        short_description: "Yozma ish: erkin mavzuda insho",
+        description: "## Talablar\n\nBerilgan mavzuda 300-500 so'zdan iborat insho yozing.\n\n**Struktura:**\n1. Kirish\n2. Asosiy qism\n3. Xulosa",
+        instructions: "1. Mavzuni o'ylab ko'ring\n2. Reja tuzing\n3. Insho yozing\n4. Tahrirlang\n5. Word yoki PDF da topshiring",
+        homework_type: 'writing',
+        difficulty: 'medium',
+        estimated_minutes: 90,
+        deadline_days: 7,
+        max_score: 100,
+        coins_reward: 20,
+        xp_reward: 100,
+    },
+    project: {
+        title: 'Loyiha ishi — [Loyiha nomi]',
+        short_description: 'Katta hajmdagi amaliy loyiha',
+        description: "## Loyiha maqsadi\n\nHaqiqiy loyihani noldan yarating.\n\n**Mezonlar:**\n- Funksionallik (40%)\n- Kod sifati (25%)\n- Dokumentatsiya (20%)\n- Dizayn (15%)",
+        instructions: "1. Reja tuzing\n2. Prototip yarating\n3. Kod yozing\n4. Test qiling\n5. README yozing\n6. GitHub linkini topshiring",
+        homework_type: 'project',
+        difficulty: 'hard',
+        estimated_minutes: 300,
+        deadline_days: 14,
+        max_score: 100,
+        coins_reward: 50,
+        xp_reward: 250,
+    },
+    quiz: {
+        title: "Test topshirig'i — [Mavzu]",
+        short_description: 'Bilimni tekshirish uchun test',
+        description: "## Test haqida\n\nBerilgan testni yechib, bilimingizni sinab ko'ring.",
+        instructions: '1. Testni boshlang\n2. Savollarga javob bering\n3. Natijani ko\'ring',
+        homework_type: 'mixed',
+        difficulty: 'easy',
+        estimated_minutes: 30,
+        deadline_days: 3,
+        max_score: 50,
+        coins_reward: 10,
+        xp_reward: 40,
+    },
+    reading: {
+        title: "O'qish topshirig'i — [Kitob]",
+        short_description: "Kitob yoki maqola o'qish vazifasi",
+        description: "## O'qish materiali\n\nBerilgan kitob/maqolani o'qib, xulosasini yozing.",
+        instructions: "1. Materialni o'qing\n2. Muhim joylarni belgilang\n3. Xulosa yozing",
+        homework_type: 'reading',
+        difficulty: 'easy',
+        estimated_minutes: 60,
+        deadline_days: 5,
+        max_score: 50,
+        coins_reward: 10,
+        xp_reward: 40,
+    },
+    practice: {
+        title: 'Amaliy mashq — [Mavzu]',
+        short_description: 'Kichik amaliy topshiriq',
+        description: "## Amaliy mashq\n\nO'tilgan mavzuni mustahkamlash uchun mashq.",
+        instructions: "1. Mavzuni eslab qoling\n2. Misollarni yeching\n3. Kodni sinab ko'ring",
+        homework_type: 'practice',
+        difficulty: 'easy',
+        estimated_minutes: 45,
+        deadline_days: 3,
+        max_score: 30,
+        coins_reward: 5,
+        xp_reward: 25,
+    },
+};
+
+function hwfApplyTemplate(key) {
+    const t = HWF_TEMPLATES[key];
+    if (!t) return;
+    Object.keys(t).forEach(id => {
+        const el = document.getElementById('id_' + id);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = !!t[id];
+        else el.value = t[id];
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    hwfCloseModal('modalTemplates');
+    hwfToast('✅ Shablon qo\'llandi', 'success');
+    hwfMarkDirty();
+    setTimeout(hwfUpdateProgress, 100);
+}
+window.hwfApplyTemplate = hwfApplyTemplate;
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    const isInput = tag === 'input' || tag === 'textarea' || tag === 'select';
+
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        document.getElementById('hwfForm').submit();
+        return;
+    }
+    if (e.key === 'F1') { e.preventDefault(); hwfOpenModal('modalHelp'); return; }
+    if (e.key === 'Escape') {
+        const open = document.querySelectorAll('.hwf-modal.open');
+        if (open.length) {
+            open.forEach(m => hwfCloseModal(m.id));
+            return;
+        }
+    }
+    if (isInput) return;
+    if (e.key.toLowerCase() === 'p') hwfOpenModal('modalPreview');
+    if (e.key.toLowerCase() === 't') hwfOpenModal('modalTemplates');
+});
+
+// Tab in code textareas
+document.querySelectorAll('.hwf-field textarea').forEach(ta => {
+    const isCode = ta.id.includes('code') || ta.classList.contains('code-input');
+    if (!isCode) return;
+    ta.addEventListener('keydown', e => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const s = ta.selectionStart, en = ta.selectionEnd;
+            ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(en);
+            ta.selectionStart = ta.selectionEnd = s + 4;
+            hwfMarkDirty();
+        }
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// DIRTY TRACKING
+// ═══════════════════════════════════════════════════════════════
+const form = document.getElementById('hwfForm');
+if (form) {
+    form.addEventListener('input', hwfMarkDirty);
+    form.addEventListener('change', hwfMarkDirty);
+    form.addEventListener('input', hwfUpdatePreview);
+    form.addEventListener('change', hwfUpdatePreview);
+    form.addEventListener('input', hwfUpdateProgress);
+
+    let submitted = false;
+    form.addEventListener('submit', e => {
+        if (submitted) { e.preventDefault(); return; }
+        submitted = true;
+        HWF.dirty = false;
+        hwfSetStatus('saving', 'Saqlanmoqda...');
+        try { localStorage.removeItem('hwf-draft-' + HWF.lessonId); } catch(err) {}
+        const btn = document.getElementById('saveBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saqlanmoqda...';
+        }
+    });
+}
+
+// Unload warning
+window.addEventListener('beforeunload', e => {
+    if (HWF.dirty) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    hwfRenderLinks();
+    hwfRenderSections();
+    hwfSyncJson();
+    hwfUpdatePreview();
+    hwfUpdateProgress();
+    hwfSetStatus('saved', 'Saqlangan');
+
+    // Restore tab
+    try {
+        const params = new URLSearchParams(location.search);
+        const t = params.get('tab');
+        if (t) {
+            const tab = document.querySelector('.hwf-tab[data-tab="' + t + '"]');
+            if (tab) tab.click();
+        }
+    } catch(e) {}
+});
+</script>
+{% endblock %}

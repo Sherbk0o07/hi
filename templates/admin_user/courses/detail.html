@@ -1,0 +1,3183 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}{{ course.title }} · DIGION{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   ROOT & RESET
+   ═══════════════════════════════════════════════════════════ */
+:root {
+    --cd-indigo: #6366f1;
+    --cd-violet: #8b5cf6;
+    --cd-pink: #ec4899;
+    --cd-emerald: #10b981;
+    --cd-amber: #f59e0b;
+    --cd-cyan: #06b6d4;
+    --cd-rose: #f43f5e;
+    --cd-max: 1400px;
+}
+
+.cd-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: -0.75rem -0.75rem 0;
+    position: relative;
+    font-size: 14px;
+}
+@media (min-width: 768px) { .cd-page { margin: -1rem -1.5rem 0; } }
+.cd-page, .cd-page * { box-sizing: border-box; min-width: 0; }
+.cd-page img { max-width: 100%; height: auto; }
+
+/* Ambient glows */
+.cd-glow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+}
+.cd-glow-1 {
+    top: -200px; left: -200px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%);
+    animation: cdFloat 20s ease-in-out infinite;
+}
+.cd-glow-2 {
+    top: 40%; right: -250px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(236,72,153,0.2), transparent 70%);
+    animation: cdFloat 25s ease-in-out infinite reverse;
+}
+.dark .cd-glow { opacity: 0.15; }
+
+.cd-wrap {
+    width: 100%;
+    max-width: var(--cd-max);
+    margin: 0 auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+@media (min-width: 640px) { .cd-wrap { padding-left: 1rem; padding-right: 1rem; } }
+@media (min-width: 1024px) { .cd-wrap { padding-left: 1.25rem; padding-right: 1.25rem; } }
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS — KATTA KUTUBXONA
+   ═══════════════════════════════════════════════════════════ */
+@keyframes cdSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cdSlideDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cdSlideLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes cdSlideRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes cdFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes cdPopIn {
+    0% { opacity: 0; transform: scale(0.85); }
+    60% { transform: scale(1.04); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes cdBounceIn {
+    0% { opacity: 0; transform: scale(0.3); }
+    50% { transform: scale(1.08); }
+    70% { transform: scale(0.96); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes cdShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes cdPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.75; }
+}
+@keyframes cdRing {
+    0% { transform: scale(0.85); opacity: 0.6; }
+    100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes cdBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+@keyframes cdFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+@keyframes cdSheetUp {
+    from { transform: translateY(100%) scale(0.96); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes cdToastIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes cdPanelIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cdFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.05); }
+    66% { transform: translate(-30px, 20px) scale(0.95); }
+}
+@keyframes cdRipple {
+    0% { transform: scale(0); opacity: 0.6; }
+    100% { transform: scale(4); opacity: 0; }
+}
+@keyframes cdSpin {
+    to { transform: rotate(360deg); }
+}
+@keyframes cdBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+@keyframes cdShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+}
+@keyframes cdGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+@keyframes cdRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@keyframes cdScaleXY {
+    0% { transform: scaleX(0); transform-origin: left; }
+    100% { transform: scaleX(1); transform-origin: left; }
+}
+
+/* Animation utility classes */
+.anim-up { opacity: 0; animation: cdSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.anim-down { opacity: 0; animation: cdSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.anim-pop { opacity: 0; animation: cdPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.anim-bounce { opacity: 0; animation: cdBounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.anim-left { opacity: 0; animation: cdSlideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.anim-right { opacity: 0; animation: cdSlideRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.d-1 { animation-delay: 0.03s; }
+.d-2 { animation-delay: 0.06s; }
+.d-3 { animation-delay: 0.09s; }
+.d-4 { animation-delay: 0.12s; }
+.d-5 { animation-delay: 0.15s; }
+.d-6 { animation-delay: 0.18s; }
+.d-7 { animation-delay: 0.21s; }
+.d-8 { animation-delay: 0.24s; }
+
+/* ═══════════════════════════════════════════════════════════
+   TOPBAR (sticky)
+   ═══════════════════════════════════════════════════════════ */
+.cd-topbar {
+    position: sticky;
+    top: 3.5rem;
+    z-index: 30;
+    background: rgba(255,255,255,0.92);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.6);
+    animation: cdSlideDown 0.4s ease;
+}
+@media (min-width: 768px) { .cd-topbar { top: 4rem; } }
+.dark .cd-topbar {
+    background: rgba(10,10,15,0.92);
+    border-bottom-color: rgba(30,41,59,0.6);
+}
+.cd-topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    max-width: var(--cd-max);
+    margin: 0 auto;
+}
+@media (min-width: 640px) { .cd-topbar-inner { padding: 0.625rem 1rem; } }
+@media (min-width: 1024px) { .cd-topbar-inner { padding: 0.625rem 1.25rem; } }
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT GRID
+   ═══════════════════════════════════════════════════════════ */
+.cd-layout { padding-top: 0.75rem; }
+@media (min-width: 1024px) {
+    .cd-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+        gap: 1rem;
+        align-items: start;
+    }
+    .cd-layout-left { grid-column: 1; min-width: 0; }
+    .cd-layout-right {
+        grid-column: 2;
+        min-width: 0;
+        position: sticky;
+        top: 7.5rem;
+        max-height: calc(100vh - 8rem);
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+    .cd-layout-right::-webkit-scrollbar { width: 4px; }
+    .cd-layout-right::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dark .cd-layout-right::-webkit-scrollbar-thumb { background: #334155; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════════ */
+.cd-hero {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 28px -12px rgba(15,23,42,0.1);
+    animation: cdSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: box-shadow 0.4s, transform 0.4s;
+    margin-bottom: 0.75rem;
+}
+.dark .cd-hero {
+    background: #0f172a;
+    border-color: #1e293b;
+    box-shadow: 0 6px 28px -12px rgba(0,0,0,0.5);
+}
+.cd-hero:hover {
+    box-shadow: 0 12px 40px -14px rgba(99,102,241,0.25);
+}
+.dark .cd-hero:hover { box-shadow: 0 12px 40px -14px rgba(0,0,0,0.6); }
+@media (min-width: 1024px) { .cd-hero { margin-bottom: 0; } }
+
+.cd-cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 40%, #ec4899 100%);
+    background-size: 200% 200%;
+    animation: cdGradientShift 10s ease infinite;
+    overflow: hidden;
+}
+@media (min-width: 640px) { .cd-cover { aspect-ratio: 21/9; } }
+@media (min-width: 1024px) { .cd-cover { aspect-ratio: 16/7; } }
+
+.cd-cover img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s;
+}
+.cd-hero:hover .cd-cover img {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+}
+
+.cd-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+        rgba(0,0,0,0.92) 0%,
+        rgba(0,0,0,0.55) 35%,
+        rgba(0,0,0,0.15) 70%,
+        transparent 100%);
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATS
+   ═══════════════════════════════════════════════════════════ */
+.cd-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+@media (min-width: 480px) { .cd-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .cd-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.625rem; } }
+@media (min-width: 1024px) { .cd-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.cd-stat {
+    position: relative;
+    padding: 0.625rem;
+    border-radius: 0.75rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s,
+                border-color 0.3s;
+}
+@media (min-width: 640px) { .cd-stat { padding: 0.75rem; } }
+.dark .cd-stat { background: #0f172a; border-color: #1e293b; }
+
+.cd-stat::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--stat-color, #6366f1), transparent);
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+}
+.cd-stat::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--stat-color, #6366f1), transparent);
+    opacity: 0;
+    transition: opacity 0.35s;
+}
+.cd-stat:hover::before { opacity: 0.07; }
+.cd-stat:hover::after { opacity: 1; }
+.cd-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px -12px rgba(15,23,42,0.18);
+    border-color: var(--stat-color, #6366f1);
+}
+.cd-stat > * { position: relative; z-index: 1; }
+
+.cd-stat-ico {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px -3px var(--stat-color, rgba(0,0,0,0.2));
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (min-width: 640px) { .cd-stat-ico { width: 36px; height: 36px; font-size: 13px; } }
+.cd-stat:hover .cd-stat-ico { transform: scale(1.12) rotate(-8deg); }
+
+.cd-stat-body { min-width: 0; flex: 1; }
+.cd-stat-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dark .cd-stat-val { color: #fff; }
+@media (min-width: 640px) { .cd-stat-val { font-size: 1.2rem; } }
+
+.cd-stat-lbl {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+.dark .cd-stat-lbl { color: #94a3b8; }
+
+/* ═══════════════════════════════════════════════════════════
+   TABS
+   ═══════════════════════════════════════════════════════════ */
+.cd-tabs {
+    position: sticky;
+    top: 6rem;
+    z-index: 25;
+    background: rgba(255,255,255,0.94);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.6);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 0.75rem;
+}
+@media (min-width: 768px) { .cd-tabs { top: 6.5rem; } }
+.dark .cd-tabs {
+    background: rgba(10,10,15,0.94);
+    border-bottom-color: rgba(30,41,59,0.6);
+}
+.cd-tabs::-webkit-scrollbar { display: none; }
+
+.cd-tabs-track {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 100%;
+    max-width: var(--cd-max);
+    margin: 0 auto;
+}
+@media (min-width: 640px) { .cd-tabs-track { padding: 0.5rem 1rem; } }
+@media (min-width: 1024px) { .cd-tabs-track { padding: 0.5rem 1.25rem; } }
+
+.cd-tab {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    min-height: 32px;
+    text-decoration: none;
+    font-family: inherit;
+    overflow: hidden;
+}
+@media (min-width: 640px) { .cd-tab { padding: 0.5rem 0.9rem; font-size: 12.5px; min-height: 34px; } }
+.dark .cd-tab { color: #94a3b8; }
+
+.cd-tab:hover { color: #4f46e5; background: rgba(99,102,241,0.08); transform: translateY(-1px); }
+.dark .cd-tab:hover { color: #a5b4fc; background: rgba(99,102,241,0.12); }
+
+.cd-tab.active {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 6px 16px -4px rgba(79,70,229,0.5);
+    animation: cdGradientShift 4s ease infinite;
+}
+.cd-tab.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%);
+    animation: cdShimmer 2.5s ease-in-out infinite;
+}
+
+.cd-tab-badge {
+    padding: 1px 6px;
+    border-radius: 9999px;
+    background: rgba(255,255,255,0.28);
+    font-size: 8.5px;
+    font-weight: 800;
+    min-width: 15px;
+    text-align: center;
+    line-height: 1.4;
+}
+.cd-tab:not(.active) .cd-tab-badge {
+    background: #e2e8f0;
+    color: #475569;
+}
+.dark .cd-tab:not(.active) .cd-tab-badge {
+    background: #1e293b;
+    color: #94a3b8;
+}
+
+.cd-tab-lbl { display: none; }
+@media (min-width: 400px) { .cd-tab-lbl { display: inline; } }
+
+/* ═══════════════════════════════════════════════════════════
+   PANELS
+   ═══════════════════════════════════════════════════════════ */
+.cd-panel { display: none; }
+.cd-panel.active {
+    display: block;
+    animation: cdPanelIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cd-panel.active > * {
+    animation: cdSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.cd-panel.active > *:nth-child(1) { animation-delay: 0.04s; }
+.cd-panel.active > *:nth-child(2) { animation-delay: 0.08s; }
+.cd-panel.active > *:nth-child(3) { animation-delay: 0.12s; }
+.cd-panel.active > *:nth-child(4) { animation-delay: 0.16s; }
+.cd-panel.active > *:nth-child(5) { animation-delay: 0.20s; }
+.cd-panel.active > *:nth-child(6) { animation-delay: 0.24s; }
+.cd-panel.active > *:nth-child(7) { animation-delay: 0.28s; }
+.cd-panel.active > *:nth-child(8) { animation-delay: 0.32s; }
+
+/* ═══════════════════════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════════════════════ */
+.cd-card {
+    position: relative;
+    padding: 0.75rem;
+    border-radius: 0.875rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s,
+                border-color 0.3s;
+}
+@media (min-width: 768px) { .cd-card { padding: 1rem; } }
+.dark .cd-card { background: #0f172a; border-color: #1e293b; }
+
+.cd-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899, #6366f1);
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity 0.4s;
+    animation: cdFlow 3s linear infinite;
+}
+.cd-card:hover::before { opacity: 1; }
+.cd-card:hover {
+    box-shadow: 0 10px 32px -16px rgba(99,102,241,0.25);
+    border-color: #c7d2fe;
+    transform: translateY(-2px);
+}
+.dark .cd-card:hover { border-color: #4338ca; }
+
+.cd-card-h {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.625rem;
+    flex-wrap: wrap;
+}
+@media (min-width: 768px) { .cd-card-h { margin-bottom: 0.75rem; } }
+
+.cd-card-t {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+@media (min-width: 640px) { .cd-card-t { font-size: 13px; } }
+.dark .cd-card-t { color: #fff; }
+
+.cd-card-t i {
+    color: #6366f1;
+    font-size: 11px;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cd-card:hover .cd-card-t i { transform: rotate(-10deg) scale(1.12); }
+
+/* ═══════════════════════════════════════════════════════════
+   MONTH CARD
+   ═══════════════════════════════════════════════════════════ */
+.cd-month {
+    position: relative;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .cd-month { background: #0f172a; border-color: #1e293b; }
+.cd-month::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    background-size: 100% 200%;
+    animation: cdFlow 4s ease infinite;
+    transition: width 0.35s;
+}
+.cd-month:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 22px -12px rgba(99,102,241,0.3);
+    border-color: #c7d2fe;
+}
+.cd-month:hover::before { width: 5px; }
+.dark .cd-month:hover { border-color: #4338ca; }
+
+.cd-month-num {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background-size: 200% 200%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px -3px rgba(99,102,241,0.55);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s;
+    animation: cdGradientShift 6s ease infinite;
+}
+@media (min-width: 640px) { .cd-month-num { width: 42px; height: 42px; font-size: 16px; } }
+.cd-month:hover .cd-month-num {
+    transform: scale(1.08) rotate(-6deg);
+    box-shadow: 0 8px 22px -5px rgba(99,102,241,0.65);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LESSON ROW
+   ═══════════════════════════════════════════════════════════ */
+.cd-lesson {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.625rem;
+    border-radius: 0.625rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.4rem;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+.dark .cd-lesson { background: #0f172a; border-color: #1e293b; }
+.cd-lesson::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #6366f1, #ec4899);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.cd-lesson:hover::before { opacity: 1; }
+.cd-lesson:hover {
+    transform: translateX(4px);
+    border-color: #a5b4fc;
+    box-shadow: 0 8px 22px -12px rgba(99,102,241,0.35);
+}
+.dark .cd-lesson:hover { border-color: #4338ca; }
+
+.cd-day {
+    width: 42px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.2rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    border: 1px solid #c7d2fe;
+    transition: all 0.3s;
+}
+.dark .cd-day {
+    background: rgba(99,102,241,0.1);
+    border-color: rgba(99,102,241,0.3);
+}
+.cd-lesson:hover .cd-day {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-color: transparent;
+    transform: scale(1.05);
+}
+.cd-day-n {
+    font-size: 7.5px;
+    font-weight: 800;
+    color: #4f46e5;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    transition: color 0.25s;
+}
+.cd-lesson:hover .cd-day-n { color: rgba(255,255,255,0.9); }
+.dark .cd-day-n { color: #a5b4fc; }
+.cd-day-v {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #312e81;
+    line-height: 1;
+    margin-top: 2px;
+    transition: color 0.25s;
+}
+.cd-lesson:hover .cd-day-v { color: #fff; }
+.dark .cd-day-v { color: #c7d2fe; }
+
+/* ═══════════════════════════════════════════════════════════
+   PROGRESS BAR
+   ═══════════════════════════════════════════════════════════ */
+.cd-prog {
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+}
+.dark .cd-prog { background: #1e293b; }
+.cd-prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 40%, #ec4899 80%, #6366f1 100%);
+    background-size: 200% 100%;
+    border-radius: 9999px;
+    transition: width 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    animation: cdFlow 4s linear infinite;
+}
+.cd-prog-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 24px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7));
+    animation: cdShimmer 2s infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PILLS / BADGES
+   ═══════════════════════════════════════════════════════════ */
+.cd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    font-size: 9.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    line-height: 1.5;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 0.01em;
+}
+.cd-pill:hover { transform: translateY(-2px) scale(1.05); }
+.cd-pill-dot {
+    width: 4.5px; height: 4.5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: cdPulse 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════ */
+.cd-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 0.65rem;
+    font-size: 11.5px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: none;
+    cursor: pointer;
+    min-height: 36px;
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    background-clip: padding-box;
+}
+@media (min-width: 640px) { .cd-btn { font-size: 12.5px; padding: 0.625rem 1.1rem; min-height: 38px; } }
+
+.cd-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+    pointer-events: none;
+}
+.cd-btn:active::before {
+    width: 300px;
+    height: 300px;
+    transition: width 0s, height 0s;
+}
+
+.cd-btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 5px 14px -5px rgba(99,102,241,0.55);
+    animation: cdGradientShift 5s ease infinite;
+}
+.cd-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -6px rgba(99,102,241,0.6);
+}
+.cd-btn-primary:active { transform: translateY(0) scale(0.98); }
+
+.cd-btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+}
+.dark .cd-btn-secondary { background: #1e293b; color: #cbd5e1; }
+.cd-btn-secondary:hover { background: #e2e8f0; transform: translateY(-2px); }
+.dark .cd-btn-secondary:hover { background: #334155; }
+.cd-btn-secondary:active { transform: translateY(0) scale(0.98); }
+
+.cd-btn-success {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #fff;
+    box-shadow: 0 5px 14px -5px rgba(16,185,129,0.55);
+}
+.cd-btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -6px rgba(16,185,129,0.6);
+}
+
+.cd-btn-danger {
+    background: linear-gradient(135deg, #e11d48, #f43f5e);
+    color: #fff;
+    box-shadow: 0 5px 14px -5px rgba(225,29,72,0.55);
+}
+.cd-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -6px rgba(225,29,72,0.6);
+}
+.cd-btn-danger:active { transform: translateY(0) scale(0.98); }
+
+.cd-btn-block { width: 100%; }
+
+/* ═══════════════════════════════════════════════════════════
+   ICON BUTTONS
+   ═══════════════════════════════════════════════════════════ */
+.cd-ico {
+    position: relative;
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    overflow: hidden;
+}
+@media (min-width: 640px) { .cd-ico { width: 36px; height: 36px; font-size: 13px; } }
+.dark .cd-ico { background: #1e293b; color: #94a3b8; }
+.cd-ico:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 6px 14px -6px rgba(0,0,0,0.15);
+}
+.dark .cd-ico:hover { background: #334155; }
+.cd-ico:active { transform: scale(0.94); }
+.cd-ico i { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.cd-ico:hover i { transform: scale(1.15); }
+
+.cd-ico-sm {
+    width: 28px; height: 28px;
+    font-size: 11px;
+    border-radius: 7px;
+}
+
+.cd-ico-pri {
+    background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+    color: #4f46e5;
+}
+.dark .cd-ico-pri { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+.cd-ico-pri:hover {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 6px 16px -4px rgba(99,102,241,0.55);
+}
+
+.cd-ico-danger {
+    background: #ffe4e6;
+    color: #e11d48;
+}
+.dark .cd-ico-danger { background: rgba(225,29,72,0.15); color: #fda4af; }
+.cd-ico-danger:hover {
+    background: linear-gradient(135deg, #e11d48, #f43f5e);
+    color: #fff;
+    box-shadow: 0 6px 16px -4px rgba(225,29,72,0.55);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════ */
+.cd-empty {
+    text-align: center;
+    padding: 1.5rem 0.75rem;
+    animation: cdFadeIn 0.5s ease;
+}
+@media (min-width: 640px) { .cd-empty { padding: 2.5rem 1rem; } }
+
+.cd-empty-ico {
+    position: relative;
+    width: 60px; height: 60px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    margin-bottom: 0.875rem;
+    box-shadow: 0 12px 28px -8px rgba(99,102,241,0.5);
+    animation: cdBounce 2.5s ease-in-out infinite;
+}
+@media (min-width: 640px) {
+    .cd-empty-ico { width: 68px; height: 68px; font-size: 28px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHEETS
+   ═══════════════════════════════════════════════════════════ */
+.cd-sheet-ov {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(15,23,42,0.72);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: cdFadeIn 0.25s ease;
+    padding: 0;
+}
+@media (min-width: 640px) { .cd-sheet-ov { align-items: center; padding: 1rem; } }
+
+.cd-sheet {
+    width: 100%;
+    max-height: 92vh;
+    background: #fff;
+    border-radius: 1.5rem 1.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: cdSheetUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    box-shadow: 0 -20px 60px -20px rgba(0,0,0,0.4);
+}
+@media (min-width: 640px) {
+    .cd-sheet {
+        max-width: 460px;
+        border-radius: 1.25rem;
+        max-height: 82vh;
+    }
+}
+.dark .cd-sheet { background: #0f172a; }
+
+.cd-sheet-bar {
+    width: 44px; height: 4px;
+    background: #cbd5e1;
+    border-radius: 2px;
+    margin: 0.5rem auto 0.25rem;
+    flex-shrink: 0;
+}
+.dark .cd-sheet-bar { background: #475569; }
+@media (min-width: 640px) { .cd-sheet-bar { display: none; } }
+
+.cd-sheet-h {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+.dark .cd-sheet-h { border-bottom-color: #1e293b; }
+
+.cd-sheet-b {
+    padding: 0.75rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+}
+
+.cd-sheet-f {
+    padding: 0.875rem 1rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    padding-bottom: calc(0.875rem + env(safe-area-inset-bottom));
+}
+.dark .cd-sheet-f { border-top-color: #1e293b; }
+
+/* Sheet list item */
+.cd-li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+.dark .cd-li { background: #0f172a; border-color: #1e293b; }
+.cd-li:hover {
+    transform: translateX(4px);
+    border-color: #a5b4fc;
+    box-shadow: 0 8px 22px -12px rgba(99,102,241,0.3);
+}
+.cd-li:active { transform: scale(0.98); }
+.dark .cd-li:hover { border-color: #4338ca; }
+
+/* ═══════════════════════════════════════════════════════════
+   FAB
+   ═══════════════════════════════════════════════════════════ */
+.cd-fab {
+    position: fixed;
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0));
+    right: 1rem;
+    z-index: 28;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+    background-size: 200% 200%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 14px 32px -10px rgba(99,102,241,0.75);
+    border: none;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: cdGradientShift 5s ease infinite;
+}
+.cd-fab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.5;
+    animation: cdRing 2.2s ease-out infinite;
+    z-index: -1;
+}
+.cd-fab:hover { transform: scale(1.12) rotate(90deg); }
+.cd-fab:active { transform: scale(0.9); }
+@media (min-width: 1024px) {
+    .cd-fab { bottom: 1.5rem; right: 1.5rem; width: 56px; height: 56px; font-size: 22px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH
+   ═══════════════════════════════════════════════════════════ */
+.cd-search {
+    position: relative;
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+.cd-search input {
+    width: 100%;
+    padding: 0.65rem 0.875rem 0.65rem 2.35rem;
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 12.5px;
+    color: #0f172a;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+.dark .cd-search input {
+    background: #0a0f1e;
+    border-color: #1e293b;
+    color: #fff;
+}
+.cd-search input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+    background: #fff;
+    transform: translateY(-1px);
+}
+.dark .cd-search input:focus { background: #1e293b; }
+.cd-search .ico {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOASTS
+   ═══════════════════════════════════════════════════════════ */
+.cd-toasts {
+    position: fixed;
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0));
+    left: 0.625rem;
+    right: 0.625rem;
+    z-index: 95;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+@media (min-width: 640px) {
+    .cd-toasts {
+        left: auto;
+        right: 1rem;
+        bottom: 1rem;
+        max-width: 22rem;
+    }
+}
+.cd-toast {
+    padding: 0.85rem 1rem;
+    border-radius: 0.875rem;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-shadow: 0 14px 32px -8px rgba(0,0,0,0.45);
+    pointer-events: auto;
+    animation: cdToastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+.cd-toast i { font-size: 15px; }
+
+/* ═══════════════════════════════════════════════════════════
+   ACCORDION
+   ═══════════════════════════════════════════════════════════ */
+.cd-acc {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cd-acc.open { max-height: 3000px; }
+.cd-acc-tg { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.cd-acc-tg.open {
+    transform: rotate(180deg);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHART
+   ═══════════════════════════════════════════════════════════ */
+.cd-chart {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    animation: cdFadeIn 0.7s ease;
+}
+@media (min-width: 640px) { .cd-chart { height: 220px; } }
+@media (min-width: 1024px) { .cd-chart { height: 240px; } }
+
+/* ═══════════════════════════════════════════════════════════
+   TIMELINE
+   ═══════════════════════════════════════════════════════════ */
+.cd-tl {
+    position: relative;
+    padding-left: 1.75rem;
+    padding-bottom: 0.5rem;
+    animation: cdSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.cd-tl:nth-child(1) { animation-delay: 0.04s; }
+.cd-tl:nth-child(2) { animation-delay: 0.08s; }
+.cd-tl:nth-child(3) { animation-delay: 0.12s; }
+.cd-tl:nth-child(4) { animation-delay: 0.16s; }
+.cd-tl:nth-child(5) { animation-delay: 0.20s; }
+.cd-tl:nth-child(6) { animation-delay: 0.24s; }
+
+.cd-tl::before {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    top: 1.2rem;
+    bottom: -0.2rem;
+    width: 2px;
+    background: linear-gradient(180deg, #6366f1, #8b5cf6, transparent);
+    opacity: 0.5;
+}
+.cd-tl:last-child::before { display: none; }
+
+.cd-tl-dot {
+    position: absolute;
+    left: 0.25rem;
+    top: 0.5rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5px;
+    color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    transition: transform 0.3s;
+}
+.cd-tl:hover .cd-tl-dot { transform: scale(1.15); }
+.dark .cd-tl-dot { background: #0f172a; }
+
+/* ═══════════════════════════════════════════════════════════
+   GRIDS & TILES
+   ═══════════════════════════════════════════════════════════ */
+.cd-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+.cd-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+@media (min-width: 768px) {
+    .cd-grid-2 { gap: 0.625rem; }
+    .cd-grid-3 { gap: 0.625rem; }
+}
+
+.cd-info-tile {
+    padding: 0.625rem;
+    border-radius: 0.625rem;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: default;
+}
+.dark .cd-info-tile {
+    background: rgba(30,41,59,0.4);
+    border-color: rgba(30,41,59,0.8);
+}
+.cd-info-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px -12px rgba(99,102,241,0.3);
+    border-color: #c7d2fe;
+}
+.dark .cd-info-tile:hover { border-color: #4338ca; }
+
+.cd-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+.cd-info-mini {
+    padding: 0.625rem;
+    border-radius: 0.625rem;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cd-info-mini:hover { transform: translateY(-3px) scale(1.04); }
+.cd-info-mini-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+@media (min-width: 640px) { .cd-info-mini-val { font-size: 1.15rem; } }
+.cd-info-mini-lbl {
+    font-size: 9px;
+    margin-top: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+}
+.dark .cd-info-mini-lbl { color: #94a3b8; }
+
+.cd-cl-1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-cl-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.cd-mw0 { min-width: 0; }
+    /* ═══════════════════════════════════════════════════════════
+   TOPBAR — OVERRIDE (eski qoidalarni ustidan yozadi)
+   ═══════════════════════════════════════════════════════════ */
+.cd-topbar {
+    position: sticky;
+    top: 3.5rem;
+    z-index: 40;
+    height: 56px;
+    background: rgba(255,255,255,0.88);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.7);
+    transition: box-shadow 0.3s, background 0.3s;
+    animation: cdSlideDown 0.4s ease;
+}
+@media (min-width: 768px) { .cd-topbar { top: 4rem; height: 60px; } }
+
+.dark .cd-topbar {
+    background: rgba(10,10,15,0.88);
+    border-bottom-color: rgba(30,41,59,0.7);
+}
+
+/* Topbar scroll bo'lganda soya */
+.cd-topbar.scrolled {
+    box-shadow: 0 4px 20px -8px rgba(15,23,42,0.12);
+}
+.dark .cd-topbar.scrolled {
+    box-shadow: 0 4px 20px -8px rgba(0,0,0,0.5);
+}
+
+.cd-topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    height: 100%;
+    padding: 0 0.75rem;
+    max-width: var(--cd-max);
+    margin: 0 auto;
+}
+@media (min-width: 640px) { .cd-topbar-inner { padding: 0 1rem; gap: 0.75rem; } }
+@media (min-width: 1024px) { .cd-topbar-inner { padding: 0 1.25rem; } }
+
+/* ═══════════════════════════════════════════════════════════
+   TABS — topbar ostida to'g'ri joylashishi
+   ═══════════════════════════════════════════════════════════ */
+.cd-tabs {
+    position: sticky;
+    top: calc(3.5rem + 56px);   /* topbar balandligi + top */
+    z-index: 35;
+    background: rgba(255,255,255,0.88);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.7);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 0.75rem;
+}
+@media (min-width: 768px) {
+    .cd-tabs { top: calc(4rem + 60px); }
+}
+.dark .cd-tabs {
+    background: rgba(10,10,15,0.88);
+    border-bottom-color: rgba(30,41,59,0.7);
+}
+.cd-tabs::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT — topbar va tabs ostidan to'g'ri masofa
+   ═══════════════════════════════════════════════════════════ */
+.cd-layout {
+    padding-top: 1rem;
+}
+@media (min-width: 1024px) {
+    .cd-layout { padding-top: 1.25rem; }
+    .cd-layout-right {
+        top: calc(4rem + 60px + 70px);   /* topbar + tabs + biroz bo'sh joy */
+    }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="cd-page">
+
+<!-- Ambient glows -->
+<div class="cd-glow cd-glow-1"></div>
+<div class="cd-glow cd-glow-2"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TOPBAR
+     ═══════════════════════════════════════════════════════ -->
+<div class="cd-topbar">
+    <div class="cd-topbar-inner">
+        <a href="{% url 'courses_admin:list' %}" class="cd-ico" title="Orqaga">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="flex-1 cd-mw0">
+            <div class="text-[9px] uppercase font-bold tracking-wider text-slate-400 leading-none mb-0.5">Kurs</div>
+
+            <div class="text-xs font-bold text-slate-900 dark:text-white cd-cl-1">{{ course.title }}</div>
+        </div>
+        <button type="button" onclick="openSheet('sheetActions')" class="cd-ico" title="Amallar">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+    </div>
+</div>
+    <br><br><br><br>
+<!-- ═══════════════════════════════════════════════════════
+     MAIN LAYOUT
+     ═══════════════════════════════════════════════════════ -->
+<div class="cd-wrap cd-layout">
+
+<!-- ═══════════════ LEFT: MAIN CONTENT ═══════════════ -->
+<div class="cd-layout-left">
+
+<!-- ═══════ HERO ═══════ -->
+<div class="cd-hero">
+    <div class="cd-cover">
+        {% if course.cover_image %}
+        <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" loading="lazy">
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center text-white/60">
+            <div class="text-center px-4">
+                <i class="fas fa-book text-5xl mb-3 opacity-70"></i>
+                <p class="text-xs font-medium">Muqova yuklanmagan</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="absolute top-3 left-3 right-3 flex flex-wrap gap-1.5 z-10">
+            <span class="cd-pill backdrop-blur-md
+                {% if course.status == 'published' %}bg-emerald-500 text-white
+                {% elif course.status == 'draft' %}bg-slate-700 text-white
+                {% elif course.status == 'pending' %}bg-amber-500 text-white
+                {% else %}bg-slate-800 text-white{% endif %}">
+                <span class="cd-pill-dot bg-white/90"></span>
+                {{ course.get_status_display }}
+            </span>
+            {% if course.is_featured %}
+            <span class="cd-pill bg-gradient-to-r from-amber-400 to-orange-400 text-amber-900 backdrop-blur-md">
+                <i class="fas fa-star text-[8px]"></i>Tanlangan
+            </span>
+            {% endif %}
+            {% if course.is_free or course.price == 0 %}
+            <span class="cd-pill bg-emerald-500 text-white backdrop-blur-md">BEPUL</span>
+            {% else %}
+            <span class="cd-pill bg-white/25 text-white backdrop-blur-md">
+                <i class="fas fa-tag text-[8px]"></i>{{ course.current_price|floatformat:0 }} so'm
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-3 md:p-4 text-white z-10">
+            <h1 class="text-base md:text-lg lg:text-xl font-bold leading-tight cd-cl-2 mb-2" style="font-family:'Space Grotesk',sans-serif;">
+                {{ course.title }}
+            </h1>
+            <div class="flex items-center gap-2.5 text-[10px] md:text-[11px] text-white/95 flex-wrap">
+                {% if course.teacher %}
+                <span class="inline-flex items-center gap-1 cd-cl-1" style="max-width:50%;">
+                    <i class="fas fa-user-tie text-[9px]"></i>
+                    {{ course.teacher.get_full_name|default:course.teacher.phone_number|truncatechars:18 }}
+                </span>
+                {% endif %}
+                <span class="inline-flex items-center gap-1">
+                    <i class="fas fa-signal text-[9px]"></i>{{ course.get_level_display }}
+                </span>
+                <span class="inline-flex items-center gap-1">
+                    <i class="fas fa-clock text-[9px]"></i>{{ course.duration_months }} oy
+                </span>
+                <span class="inline-flex items-center gap-1">
+                    <i class="fas fa-language text-[9px]"></i>{{ course.get_language_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="grid grid-cols-4 border-t border-slate-200 dark:border-slate-800">
+        <a href="{% url 'courses_admin:edit' pk=course.pk %}"
+           class="group flex flex-col items-center gap-1 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-300">
+            <i class="fas fa-pen-to-square text-indigo-500 text-sm transition-transform duration-300 group-hover:scale-125 group-hover:-rotate-12"></i>
+            <span class="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400">Tahrirlash</span>
+        </a>
+        <button type="button" onclick="chooseMonthForLesson()"
+                class="group flex flex-col items-center gap-1 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-300">
+            <i class="fas fa-plus text-emerald-500 text-sm transition-transform duration-300 group-hover:scale-125 group-hover:rotate-180"></i>
+            <span class="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400">Dars</span>
+        </button>
+        <a href="{% url 'courses_admin:group_create' %}"
+           class="group flex flex-col items-center gap-1 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-300">
+            <i class="fas fa-users-rectangle text-cyan-500 text-sm transition-transform duration-300 group-hover:scale-125 group-hover:rotate-6"></i>
+            <span class="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400">Guruh</span>
+        </a>
+        <button type="button" onclick="togglePublish({{ course.pk }}, '{{ course.status }}')"
+                class="group flex flex-col items-center gap-1 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-300">
+            {% if course.status == 'published' %}
+            <i class="fas fa-eye-slash text-slate-500 text-sm transition-transform duration-300 group-hover:scale-110"></i>
+            <span class="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400">Yopish</span>
+            {% else %}
+            <i class="fas fa-rocket text-amber-500 text-sm transition-transform duration-300 group-hover:scale-125 group-hover:-translate-y-1"></i>
+            <span class="text-[9.5px] font-semibold text-slate-600 dark:text-slate-400">E'lon</span>
+            {% endif %}
+        </button>
+    </div>
+</div>
+
+    <br>
+<!-- ═══════ STATS ═══════ -->
+<div class="cd-stats">
+    <div class="cd-stat anim-pop d-1" style="--stat-color: #6366f1;">
+        <div class="cd-stat-ico" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="cd-stat-body">
+            <div class="cd-stat-val" data-count="{{ stats.total_months|default:0 }}">0</div>
+            <div class="cd-stat-lbl">Oylar</div>
+        </div>
+    </div>
+
+    <div class="cd-stat anim-pop d-2" style="--stat-color: #10b981;">
+        <div class="cd-stat-ico" style="background:linear-gradient(135deg,#10b981,#14b8a6);">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <div class="cd-stat-body">
+            <div class="cd-stat-val" data-count="{{ stats.total_lessons|default:0 }}">0</div>
+            <div class="cd-stat-lbl">Darslar</div>
+        </div>
+    </div>
+
+    <div class="cd-stat anim-pop d-3" style="--stat-color: #06b6d4;">
+        <div class="cd-stat-ico" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="cd-stat-body">
+            <div class="cd-stat-val" data-count="{{ stats.total_students|default:0 }}">0</div>
+            <div class="cd-stat-lbl">Talabalar</div>
+        </div>
+    </div>
+
+    <div class="cd-stat anim-pop d-4" style="--stat-color: #f59e0b;">
+        <div class="cd-stat-ico" style="background:linear-gradient(135deg,#f59e0b,#f97316);">
+            <i class="fas fa-clipboard-check"></i>
+        </div>
+        <div class="cd-stat-body">
+            <div class="cd-stat-val" data-count="{{ stats.total_homework|default:0 }}">0</div>
+            <div class="cd-stat-lbl">Vazifalar</div>
+        </div>
+    </div>
+
+    <div class="cd-stat anim-pop d-5" style="--stat-color: #ec4899;">
+        <div class="cd-stat-ico" style="background:linear-gradient(135deg,#ec4899,#f43f5e);">
+            <i class="fas fa-circle-question"></i>
+        </div>
+        <div class="cd-stat-body">
+            <div class="cd-stat-val" data-count="{{ stats.total_quizzes|default:0 }}">0</div>
+            <div class="cd-stat-lbl">Testlar</div>
+        </div>
+    </div>
+
+    <div class="cd-stat anim-pop d-6" style="--stat-color: #eab308;">
+        <div class="cd-stat-ico" style="background:linear-gradient(135deg,#eab308,#f59e0b);">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="cd-stat-body">
+            <div class="cd-stat-val" data-count="{{ stats.avg_rating|default:0 }}" data-decimal="1">0</div>
+            <div class="cd-stat-lbl">Reyting</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════ PROGRESS ═══════ -->
+<div class="cd-card anim-up d-3">
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2 cd-mw0">
+            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shrink-0 shadow-md shadow-indigo-500/30">
+                <i class="fas fa-chart-simple text-[12px]"></i>
+            </div>
+            <div class="cd-mw0">
+                <div class="text-xs font-bold text-slate-900 dark:text-white cd-cl-1">Kurs jarayoni</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 cd-cl-1">Boshlanishdan tugashgacha</div>
+            </div>
+        </div>
+        <div class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 shrink-0" style="font-family:'Space Grotesk',sans-serif;">
+            <span data-count="{{ stats.progress_percent|default:0 }}">0</span>%
+        </div>
+    </div>
+
+    <div class="cd-prog mb-3">
+        <div class="cd-prog-fill" style="width: 0%;" data-target="{{ stats.progress_percent|default:0 }}%"></div>
+    </div>
+
+    <div class="cd-info-grid">
+        <div class="cd-info-mini bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/40 dark:to-slate-800/20">
+            <div class="cd-info-mini-val text-slate-900 dark:text-white" data-count="{{ stats.days_remaining|default:0 }}">0</div>
+            <div class="cd-info-mini-lbl">Qolgan kun</div>
+        </div>
+        <div class="cd-info-mini bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10">
+            <div class="cd-info-mini-val text-emerald-600 dark:text-emerald-400"><span data-count="{{ stats.completion_rate|default:0 }}">0</span>%</div>
+            <div class="cd-info-mini-lbl">Tugatish</div>
+        </div>
+        <div class="cd-info-mini bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-500/10 dark:to-blue-500/10">
+            <div class="cd-info-mini-val text-cyan-600 dark:text-cyan-400" data-count="{{ stats.total_groups|default:0 }}">0</div>
+            <div class="cd-info-mini-lbl">Guruhlar</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════ TABS ═══════ -->
+<div class="cd-tabs">
+    <div class="cd-tabs-track">
+        <button type="button" data-tab="overview" class="cd-tab active">
+            <i class="fas fa-circle-info"></i><span class="cd-tab-lbl">Umumiy</span>
+        </button>
+        <button type="button" data-tab="months" class="cd-tab">
+            <i class="fas fa-calendar-alt"></i><span class="cd-tab-lbl">Oylar</span>
+            <span class="cd-tab-badge">{{ stats.total_months|default:0 }}</span>
+        </button>
+        <button type="button" data-tab="lessons" class="cd-tab">
+            <i class="fas fa-book-open"></i><span class="cd-tab-lbl">Darslar</span>
+            <span class="cd-tab-badge">{{ stats.total_lessons|default:0 }}</span>
+        </button>
+        <button type="button" data-tab="groups" class="cd-tab">
+            <i class="fas fa-users-rectangle"></i><span class="cd-tab-lbl">Guruhlar</span>
+            <span class="cd-tab-badge">{{ stats.total_groups|default:0 }}</span>
+        </button>
+        <button type="button" data-tab="homework" class="cd-tab">
+            <i class="fas fa-clipboard-check"></i><span class="cd-tab-lbl">Vazifa</span>
+            <span class="cd-tab-badge">{{ stats.total_homework|default:0 }}</span>
+        </button>
+        <button type="button" data-tab="quizzes" class="cd-tab">
+            <i class="fas fa-circle-question"></i><span class="cd-tab-lbl">Testlar</span>
+            <span class="cd-tab-badge">{{ stats.total_quizzes|default:0 }}</span>
+        </button>
+        <button type="button" data-tab="students" class="cd-tab">
+            <i class="fas fa-user-graduate"></i><span class="cd-tab-lbl">Talaba</span>
+        </button>
+        <button type="button" data-tab="certificates" class="cd-tab">
+            <i class="fas fa-award"></i><span class="cd-tab-lbl">Sertifikat</span>
+        </button>
+        <button type="button" data-tab="stats" class="cd-tab">
+            <i class="fas fa-chart-line"></i><span class="cd-tab-lbl">Statistika</span>
+        </button>
+        <button type="button" data-tab="activity" class="cd-tab">
+            <i class="fas fa-clock-rotate-left"></i><span class="cd-tab-lbl">Faoliyat</span>
+        </button>
+        <button type="button" data-tab="settings" class="cd-tab">
+            <i class="fas fa-gear"></i><span class="cd-tab-lbl">Sozlama</span>
+        </button>
+    </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: OVERVIEW ═══════════════ -->
+<div id="panel-overview" class="cd-panel active">
+    {% if course.description %}
+    <div class="cd-card">
+        <div class="cd-card-h">
+            <div class="cd-card-t"><i class="fas fa-align-left"></i><span>Tavsif</span></div>
+        </div>
+        <div class="text-[12px] leading-relaxed text-slate-600 dark:text-slate-300" style="word-break:break-word;">
+            {{ course.description|linebreaks }}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="cd-card">
+        <div class="cd-card-h">
+            <div class="cd-card-t"><i class="fas fa-list-check"></i><span>Asosiy ma'lumotlar</span></div>
+        </div>
+        <div class="cd-grid-2">
+            <div class="cd-info-tile">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i class="fas fa-play-circle text-emerald-500 text-[10px]"></i>
+                    <span class="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Boshlanish</span>
+                </div>
+                <div class="text-xs font-bold text-slate-900 dark:text-white">{{ course.start_date|date:"d.m.Y"|default:"—" }}</div>
+            </div>
+            <div class="cd-info-tile">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i class="fas fa-stop-circle text-rose-500 text-[10px]"></i>
+                    <span class="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Tugash</span>
+                </div>
+                <div class="text-xs font-bold text-slate-900 dark:text-white">{{ course.end_date|date:"d.m.Y"|default:"—" }}</div>
+            </div>
+            <div class="cd-info-tile">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i class="fas fa-trophy text-amber-500 text-[10px]"></i>
+                    <span class="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">O'tish bali</span>
+                </div>
+                <div class="text-xs font-bold text-slate-900 dark:text-white">{{ course.passing_score }}%</div>
+            </div>
+            <div class="cd-info-tile">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i class="fas fa-user-check text-blue-500 text-[10px]"></i>
+                    <span class="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Davomat</span>
+                </div>
+                <div class="text-xs font-bold text-slate-900 dark:text-white">{{ course.attendance_required }}%</div>
+            </div>
+            <div class="cd-info-tile">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i class="fas fa-users text-violet-500 text-[10px]"></i>
+                    <span class="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Maks. talaba</span>
+                </div>
+                <div class="text-xs font-bold text-slate-900 dark:text-white">{{ course.max_students|default:"Cheksiz" }}</div>
+            </div>
+            <div class="cd-info-tile">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i class="fas fa-award text-pink-500 text-[10px]"></i>
+                    <span class="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">Sertifikat</span>
+                </div>
+                <div class="text-xs font-bold text-slate-900 dark:text-white">{% if course.is_certificate_enabled %}Ha{% else %}Yo'q{% endif %}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if course.tags.all %}
+    <div class="cd-card">
+        <div class="cd-card-h">
+            <div class="cd-card-t"><i class="fas fa-tags text-amber-500"></i><span>Teglar</span></div>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+            {% for tag in course.tags.all %}
+            <span class="cd-pill" style="background:{{ tag.color }}20;color:{{ tag.color }};">
+                <i class="fas fa-tag text-[8px]"></i>{{ tag.name }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if course.promo_video %}
+    <a href="{{ course.promo_video }}" target="_blank" rel="noopener"
+       class="cd-card block hover:shadow-lg transition-all duration-300 group" style="text-decoration:none;color:inherit;">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white shadow-lg shadow-rose-500/40 shrink-0 transition-transform duration-300 group-hover:scale-110">
+                <i class="fas fa-play text-lg"></i>
+            </div>
+            <div class="flex-1 cd-mw0">
+                <div class="text-xs font-bold text-slate-900 dark:text-white">Taqdimot video</div>
+                <div class="text-[10px] text-slate-500 cd-cl-1">{{ course.promo_video }}</div>
+            </div>
+            <i class="fas fa-arrow-up-right-from-square text-slate-400 text-[10px] transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i>
+        </div>
+    </a>
+    {% endif %}
+
+    <div class="cd-card">
+        <div class="cd-card-h">
+            <div class="cd-card-t"><i class="fas fa-bolt text-amber-500"></i><span>Tezkor amallar</span></div>
+        </div>
+        <div class="cd-grid-2">
+            <a href="{% url 'courses_admin:month_create' course_pk=course.pk %}"
+               class="cd-btn cd-btn-secondary flex-col group" style="padding:1rem .5rem;height:auto;">
+                <i class="fas fa-calendar-plus text-indigo-500 text-xl transition-transform duration-300 group-hover:scale-125 group-hover:rotate-6"></i>
+                <span class="text-[10px] mt-1">Oy qo'shish</span>
+            </a>
+            <button type="button" onclick="chooseMonthForLesson()"
+                    class="cd-btn cd-btn-secondary flex-col group" style="padding:1rem .5rem;height:auto;">
+                <i class="fas fa-book-medical text-emerald-500 text-xl transition-transform duration-300 group-hover:scale-125 group-hover:-rotate-6"></i>
+                <span class="text-[10px] mt-1">Dars qo'shish</span>
+            </button>
+            <a href="{% url 'courses_admin:group_create' %}"
+               class="cd-btn cd-btn-secondary flex-col group" style="padding:1rem .5rem;height:auto;">
+                <i class="fas fa-users-rectangle text-cyan-500 text-xl transition-transform duration-300 group-hover:scale-125 group-hover:rotate-6"></i>
+                <span class="text-[10px] mt-1">Guruh</span>
+            </a>
+            <button type="button" onclick="openSheet('sheetActions')"
+                    class="cd-btn cd-btn-secondary flex-col group" style="padding:1rem .5rem;height:auto;">
+                <i class="fas fa-cog text-slate-500 text-xl transition-transform duration-300 group-hover:rotate-180"></i>
+                <span class="text-[10px] mt-1">Boshqa</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: MONTHS ═══════════════ -->
+<div id="panel-months" class="cd-panel">
+    <div class="flex items-center justify-between mb-3">
+        <div class="cd-mw0">
+            <div class="text-sm font-bold text-slate-900 dark:text-white">Kurs oylari</div>
+            <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">Har oyda 4 hafta, 3 kun</div>
+        </div>
+        <a href="{% url 'courses_admin:month_create' course_pk=course.pk %}" class="cd-btn cd-btn-primary shrink-0">
+            <i class="fas fa-plus text-[10px]"></i><span>Yangi</span>
+        </a>
+    </div>
+
+    {% if months %}
+        {% for month in months %}
+        <div class="cd-month">
+            <div class="flex items-start gap-2.5 mb-1.5">
+                <div class="cd-month-num">{{ month.month_number }}</div>
+                <div class="flex-1 cd-mw0">
+                    <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                        <div class="text-[12.5px] font-bold text-slate-900 dark:text-white cd-cl-1">{{ month.title }}</div>
+                        {% if month.is_completed %}
+                        <span class="cd-pill bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+                            <i class="fas fa-check text-[7px]"></i>Tugagan
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[9.5px] text-slate-500 dark:text-slate-400 mb-1.5">
+                        <span class="inline-flex items-center gap-1">
+                            <i class="fas fa-calendar text-[8px]"></i>
+                            {{ month.start_date|date:"d.m" }} – {{ month.end_date|date:"d.m" }}
+                        </span>
+                        <span class="inline-flex items-center gap-1">
+                            <i class="fas fa-book text-[8px]"></i>{{ month.total_lessons }} dars
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="cd-prog flex-1">
+                            <div class="cd-prog-fill" style="width: 0%;" data-target="{{ month.progress_percent }}%"></div>
+                        </div>
+                        <span class="text-[9.5px] font-bold text-slate-600 dark:text-slate-400 shrink-0">{{ month.progress_percent }}%</span>
+                    </div>
+                </div>
+                <button type="button" class="cd-ico cd-acc-tg shrink-0"
+                        onclick="toggleMonthAccordion({{ month.pk }})" title="Kengaytirish">
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+            </div>
+
+            <div class="cd-acc" id="month-acc-{{ month.pk }}">
+                <div class="pt-2.5 border-t border-slate-200 dark:border-slate-800">
+                    {% if month.topics_covered %}
+                    <div class="mb-2.5">
+                        <div class="text-[9.5px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                            <i class="fas fa-list-ul mr-1"></i>Mavzular
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            {% for topic in month.topics_covered %}
+                            <span class="cd-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">{{ topic }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex items-center gap-1.5 mb-2">
+                        <a href="{% url 'courses_admin:month_edit' pk=month.pk %}" class="cd-btn cd-btn-secondary flex-1">
+                            <i class="fas fa-pen-to-square text-[10px]"></i><span>Tahrirlash</span>
+                        </a>
+                        <button type="button" onclick="deleteMonth({{ month.pk }}, '{{ month.title|escapejs }}')"
+                                class="cd-btn cd-btn-danger" style="padding:.5rem .75rem;">
+                            <i class="fas fa-trash-can text-[11px]"></i>
+                        </button>
+                    </div>
+
+                    {% if month.lessons.all %}
+                    <div class="space-y-1">
+                       {% for lesson in month.lessons.all|slice:":10" %}
+                            {% if not lesson.is_deleted %}
+                                <a href="{% url 'courses_admin:lesson_detail' pk=lesson.pk %}"
+                                   class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-200" style="text-decoration:none;color:inherit;">
+                                    <span class="w-6 h-6 rounded-md bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                        {{ lesson.lesson_number|default:"?" }}
+                                    </span>
+                                    <span class="text-[11px] font-medium text-slate-700 dark:text-slate-300 cd-cl-1 flex-1">{{ lesson.title }}</span>
+                                    {% if lesson.status == 'completed' %}<i class="fas fa-circle-check text-emerald-500 text-[10px] shrink-0"></i>{% endif %}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="cd-card">
+        <div class="cd-empty">
+            <div class="cd-empty-ico" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                <i class="fas fa-calendar-plus"></i>
+            </div>
+            <div class="text-sm font-bold text-slate-900 dark:text-white mb-1">Hali oylar yo'q</div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Birinchi oyni qo'shing</p>
+            <a href="{% url 'courses_admin:month_create' course_pk=course.pk %}" class="cd-btn cd-btn-primary">
+                <i class="fas fa-plus"></i>Oy qo'shish
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ═══════════════ PANEL: LESSONS ═══════════════ -->
+<div id="panel-lessons" class="cd-panel">
+    <div class="flex items-center justify-between mb-3">
+        <div class="cd-mw0">
+            <div class="text-sm font-bold text-slate-900 dark:text-white">Darslar</div>
+            <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{{ lessons|length }} ta</div>
+        </div>
+        <button type="button" onclick="chooseMonthForLesson()" class="cd-btn cd-btn-primary shrink-0">
+            <i class="fas fa-plus text-[10px]"></i><span>Yangi</span>
+        </button>
+    </div>
+
+    <div class="cd-search">
+        <i class="fas fa-search ico"></i>
+        <input type="text" id="lessonSearch" placeholder="Dars qidirish..." autocomplete="off">
+    </div>
+
+    {% if lessons %}
+    <div id="lessonsList">
+        {% for lesson in lessons %}
+        <div class="cd-lesson" data-lesson-title="{{ lesson.title|lower }}">
+            <div class="cd-day">
+                <div class="cd-day-n">{{ lesson.get_day_of_week_display|slice:":3"|upper }}</div>
+                <div class="cd-day-v">{% if lesson.lesson_date %}{{ lesson.lesson_date|date:"d" }}{% else %}{{ lesson.lesson_number|default:"—" }}{% endif %}</div>
+            </div>
+            <div class="flex-1 cd-mw0">
+                <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+                    <a href="{% url 'courses_admin:lesson_detail' pk=lesson.pk %}"
+                       class="text-[11.5px] font-bold text-slate-900 dark:text-white hover:text-indigo-600 cd-cl-1 flex-1" style="text-decoration:none;">
+                        {{ lesson.title }}
+                    </a>
+                    <span class="cd-pill shrink-0
+                        {% if lesson.status == 'completed' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400
+                        {% elif lesson.status == 'in_progress' %}bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400
+                        {% elif lesson.status == 'planned' %}bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300
+                        {% else %}bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400{% endif %}">
+                        {{ lesson.get_status_display }}
+                    </span>
+                </div>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9.5px] text-slate-500 dark:text-slate-400">
+                    {% if lesson.month %}<span><i class="fas fa-calendar text-[8px]"></i> {{ lesson.month.month_number }}-oy</span>{% endif %}
+                    <span><i class="fas fa-hashtag text-[8px]"></i> {{ lesson.lesson_number }}</span>
+                    {% if lesson.lesson_date %}<span><i class="fas fa-clock text-[8px]"></i> {{ lesson.lesson_date|date:"d.m" }}</span>{% endif %}
+                </div>
+            </div>
+            <div class="flex flex-col gap-1 shrink-0">
+                <a href="{% url 'courses_admin:lesson_detail' pk=lesson.pk %}" class="cd-ico cd-ico-sm cd-ico-pri"><i class="fas fa-eye"></i></a>
+                <a href="{% url 'courses_admin:lesson_edit' pk=lesson.pk %}" class="cd-ico cd-ico-sm"><i class="fas fa-pen-to-square"></i></a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="lessonsEmpty" class="cd-card hidden">
+        <div class="cd-empty"><p class="text-xs text-slate-500">Topilmadi</p></div>
+    </div>
+    {% else %}
+    <div class="cd-card">
+        <div class="cd-empty">
+            <div class="cd-empty-ico" style="background:linear-gradient(135deg,#10b981,#14b8a6)"><i class="fas fa-book-open"></i></div>
+            <div class="text-sm font-bold text-slate-900 dark:text-white mb-1">Darslar yo'q</div>
+            <button type="button" onclick="chooseMonthForLesson()" class="cd-btn cd-btn-primary"><i class="fas fa-plus"></i>Qo'shish</button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ═══════════════ PANEL: GROUPS ═══════════════ -->
+<div id="panel-groups" class="cd-panel">
+    <div class="flex items-center justify-between mb-3">
+        <div class="cd-mw0">
+            <div class="text-sm font-bold text-slate-900 dark:text-white">Guruhlar</div>
+            <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{{ groups|length }} ta</div>
+        </div>
+        <a href="{% url 'courses_admin:group_create' %}" class="cd-btn cd-btn-primary shrink-0">
+            <i class="fas fa-plus text-[10px]"></i><span>Yangi</span>
+        </a>
+    </div>
+
+    {% if groups %}
+        {% for group in groups %}
+        <div class="cd-card">
+            <div class="flex items-start gap-2.5">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base shrink-0 shadow-md"
+                     style="background:linear-gradient(135deg,{{ group.color|default:'#6366f1' }},{{ group.color|default:'#8b5cf6' }});">
+                    {{ group.name|first|upper }}
+                </div>
+                <div class="flex-1 cd-mw0">
+                    <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                        <a href="{% url 'courses_admin:group_detail' pk=group.pk %}"
+                           class="text-[12.5px] font-bold text-slate-900 dark:text-white cd-cl-1 hover:text-indigo-600" style="text-decoration:none;">
+                            {{ group.name }}
+                        </a>
+                        <span class="cd-pill shrink-0
+                            {% if group.status == 'active' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400
+                            {% else %}bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300{% endif %}">
+                            {{ group.get_status_display }}
+                        </span>
+                    </div>
+                    {% if group.schedule %}
+                    <div class="flex flex-wrap gap-1 mb-1.5">
+                        {% for day, time in group.schedule.items %}
+                        <span class="cd-pill bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400">
+                            <i class="fas fa-clock text-[7px]"></i>{{ day|slice:":3" }} {{ time }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[9.5px] text-slate-500 dark:text-slate-400 mb-1.5">
+                        <span><i class="fas fa-users text-[8px]"></i> {{ group.students_count_annot|default:0 }}/{{ group.max_students }}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="cd-prog flex-1">
+                            <div class="cd-prog-fill" style="width: 0%;" data-target="{{ group.capacity_percent }}%"></div>
+                        </div>
+                        <span class="text-[9.5px] font-bold text-slate-600 dark:text-slate-400 shrink-0">{{ group.capacity_percent }}%</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1 shrink-0">
+                    <a href="{% url 'courses_admin:group_detail' pk=group.pk %}" class="cd-ico cd-ico-sm cd-ico-pri"><i class="fas fa-eye"></i></a>
+                    <a href="{% url 'courses_admin:group_edit' pk=group.pk %}" class="cd-ico cd-ico-sm"><i class="fas fa-pen-to-square"></i></a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="cd-card">
+        <div class="cd-empty">
+            <div class="cd-empty-ico" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><i class="fas fa-users-rectangle"></i></div>
+            <div class="text-sm font-bold text-slate-900 dark:text-white mb-1">Guruhlar yo'q</div>
+            <a href="{% url 'courses_admin:group_create' %}" class="cd-btn cd-btn-primary"><i class="fas fa-plus"></i>Yaratish</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ═══════════════ PANEL: HOMEWORK ═══════════════ -->
+<!-- ═══════════════ PANEL: HOMEWORK ═══════════════ -->
+<div id="panel-homework" class="cd-panel">
+    <div class="mb-3">
+        <div class="text-sm font-bold text-slate-900 dark:text-white">Uyga vazifalar</div>
+        <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{{ homeworks|length }} ta</div>
+    </div>
+
+    {% if homeworks %}
+        {# ═══ MAVJUD VAZIFALAR RO'YXATI ═══ #}
+        {% for hw in homeworks %}
+        <div class="cd-card">
+            <div class="flex items-start gap-2">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shrink-0 shadow-md">
+                    <i class="fas fa-clipboard-check text-sm"></i>
+                </div>
+                <div class="flex-1 cd-mw0">
+                    <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                        <div class="text-[11.5px] font-bold text-slate-900 dark:text-white cd-cl-1">{{ hw.title }}</div>
+                        {% if hw.is_approved and hw.is_sent %}
+                        <span class="cd-pill shrink-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+                            <i class="fas fa-circle-check text-[7px]"></i>Faol
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[9.5px] text-slate-500 dark:text-slate-400">
+                        <span class="cd-cl-1" style="max-width:140px">
+                            <i class="fas fa-book text-[8px]"></i> {{ hw.lesson.title|truncatechars:20 }}
+                        </span>
+                        <span><i class="fas fa-star text-[8px]"></i> {{ hw.max_score }}</span>
+                        <span><i class="fas fa-clock text-[8px]"></i> {{ hw.deadline_days }}k</span>
+                    </div>
+                </div>
+                {# ✅ TO'G'RI — homework_form, lesson_pk bilan #}
+                <a href="{% url 'courses_admin:homework_form' lesson_pk=hw.lesson.pk %}"
+                   class="cd-ico cd-ico-sm shrink-0" title="Tahrirlash">
+                    <i class="fas fa-pen-to-square"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+
+    {% elif lessons %}
+        {# ═══ VAZIFALAR YO'Q, LEKIN DARSLAR BOR — DARSNI TANLASH ═══ #}
+        <div class="cd-card mb-3">
+            <div class="cd-empty" style="padding:1.25rem .75rem;">
+                <div class="cd-empty-ico" style="background:linear-gradient(135deg,#f59e0b,#f97316);width:52px;height:52px;font-size:22px;">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-900 dark:text-white mb-1">Hali vazifalar yo'q</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
+                    Uyga vazifa qo'shish uchun <strong>darsni tanlang</strong>
+                </p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500">
+                    Har bir dars uchun faqat bitta vazifa qo'shiladi
+                </p>
+            </div>
+        </div>
+
+        {# Darslar ro'yxati — bosilsa homework_form ochiladi #}
+        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-2 px-1">
+            <i class="fas fa-book-open mr-1"></i>Darsni tanlang
+        </div>
+
+        {% for lesson in lessons %}
+        <a href="{% url 'courses_admin:homework_form' lesson_pk=lesson.pk %}"
+           class="cd-card block group" style="text-decoration:none;color:inherit;margin-bottom:.5rem;">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+                    {{ lesson.lesson_number }}
+                </div>
+                <div class="flex-1 cd-mw0">
+                    <div class="text-[11.5px] font-bold text-slate-900 dark:text-white cd-cl-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {{ lesson.title }}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9.5px] text-slate-500 dark:text-slate-400">
+                        {% if lesson.month %}
+                        <span><i class="fas fa-calendar text-[8px]"></i> {{ lesson.month.month_number }}-oy</span>
+                        {% endif %}
+                        {% if lesson.has_homework %}
+                        <span class="text-amber-600 dark:text-amber-400 font-semibold">
+                            <i class="fas fa-circle-check text-[8px]"></i> Vazifa bor
+                        </span>
+                        {% else %}
+                        <span class="text-slate-400">
+                            <i class="fas fa-circle-plus text-[8px]"></i> Vazifa yo'q
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-slate-400 text-[10px] shrink-0 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-indigo-500"></i>
+            </div>
+        </a>
+        {% endfor %}
+
+    {% else %}
+        {# ═══ NA VAZIFA, NA DARS — DARS QO'SHISH KERAK ═══ #}
+        <div class="cd-card">
+            <div class="cd-empty">
+                <div class="cd-empty-ico" style="background:linear-gradient(135deg,#f59e0b,#f97316)">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-900 dark:text-white mb-1">Darslar yo'q</div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                    Avval kamida bitta dars qo'shing
+                </p>
+
+                {# ✅ To'g'ri — DARS qo'shish tugmasi #}
+                <button type="button" onclick="chooseMonthForLesson()" class="cd-btn cd-btn-primary">
+                    <i class="fas fa-plus text-[10px]"></i>
+                    <span>Uyga vazifa qo'shish</span>
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- ═══════════════ PANEL: QUIZZES ═══════════════ -->
+<div id="panel-quizzes" class="cd-panel">
+    <div class="mb-3">
+        <div class="text-sm font-bold text-slate-900 dark:text-white">Testlar</div>
+        <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{{ quizzes|length }} ta</div>
+    </div>
+    {% if quizzes %}
+        {% for quiz in quizzes %}
+        <a href="{% url 'courses_admin:quiz_detail' pk=quiz.pk %}" class="cd-card block" style="text-decoration:none;color:inherit;">
+            <div class="flex items-start gap-2">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white shrink-0 shadow-md">
+                    <i class="fas fa-circle-question text-sm"></i>
+                </div>
+                <div class="flex-1 cd-mw0">
+                    <div class="text-[11.5px] font-bold text-slate-900 dark:text-white cd-cl-1 mb-1">{{ quiz.title }}</div>
+                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[9.5px] text-slate-500 dark:text-slate-400 mb-1">
+                        <span><i class="fas fa-list-ol text-[8px]"></i> {{ quiz.questions_count_annot|default:0 }}</span>
+                        <span><i class="fas fa-clock text-[8px]"></i> {{ quiz.duration_minutes }}d</span>
+                        <span><i class="fas fa-trophy text-[8px]"></i> {{ quiz.passing_score }}%</span>
+                    </div>
+                    <span class="cd-pill
+                        {% if quiz.difficulty == 'easy' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400
+                        {% elif quiz.difficulty == 'medium' %}bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400
+                        {% else %}bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-400{% endif %}">
+                        {{ quiz.get_difficulty_display }}
+                    </span>
+                </div>
+                <i class="fas fa-chevron-right text-slate-400 text-[10px] shrink-0 mt-2"></i>
+            </div>
+        </a>
+        {% endfor %}
+    {% else %}
+    <div class="cd-card">
+        <div class="cd-empty">
+            <div class="cd-empty-ico" style="background:linear-gradient(135deg,#ec4899,#f43f5e)"><i class="fas fa-circle-question"></i></div>
+            <div class="text-sm font-bold text-slate-900 dark:text-white mb-1">Testlar yo'q</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ═══════════════ PANEL: STUDENTS ═══════════════ -->
+<div id="panel-students" class="cd-panel">
+    <div class="mb-3">
+        <div class="text-sm font-bold text-slate-900 dark:text-white">Talabalar</div>
+        <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{{ enrollments|length }} ta</div>
+    </div>
+    <div class="cd-search">
+        <i class="fas fa-search ico"></i>
+        <input type="text" id="studentSearch" placeholder="Talaba qidirish..." autocomplete="off">
+    </div>
+    {% if enrollments %}
+    <div id="studentsList">
+        {% for enrollment in enrollments %}
+        <div class="cd-card cd-student-card" data-student-name="{{ enrollment.student.user.get_full_name|lower }} {{ enrollment.student.user.phone_number }}">
+            <div class="flex items-center gap-2.5">
+                <div class="relative shrink-0">
+                    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                        {{ enrollment.student.user.first_name|first|upper }}{{ enrollment.student.user.last_name|first|upper }}
+                    </div>
+                    {% if enrollment.status == 'active' %}
+                    <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
+                    {% endif %}
+                </div>
+                <div class="flex-1 cd-mw0">
+                    <div class="text-[11.5px] font-bold text-slate-900 dark:text-white cd-cl-1">{{ enrollment.student.user.get_full_name }}</div>
+                    <div class="text-[9.5px] text-slate-500 dark:text-slate-400 cd-cl-1">{{ enrollment.student.user.phone_number }}</div>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        {% if enrollment.group %}
+                        <span class="cd-pill bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-400">{{ enrollment.group.name }}</span>
+                        {% endif %}
+                        <div class="flex items-center gap-1">
+                            <div class="cd-prog" style="width:44px;"><div class="cd-prog-fill" style="width: 0%;" data-target="{{ enrollment.progress_percent }}%"></div></div>
+                            <span class="text-[9px] font-bold text-slate-600 dark:text-slate-400">{{ enrollment.progress_percent|floatformat:0 }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="studentsEmpty" class="cd-card hidden"><div class="cd-empty"><p class="text-xs text-slate-500">Topilmadi</p></div></div>
+    {% else %}
+    <div class="cd-card">
+        <div class="cd-empty">
+            <div class="cd-empty-ico" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"><i class="fas fa-user-graduate"></i></div>
+            <div class="text-sm font-bold text-slate-900 dark:text-white">Talabalar yo'q</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ═══════════════ PANEL: CERTIFICATES ═══════════════ -->
+<div id="panel-certificates" class="cd-panel">
+    <div class="mb-3">
+        <div class="text-sm font-bold text-slate-900 dark:text-white">Sertifikatlar</div>
+        <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{{ certificates|length }} ta</div>
+    </div>
+    {% if certificates %}
+        {% for cert in certificates %}
+        <div class="cd-card">
+            <div class="flex items-center gap-2.5">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shrink-0 shadow-md">
+                    <i class="fas fa-award text-base"></i>
+                </div>
+                <div class="flex-1 cd-mw0">
+                    <div class="text-[11.5px] font-bold text-slate-900 dark:text-white cd-cl-1">{{ cert.enrollment.student.user.get_full_name }}</div>
+                    <div class="text-[9.5px] text-slate-500 dark:text-slate-400 cd-cl-1 font-mono">№ {{ cert.certificate_number }}</div>
+                </div>
+                {% if cert.file %}
+                <a href="{{ cert.file.url }}" target="_blank" rel="noopener" class="cd-ico cd-ico-sm shrink-0 cd-ico-pri"><i class="fas fa-download"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="cd-card">
+        <div class="cd-empty">
+            <div class="cd-empty-ico" style="background:linear-gradient(135deg,#f59e0b,#f97316)"><i class="fas fa-award"></i></div>
+            <div class="text-sm font-bold text-slate-900 dark:text-white">Sertifikatlar yo'q</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ═══════════════ PANEL: STATS ═══════════════ -->
+<div id="panel-stats" class="cd-panel">
+    <div class="cd-card">
+        <div class="cd-card-h"><div class="cd-card-t"><i class="fas fa-chart-line"></i><span>Faollik (7 kun)</span></div></div>
+        <div class="cd-chart"><canvas id="activityChart"></canvas></div>
+    </div>
+    <div class="cd-card">
+        <div class="cd-card-h"><div class="cd-card-t"><i class="fas fa-chart-pie text-pink-500"></i><span>Talabalar holati</span></div></div>
+        <div class="cd-chart"><canvas id="studentsChart"></canvas></div>
+        <div class="cd-info-grid mt-3">
+            <div class="cd-info-mini bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10">
+                <div class="cd-info-mini-val text-emerald-600 dark:text-emerald-400" data-count="{{ stats.total_students|default:0 }}">0</div>
+                <div class="cd-info-mini-lbl">Aktiv</div>
+            </div>
+            <div class="cd-info-mini bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10">
+                <div class="cd-info-mini-val text-amber-600 dark:text-amber-400" data-count="{{ stats.frozen_students|default:0 }}">0</div>
+                <div class="cd-info-mini-lbl">Muzlatilgan</div>
+            </div>
+            <div class="cd-info-mini bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-500/10 dark:to-violet-500/10">
+                <div class="cd-info-mini-val text-purple-600 dark:text-purple-400" data-count="{{ stats.completed_students|default:0 }}">0</div>
+                <div class="cd-info-mini-lbl">Tugatgan</div>
+            </div>
+        </div>
+    </div>
+    <div class="cd-card">
+        <div class="cd-card-h"><div class="cd-card-t"><i class="fas fa-ranking-star text-amber-500"></i><span>Top talabalar</span></div></div>
+        {% if top_students %}
+            {% for student in top_students %}
+            <div class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-200 hover:translate-x-1">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0 shadow-md
+                    {% if forloop.counter == 1 %}bg-gradient-to-br from-amber-400 to-orange-500
+                    {% elif forloop.counter == 2 %}bg-gradient-to-br from-slate-400 to-slate-500
+                    {% elif forloop.counter == 3 %}bg-gradient-to-br from-orange-400 to-amber-600
+                    {% else %}bg-gradient-to-br from-indigo-400 to-violet-500{% endif %}">{{ forloop.counter }}</div>
+                <div class="flex-1 cd-mw0">
+                    <div class="text-[11px] font-semibold text-slate-900 dark:text-white cd-cl-1">{{ student.user.get_full_name }}</div>
+                    <div class="text-[9.5px] text-slate-500 dark:text-slate-400 cd-cl-1">{{ student.user.phone_number }}</div>
+                </div>
+                <div class="text-[12px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 shrink-0">{{ student.score_total|default:0 }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-xs text-slate-500 text-center py-4">Ma'lumot yo'q</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<!-- ═══════════════ PANEL: ACTIVITY ═══════════════ -->
+<div id="panel-activity" class="cd-panel">
+    <div class="text-sm font-bold text-slate-900 dark:text-white mb-3">Faoliyat tarixi</div>
+    {% if activities %}
+        {% for activity in activities %}
+        <div class="cd-tl">
+            <div class="cd-tl-dot"><i class="fas fa-circle text-[4px]"></i></div>
+            <div class="cd-card" style="margin-bottom:.5rem;">
+                <div class="flex items-start justify-between gap-2 mb-0.5">
+                    <div class="text-[11.5px] font-semibold text-slate-900 dark:text-white cd-cl-1 flex-1">
+                        {{ activity.user.get_full_name|default:activity.user.phone_number|default:"Tizim" }}
+                    </div>
+                    <div class="text-[9.5px] text-slate-400 shrink-0">{{ activity.created_at|timesince }} oldin</div>
+                </div>
+                <p class="text-[10.5px] text-slate-600 dark:text-slate-400">{{ activity.description|default:activity.get_action_display }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="cd-card"><div class="cd-empty"><p class="text-xs text-slate-500">Faoliyat yo'q</p></div></div>
+    {% endif %}
+</div>
+
+
+<!-- ═══════════════ PANEL: SETTINGS ═══════════════ -->
+<div id="panel-settings" class="cd-panel">
+    <div class="cd-card">
+        <div class="cd-card-h"><div class="cd-card-t"><i class="fas fa-gear"></i><span>Tezkor sozlamalar</span></div></div>
+        <form method="post" action="{% url 'courses_admin:edit' pk=course.pk %}" class="space-y-3">
+            {% csrf_token %}
+            <div class="cd-grid-2">
+                <div>
+                    <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Holat</label>
+                    <select name="status" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors">
+                        {% for value, label in status_choices %}<option value="{{ value }}" {% if course.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Daraja</label>
+                    <select name="level" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-500 transition-colors">
+                        {% for value, label in level_choices %}<option value="{{ value }}" {% if course.level == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" name="is_active" {% if course.is_active %}checked{% endif %} class="w-4 h-4 rounded text-indigo-600">
+                    <span class="text-[11px] font-medium text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 transition-colors">Faol</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" name="is_featured" {% if course.is_featured %}checked{% endif %} class="w-4 h-4 rounded text-indigo-600">
+                    <span class="text-[11px] font-medium text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 transition-colors">Tanlangan</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" name="is_certificate_enabled" {% if course.is_certificate_enabled %}checked{% endif %} class="w-4 h-4 rounded text-indigo-600">
+                    <span class="text-[11px] font-medium text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 transition-colors">Sertifikat</span>
+                </label>
+            </div>
+            <button type="submit" class="cd-btn cd-btn-primary cd-btn-block">
+                <i class="fas fa-floppy-disk text-[11px]"></i>Saqlash
+            </button>
+        </form>
+    </div>
+
+    <div class="cd-card" style="border-color:#fecdd3;">
+        <div class="cd-card-h">
+            <div class="cd-card-t" style="color:#e11d48;">
+                <i class="fas fa-triangle-exclamation" style="color:#e11d48;background:linear-gradient(135deg,rgba(225,29,72,0.15),rgba(244,63,94,0.15));"></i>
+                <span>Xavfli hudud</span>
+            </div>
+        </div>
+        <p class="text-[10.5px] text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">Kursni o'chirsangiz, hamma narsa o'chiriladi!</p>
+        <button type="button" onclick="deleteCourse({{ course.pk }}, '{{ course.title|escapejs }}')"
+                class="cd-btn cd-btn-danger cd-btn-block">
+            <i class="fas fa-trash-can text-[11px]"></i>O'chirish
+        </button>
+    </div>
+</div>
+
+</div><!-- /.cd-layout-left -->
+
+
+<!-- ═══════════════ RIGHT SIDEBAR ═══════════════ -->
+<aside class="cd-layout-right">
+    <div class="cd-card anim-up d-4">
+        <div class="cd-card-h">
+            <div class="cd-card-t"><i class="fas fa-user-tie"></i><span>O'qituvchi</span></div>
+        </div>
+        {% if course.teacher %}
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-md">
+                {{ course.teacher.first_name|first|upper }}{{ course.teacher.last_name|first|upper }}
+            </div>
+            <div class="flex-1 cd-mw0">
+                <div class="text-xs font-bold text-slate-900 dark:text-white cd-cl-1">{{ course.teacher.get_full_name|default:course.teacher.phone_number }}</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ course.teacher.phone_number }}</div>
+            </div>
+            <a href="tel:{{ course.teacher.phone_number }}" class="cd-ico cd-ico-pri"><i class="fas fa-phone"></i></a>
+        </div>
+        {% else %}
+        <p class="text-xs text-slate-500 text-center py-2">Belgilanmagan</p>
+        {% endif %}
+    </div>
+
+    <div class="cd-card">
+        <div class="cd-card-h">
+            <div class="cd-card-t"><i class="fas fa-money-bill-wave text-emerald-500"></i><span>Narx</span></div>
+        </div>
+        {% if course.is_free or course.price == 0 %}
+        <div class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500" style="font-family:'Space Grotesk',sans-serif;">BEPUL</div>
+        {% else %}
+        <div class="text-2xl font-bold text-slate-900 dark:text-white" style="font-family:'Space Grotesk',sans-serif;">
+            {{ course.current_price|floatformat:0 }} <span class="text-sm text-slate-500 font-normal">so'm</span>
+        </div>
+        {% if course.discounted_price %}
+        <div class="flex items-center gap-2 mt-2">
+            <span class="text-sm line-through text-slate-400">{{ course.price|floatformat:0 }}</span>
+            <span class="cd-pill bg-gradient-to-r from-rose-500 to-pink-500 text-white">-{{ course.discount_percent }}%</span>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    {% if course.tags.all %}
+    <div class="cd-card">
+        <div class="cd-card-h"><div class="cd-card-t"><i class="fas fa-tags text-amber-500"></i><span>Teglar</span></div></div>
+        <div class="flex flex-wrap gap-1.5">
+            {% for tag in course.tags.all %}
+            <span class="cd-pill" style="background:{{ tag.color }}20;color:{{ tag.color }};">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="cd-card">
+        <div class="cd-card-h"><div class="cd-card-t"><i class="fas fa-bolt text-amber-500"></i><span>Tezkor</span></div></div>
+        <div class="grid grid-cols-2 gap-2">
+            <a href="{% url 'courses_admin:month_create' course_pk=course.pk %}" class="cd-btn cd-btn-secondary flex-col" style="padding:.85rem .35rem;height:auto;">
+                <i class="fas fa-calendar-plus text-indigo-500 text-base"></i>
+                <span class="text-[10px] mt-1">Oy</span>
+            </a>
+            <button type="button" onclick="chooseMonthForLesson()" class="cd-btn cd-btn-secondary flex-col" style="padding:.85rem .35rem;height:auto;">
+                <i class="fas fa-book-medical text-emerald-500 text-base"></i>
+                <span class="text-[10px] mt-1">Dars</span>
+            </button>
+            <a href="{% url 'courses_admin:group_create' %}" class="cd-btn cd-btn-secondary flex-col" style="padding:.85rem .35rem;height:auto;">
+                <i class="fas fa-users-rectangle text-cyan-500 text-base"></i>
+                <span class="text-[10px] mt-1">Guruh</span>
+            </a>
+            <button type="button" onclick="openSheet('sheetActions')" class="cd-btn cd-btn-secondary flex-col" style="padding:.85rem .35rem;height:auto;">
+                <i class="fas fa-cog text-slate-500 text-base"></i>
+                <span class="text-[10px] mt-1">Boshqa</span>
+            </button>
+        </div>
+    </div>
+</aside>
+
+</div><!-- /.cd-layout -->
+
+
+<!-- ═══════════════ FAB ═══════════════ -->
+<button type="button" class="cd-fab" onclick="openSheet('sheetQuickAdd')" title="Tez qo'shish">
+    <i class="fas fa-plus"></i>
+</button>
+
+
+<!-- ═══════════════ SHEETS ═══════════════ -->
+
+<!-- Quick Add Sheet -->
+<div id="sheetQuickAdd" class="cd-sheet-ov hidden">
+    <div class="cd-sheet">
+        <div class="cd-sheet-bar"></div>
+        <div class="cd-sheet-h">
+            <div class="text-sm font-bold text-slate-900 dark:text-white">Tez qo'shish</div>
+            <button type="button" onclick="closeSheet('sheetQuickAdd')" class="cd-ico cd-ico-sm"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="cd-sheet-b">
+            <div class="cd-grid-2">
+                <a href="{% url 'courses_admin:month_create' course_pk=course.pk %}"
+                   class="flex flex-col items-center gap-2 p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 active:scale-95 transition-all" style="text-decoration:none;">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                        <i class="fas fa-calendar-plus text-lg"></i>
+                    </div>
+                    <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400">Yangi oy</span>
+                </a>
+                <button type="button" onclick="closeSheet('sheetQuickAdd'); chooseMonthForLesson()"
+                        class="flex flex-col items-center gap-2 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 active:scale-95 transition-all">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                        <i class="fas fa-book-medical text-lg"></i>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">Yangi dars</span>
+                </button>
+                <a href="{% url 'courses_admin:group_create' %}"
+                   class="flex flex-col items-center gap-2 p-3 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 active:scale-95 transition-all" style="text-decoration:none;">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/30">
+                        <i class="fas fa-users-rectangle text-lg"></i>
+                    </div>
+                    <span class="text-xs font-bold text-cyan-700 dark:text-cyan-400">Yangi guruh</span>
+                </a>
+                <a href="{% url 'courses_admin:edit' pk=course.pk %}"
+                   class="flex flex-col items-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 active:scale-95 transition-all" style="text-decoration:none;">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/30">
+                        <i class="fas fa-pen-to-square text-lg"></i>
+                    </div>
+                    <span class="text-xs font-bold text-amber-700 dark:text-amber-400">Tahrirlash</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions Sheet -->
+<div id="sheetActions" class="cd-sheet-ov hidden">
+    <div class="cd-sheet">
+        <div class="cd-sheet-bar"></div>
+        <div class="cd-sheet-h">
+            <div class="text-sm font-bold text-slate-900 dark:text-white">Kurs amallari</div>
+            <button type="button" onclick="closeSheet('sheetActions')" class="cd-ico cd-ico-sm"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="cd-sheet-b">
+            <a href="{% url 'courses_admin:edit' pk=course.pk %}" class="cd-li">
+                <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-500/15 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                    <i class="fas fa-pen-to-square"></i>
+                </div>
+                <div class="flex-1 cd-mw0"><div class="text-xs font-bold text-slate-900 dark:text-white">Tahrirlash</div></div>
+                <i class="fas fa-chevron-right text-slate-400 text-[10px]"></i>
+            </a>
+            <button type="button" onclick="closeSheet('sheetActions'); togglePublish({{ course.pk }}, '{{ course.status }}')" class="cd-li">
+                <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="flex-1 cd-mw0"><div class="text-xs font-bold text-slate-900 dark:text-white">
+                    {% if course.status == 'published' %}E'londan olish{% else %}E'lon qilish{% endif %}
+                </div></div>
+                <i class="fas fa-chevron-right text-slate-400 text-[10px]"></i>
+            </button>
+            <button type="button" onclick="closeSheet('sheetActions'); duplicateCourse({{ course.pk }})" class="cd-li">
+                <div class="w-11 h-11 rounded-xl bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                    <i class="fas fa-copy"></i>
+                </div>
+                <div class="flex-1 cd-mw0"><div class="text-xs font-bold text-slate-900 dark:text-white">Nusxa olish</div></div>
+                <i class="fas fa-chevron-right text-slate-400 text-[10px]"></i>
+            </button>
+            <button type="button" onclick="closeSheet('sheetActions'); deleteCourse({{ course.pk }}, '{{ course.title|escapejs }}')" class="cd-li">
+                <div class="w-11 h-11 rounded-xl bg-rose-100 dark:bg-rose-500/15 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                    <i class="fas fa-trash-can"></i>
+                </div>
+                <div class="flex-1 cd-mw0"><div class="text-xs font-bold text-rose-600 dark:text-rose-400">O'chirish</div></div>
+                <i class="fas fa-chevron-right text-slate-400 text-[10px]"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Choose Month Sheet -->
+<div id="sheetChooseMonth" class="cd-sheet-ov hidden">
+    <div class="cd-sheet">
+        <div class="cd-sheet-bar"></div>
+        <div class="cd-sheet-h">
+            <div class="cd-mw0">
+                <div class="text-sm font-bold text-slate-900 dark:text-white">Dars qo'shish</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400">Qaysi oyga?</div>
+            </div>
+            <button type="button" onclick="closeSheet('sheetChooseMonth')" class="cd-ico cd-ico-sm shrink-0"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="cd-sheet-b">
+            {% for month in months %}
+            <a href="{% url 'courses_admin:lesson_create' month_pk=month.pk %}" class="cd-li">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-md">
+                    {{ month.month_number }}
+                </div>
+                <div class="flex-1 cd-mw0">
+                    <div class="text-xs font-bold text-slate-900 dark:text-white cd-cl-1">{{ month.title }}</div>
+                    <div class="text-[10px] text-slate-500">{{ month.total_lessons }} dars</div>
+                </div>
+                <i class="fas fa-chevron-right text-slate-400 text-[10px]"></i>
+            </a>
+            {% empty %}
+            <div class="cd-empty">
+                <div class="cd-empty-ico" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <p class="text-xs text-slate-500 mb-3">Hali oylar yo'q</p>
+                <a href="{% url 'courses_admin:month_create' course_pk=course.pk %}" class="cd-btn cd-btn-primary">
+                    <i class="fas fa-plus"></i>Oy qo'shish
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Sheet -->
+<div id="sheetConfirm" class="cd-sheet-ov hidden">
+    <div class="cd-sheet" style="max-width:420px;">
+        <div class="cd-sheet-bar"></div>
+        <div class="cd-sheet-b" style="text-align:center;padding:2rem 1.25rem 1.25rem;">
+            <div class="relative inline-block mb-4">
+                <div class="absolute inset-0 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 blur-2xl opacity-60" style="animation:cdPulse 2s ease-in-out infinite;"></div>
+                <div class="relative w-16 h-16 rounded-full bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-500/20 dark:to-pink-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 mx-auto"
+                     style="animation:cdBounceIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                    <i class="fas fa-triangle-exclamation text-2xl"></i>
+                </div>
+            </div>
+            <div id="confirmTitle" class="text-base font-bold text-slate-900 dark:text-white mb-2" style="font-family:'Space Grotesk',sans-serif;"></div>
+            <p id="confirmMessage" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs mx-auto"></p>
+        </div>
+        <div class="cd-sheet-f" style="gap:.625rem;">
+            <button type="button" id="confirmCancel" class="cd-btn cd-btn-secondary flex-1">
+                <i class="fas fa-times text-[10px]"></i>Bekor
+            </button>
+            <button type="button" id="confirmOk" class="cd-btn cd-btn-danger flex-1">
+                <i class="fas fa-check text-[10px]"></i>Tasdiqlash
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toasts container -->
+<div id="toastWrap" class="cd-toasts"></div>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// URLS — Django template tags orqali, JS da ishlatish uchun
+// ═══════════════════════════════════════════════════════════════
+const URLS = {
+    delete: "{% url 'courses_admin:delete' pk=0 %}".replace('/0/', '/PK/'),
+    duplicate: "{% url 'courses_admin:duplicate' pk=0 %}".replace('/0/', '/PK/'),
+    togglePublish: "{% url 'courses_admin:toggle_publish' pk=0 %}".replace('/0/', '/PK/'),
+    monthDelete: "{% url 'courses_admin:month_delete' pk=0 %}".replace('/0/', '/PK/'),
+    listUrl: "{% url 'courses_admin:list' %}",
+};
+
+function buildUrl(template, pk) {
+    return template.replace('PK', pk);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CSRF
+// ═══════════════════════════════════════════════════════════════
+const CSRF = (() => {
+    let v = null;
+    document.cookie.split(';').forEach(c => {
+        const [k, val] = c.trim().split('=');
+        if (k === 'csrftoken') v = decodeURIComponent(val);
+    });
+    return v;
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function toast(msg, type='success') {
+    const bg = {
+        success: 'linear-gradient(135deg,#059669,#10b981)',
+        error: 'linear-gradient(135deg,#e11d48,#f43f5e)',
+        warning: 'linear-gradient(135deg,#f59e0b,#f97316)',
+        info: 'linear-gradient(135deg,#4f46e5,#6366f1)'
+    }[type] || 'linear-gradient(135deg,#4f46e5,#6366f1)';
+    const icon = { success:'fa-circle-check', error:'fa-circle-xmark', warning:'fa-triangle-exclamation', info:'fa-circle-info' }[type] || 'fa-circle-info';
+    const el = document.createElement('div');
+    el.className = 'cd-toast';
+    el.style.background = bg;
+    el.innerHTML = `<i class="fas ${icon}"></i><span class="flex-1">${msg}</span>`;
+    document.getElementById('toastWrap').appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(16px) scale(0.9)';
+        el.style.transition = 'all .35s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => el.remove(), 350);
+    }, 3400);
+}
+window.toast = toast;
+
+// ═══════════════════════════════════════════════════════════════
+// COUNTER ANIMATION
+// ═══════════════════════════════════════════════════════════════
+function animateCounter(el) {
+    const target = parseFloat(el.dataset.count || el.textContent) || 0;
+    const isDecimal = el.dataset.decimal === '1';
+    const duration = 1400;
+    const start = performance.now();
+    function step(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        const current = target * eased;
+        el.textContent = isDecimal ? current.toFixed(1) : Math.round(current);
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = isDecimal ? target.toFixed(1) : Math.round(target);
+    }
+    requestAnimationFrame(step);
+}
+
+function animateProgressBars() {
+    document.querySelectorAll('.cd-prog-fill[data-target]').forEach((bar, i) => {
+        setTimeout(() => { bar.style.width = bar.dataset.target; }, 200 + i * 60);
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTERSECTION OBSERVER
+// ═══════════════════════════════════════════════════════════════
+function initObserver() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                if (el.dataset.count !== undefined && !el.dataset.counted) {
+                    el.dataset.counted = '1';
+                    animateCounter(el);
+                }
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.25 });
+    document.querySelectorAll('[data-count]:not([data-counted])').forEach(el => observer.observe(el));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+const TAB_KEY = 'cd-tab-v5';
+document.querySelectorAll('.cd-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.cd-tab').forEach(b => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('.cd-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+        try { localStorage.setItem(TAB_KEY, tab); } catch(e) {}
+        setTimeout(animateProgressBars, 80);
+        setTimeout(initObserver, 80);
+        const tabs = document.querySelector('.cd-tabs');
+        if (tabs) {
+            const y = tabs.getBoundingClientRect().top + window.scrollY - 120;
+            window.scrollTo({ top: Math.max(y, 0), behavior: 'smooth' });
+        }
+        // URL hash yangilash
+        history.replaceState(null, '', '?tab=' + tab);
+    });
+});
+
+// Tab tiklash
+(function() {
+    const params = new URLSearchParams(location.search);
+    const saved = params.get('tab') || localStorage.getItem(TAB_KEY);
+    if (saved && saved !== 'overview') {
+        setTimeout(() => {
+            document.querySelector(`.cd-tab[data-tab="${saved}"]`)?.click();
+        }, 200);
+    }
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// SHEETS
+// ═══════════════════════════════════════════════════════════════
+function openSheet(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeSheet(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('hidden');
+    document.body.style.overflow = '';
+}
+window.openSheet = openSheet;
+window.closeSheet = closeSheet;
+
+document.querySelectorAll('.cd-sheet-ov').forEach(ov => {
+    ov.addEventListener('click', (e) => {
+        if (e.target === ov) {
+            ov.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    });
+});
+
+function chooseMonthForLesson() { openSheet('sheetChooseMonth'); }
+window.chooseMonthForLesson = chooseMonthForLesson;
+
+// ═══════════════════════════════════════════════════════════════
+// ACCORDION
+// ═══════════════════════════════════════════════════════════════
+function toggleMonthAccordion(id) {
+    const body = document.getElementById('month-acc-' + id);
+    const btn = body?.previousElementSibling?.querySelector('.cd-acc-tg');
+    if (!body) return;
+    const isOpen = body.classList.toggle('open');
+    btn?.classList.toggle('open', isOpen);
+}
+window.toggleMonthAccordion = toggleMonthAccordion;
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIRM
+// ═══════════════════════════════════════════════════════════════
+function confirmAction(msg, title) {
+    return new Promise(resolve => {
+        const modal = document.getElementById('sheetConfirm');
+        document.getElementById('confirmTitle').textContent = title || 'Tasdiqlash';
+        document.getElementById('confirmMessage').textContent = msg;
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        const ok = document.getElementById('confirmOk');
+        const cancel = document.getElementById('confirmCancel');
+        function cleanup(r) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            ok.removeEventListener('click', onOk);
+            cancel.removeEventListener('click', onCancel);
+            modal.removeEventListener('click', onBg);
+            resolve(r);
+        }
+        function onOk() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+        function onBg(e) { if (e.target === modal) cleanup(false); }
+        ok.addEventListener('click', onOk);
+        cancel.addEventListener('click', onCancel);
+        modal.addEventListener('click', onBg);
+    });
+}
+window.confirmAction = confirmAction;
+
+// ═══════════════════════════════════════════════════════════════
+// AJAX HELPER
+// ═══════════════════════════════════════════════════════════════
+async function ajaxPost(url) {
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': CSRF,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    });
+    return await res.json();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DELETE COURSE
+// ═══════════════════════════════════════════════════════════════
+function deleteCourse(pk, title) {
+    confirmAction(`"${title}" kursini o'chirmoqchimisiz?`, 'Kursni o\'chirish').then(async ok => {
+        if (!ok) return;
+        try {
+            const d = await ajaxPost(buildUrl(URLS.delete, pk));
+            if (d.success) {
+                toast('✅ Kurs o\'chirildi', 'success');
+                setTimeout(() => location.href = URLS.listUrl, 700);
+            } else {
+                toast(d.error || 'Xatolik', 'error');
+            }
+        } catch (e) {
+            toast('Tarmoq xatosi', 'error');
+        }
+    });
+}
+window.deleteCourse = deleteCourse;
+
+// ═══════════════════════════════════════════════════════════════
+// DELETE MONTH
+// ═══════════════════════════════════════════════════════════════
+function deleteMonth(pk, title) {
+    confirmAction(`"${title}" oyini o'chirmoqchimisiz?`, 'Oyni o\'chirish').then(async ok => {
+        if (!ok) return;
+        try {
+            const d = await ajaxPost(buildUrl(URLS.monthDelete, pk));
+            if (d.success) {
+                toast('✅ Oy o\'chirildi', 'success');
+                setTimeout(() => location.reload(), 600);
+            } else {
+                toast(d.error || 'Xatolik', 'error');
+            }
+        } catch (e) {
+            toast('Tarmoq xatosi', 'error');
+        }
+    });
+}
+window.deleteMonth = deleteMonth;
+
+// ═══════════════════════════════════════════════════════════════
+// TOGGLE PUBLISH
+// ═══════════════════════════════════════════════════════════════
+function togglePublish(pk, current) {
+    const isPub = current === 'published';
+    confirmAction(
+        isPub ? 'Kursni e\'londan olishni tasdiqlaysizmi?' : 'Kursni e\'lon qilishni tasdiqlaysizmi?',
+        isPub ? 'E\'londan olish' : 'E\'lon qilish'
+    ).then(async ok => {
+        if (!ok) return;
+        try {
+            const d = await ajaxPost(buildUrl(URLS.togglePublish, pk));
+            if (d.success) {
+                toast(d.message || '✅ Holat yangilandi', 'success');
+                setTimeout(() => location.reload(), 700);
+            } else {
+                toast(d.error || 'Xatolik', 'error');
+            }
+        } catch (e) {
+            toast('Tarmoq xatosi', 'error');
+        }
+    });
+}
+window.togglePublish = togglePublish;
+
+// ═══════════════════════════════════════════════════════════════
+// DUPLICATE
+// ═══════════════════════════════════════════════════════════════
+function duplicateCourse(pk) {
+    confirmAction('Kursdan nusxa olishni tasdiqlaysizmi?', 'Nusxa olish').then(async ok => {
+        if (!ok) return;
+        try {
+            const d = await ajaxPost(buildUrl(URLS.duplicate, pk));
+            if (d.success) {
+                toast('✅ Nusxa yaratildi!', 'success');
+                if (d.new_id) {
+                    setTimeout(() => {
+                        location.href = URLS.listUrl + d.new_id + '/';
+                    }, 800);
+                } else {
+                    setTimeout(() => location.reload(), 800);
+                }
+            } else {
+                toast(d.error || 'Xatolik', 'error');
+            }
+        } catch (e) {
+            toast('Tarmoq xatosi', 'error');
+        }
+    });
+}
+window.duplicateCourse = duplicateCourse;
+
+// ═══════════════════════════════════════════════════════════════
+// SEARCHES
+// ═══════════════════════════════════════════════════════════════
+function initLocalSearch(inputId, listSelector, itemSelector, emptyId, dataAttr) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    let timer;
+    input.addEventListener('input', function() {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            const q = this.value.toLowerCase().trim();
+            let visible = 0;
+            document.querySelectorAll(`${listSelector} ${itemSelector}`).forEach(row => {
+                const match = !q || (row.dataset[dataAttr] || '').includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            document.getElementById(emptyId)?.classList.toggle('hidden', visible > 0);
+        }, 180);
+    });
+}
+initLocalSearch('lessonSearch', '#lessonsList', '.cd-lesson', 'lessonsEmpty', 'lessonTitle');
+initLocalSearch('studentSearch', '#studentsList', '.cd-student-card', 'studentsEmpty', 'studentName');
+
+// ═══════════════════════════════════════════════════════════════
+// SWIPE GESTURES (tabs)
+// ═══════════════════════════════════════════════════════════════
+(function() {
+    let startX = 0, startY = 0;
+    const min = 80;
+    const container = document.querySelector('.cd-page');
+    container?.addEventListener('touchstart', (e) => {
+        startX = e.changedTouches[0].screenX;
+        startY = e.changedTouches[0].screenY;
+    }, { passive: true });
+    container?.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].screenX - startX;
+        const dy = e.changedTouches[0].screenY - startY;
+        if (Math.abs(dx) < min) return;
+        if (Math.abs(dy) > Math.abs(dx) * 0.7) return;
+        const tabs = Array.from(document.querySelectorAll('.cd-tab'));
+        const idx = tabs.findIndex(t => t.classList.contains('active'));
+        if (idx === -1) return;
+        let next = idx;
+        if (dx < 0 && idx < tabs.length - 1) next = idx + 1;
+        if (dx > 0 && idx > 0) next = idx - 1;
+        tabs[next]?.click();
+    }, { passive: true });
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// ESC — close sheets
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.cd-sheet-ov:not(.hidden)').forEach(el => el.classList.add('hidden'));
+        document.body.style.overflow = '';
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+    // Counters
+    setTimeout(() => {
+        document.querySelectorAll('.cd-stat-val[data-count]').forEach(animateCounter);
+    }, 400);
+
+    // Progress bars
+    setTimeout(animateProgressBars, 500);
+
+    // Observer
+    initObserver();
+
+    // ═══ CHART: Activity ═══
+    const actCtx = document.getElementById('activityChart');
+    if (actCtx && typeof Chart !== 'undefined') {
+        const grad = actCtx.getContext('2d').createLinearGradient(0, 0, 0, 220);
+        grad.addColorStop(0, 'rgba(99,102,241,0.4)');
+        grad.addColorStop(1, 'rgba(99,102,241,0)');
+        new Chart(actCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|default:"[]"|safe }},
+                datasets: [{
+                    data: {{ chart_data|default:"[]"|safe }},
+                    borderColor: '#6366f1',
+                    backgroundColor: grad,
+                    tension: 0.45,
+                    fill: true,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    borderWidth: 2.5,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1400, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15,23,42,0.95)',
+                        padding: 10,
+                        cornerRadius: 10,
+                        titleFont: { size: 11, weight: '600' },
+                        bodyFont: { size: 10 },
+                        displayColors: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(148,163,184,0.1)', drawBorder: false },
+                        ticks: { font: { size: 9 }, color: '#94a3b8', padding: 4 }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 9 }, color: '#94a3b8', padding: 4 }
+                    }
+                }
+            }
+        });
+    }
+
+    // ═══ CHART: Students doughnut ═══
+    const stCtx = document.getElementById('studentsChart');
+    if (stCtx && typeof Chart !== 'undefined') {
+        new Chart(stCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aktiv', 'Muzlatilgan', 'Tugatgan'],
+                datasets: [{
+                    data: [
+                        {{ stats.total_students|default:0 }},
+                        {{ stats.frozen_students|default:0 }},
+                        {{ stats.completed_students|default:0 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(16,185,129,0.9)',
+                        'rgba(245,158,11,0.9)',
+                        'rgba(168,85,247,0.9)'
+                    ],
+                    borderColor: ['#10b981', '#f59e0b', '#a855f7'],
+                    borderWidth: 2,
+                    hoverOffset: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1400,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15,23,42,0.95)',
+                        padding: 10,
+                        cornerRadius: 10,
+                        titleFont: { size: 11, weight: '600' },
+                        bodyFont: { size: 10 }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+});
+    // ═══ Topbar scroll effekti ═══
+const topbar = document.querySelector('.cd-topbar');
+if (topbar) {
+    let ticking = false;
+    const handleScroll = () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                topbar.classList.toggle('scrolled', window.scrollY > 20);
+                ticking = false;
+            });
+            ticking = true;
+        }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // boshlang'ich holat
+}
+</script>
+{% endblock %}

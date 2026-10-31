@@ -1,0 +1,713 @@
+{% extends "student/telegram_base.html" %}
+
+{% block title %}Profil topilmadi | DIGION{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     ASOSIY KARTA
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card text-center animate-scale-in" style="padding: 32px 24px;">
+
+  <!-- Ikona -->
+  <div class="relative inline-block mb-4">
+    <div class="w-24 h-24 mx-auto rounded-full flex items-center justify-center float-icon"
+         style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15));">
+      <span class="text-6xl">👤</span>
+    </div>
+    <span class="absolute top-0 right-0 w-6 h-6 rounded-full bg-rose flex items-center justify-center">
+      <i class="fas fa-exclamation text-white text-xs"></i>
+    </span>
+  </div>
+
+  <!-- Sarlavha -->
+  <h1 class="text-2xl font-extrabold mb-2">Talaba profili topilmadi</h1>
+
+  <!-- Tavsif -->
+  <p class="text-sm leading-relaxed mb-4" style="color: var(--tg-hint);">
+    Sizning Telegram akkauntingiz tizimga muvaffaqiyatli bog'langan,
+    lekin sizda <b class="text-warm">talaba profili</b> mavjud emas.
+  </p>
+
+  <!-- Status badge -->
+  <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
+       style="background: rgba(79, 70, 229, 0.1);">
+    <i class="fas fa-info-circle text-primary"></i>
+    <span class="text-xs font-semibold">Hisob faol — profil kerak</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOYDALANUVCHI MA'LUMOTLARI (agar mavjud bo'lsa)
+     ═══════════════════════════════════════════════════════════ -->
+{% if user %}
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-3 mb-4">
+    <div class="avatar">
+      {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="font-bold truncate">
+        {{ user.get_full_name|default:user.phone_number }}
+      </p>
+      <p class="text-xs truncate" style="color: var(--tg-hint);">
+        <i class="fas fa-phone mr-1"></i>{{ user.phone_number }}
+      </p>
+    </div>
+    <span class="badge badge-primary">{{ user.get_role_display_uz }}</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="grid grid-cols-2 gap-3 text-xs">
+    <div>
+      <p style="color: var(--tg-hint);">Rol</p>
+      <p class="font-bold">{{ user.role }}</p>
+    </div>
+    <div>
+      <p style="color: var(--tg-hint);">Faol</p>
+      <p class="font-bold">
+        {% if user.is_active %}Ha ✅{% else %}Yo'q ❌{% endif %}
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     MUMKIN SABABLAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(245, 158, 11, 0.15);">
+      <i class="fas fa-question text-warm"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Mumkin sabablar
+    </h3>
+  </div>
+
+  <div class="space-y-3">
+    <!-- Sabab 1 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl"
+         style="background: var(--tg-bg);">
+      <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-user-tie text-primary text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Boshqa rol</p>
+        <p class="text-xs mt-0.5" style="color: var(--tg-hint);">
+          Siz <b>admin</b>, <b>o'qituvchi</b> yoki <b>menejer</b> sifatida kirgansiz
+        </p>
+      </div>
+    </div>
+
+    <!-- Sabab 2 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl"
+         style="background: var(--tg-bg);">
+      <div class="w-8 h-8 rounded-full bg-warm/10 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-user-plus text-warm text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Ro'yxatga olinmagan</p>
+        <p class="text-xs mt-0.5" style="color: var(--tg-hint);">
+          Sizga hali <b>talaba</b> roli berilmagan
+        </p>
+      </div>
+    </div>
+
+    <!-- Sabab 3 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl"
+         style="background: var(--tg-bg);">
+      <div class="w-8 h-8 rounded-full bg-rose/10 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-users-slash text-rose text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Guruhga qo'shilmagan</p>
+        <p class="text-xs mt-0.5" style="color: var(--tg-hint);">
+          Siz hech qanday guruhga a'zo emassiz
+        </p>
+      </div>
+    </div>
+
+    <!-- Sabab 4 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl"
+         style="background: var(--tg-bg);">
+      <div class="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-user-slash text-accent text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Bloklangan / Nofaol</p>
+        <p class="text-xs mt-0.5" style="color: var(--tg-hint);">
+          Hisobingiz nofaol yoki bloklangan
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     YECHIMLAR — 3 ta variant
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(16, 185, 129, 0.15);">
+      <i class="fas fa-lightbulb text-success"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Qanday hal qilish mumkin
+    </h3>
+  </div>
+
+  <div class="space-y-3">
+    <!-- Variant 1: Adminga murojaat -->
+    <div class="p-4 rounded-2xl border-2 border-dashed"
+         style="border-color: var(--tg-line);">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+          1
+        </span>
+        <div class="flex-1">
+          <p class="font-bold text-sm">Adminga murojaat</p>
+          <p class="text-xs" style="color: var(--tg-hint);">
+            Eng tezkor usul
+          </p>
+        </div>
+      </div>
+      <p class="text-xs mb-3" style="color: var(--tg-hint);">
+        Administratorga xabar yuboring va <b>talaba roli</b> so'rang
+      </p>
+      <button onclick="contactAdmin()"
+              class="btn btn-primary btn-sm w-full">
+        <i class="fas fa-paper-plane"></i>
+        <span>Adminga yozish</span>
+      </button>
+    </div>
+
+    <!-- Variant 2: Botga qayta kirish -->
+    <div class="p-4 rounded-2xl border-2 border-dashed"
+         style="border-color: var(--tg-line);">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+          2
+        </span>
+        <div class="flex-1">
+          <p class="font-bold text-sm">Botni qayta ochish</p>
+          <p class="text-xs" style="color: var(--tg-hint);">
+            Hisobni qayta bog'lash
+          </p>
+        </div>
+      </div>
+      <p class="text-xs mb-3" style="color: var(--tg-hint);">
+        Botga qayta kirib, telefon raqamingizni qaytadan yuboring
+      </p>
+      <button onclick="reopenBot()"
+              class="btn btn-secondary btn-sm w-full">
+        <i class="fab fa-telegram"></i>
+        <span>Botni ochish</span>
+      </button>
+    </div>
+
+    <!-- Variant 3: Qayta urinish -->
+    <div class="p-4 rounded-2xl border-2 border-dashed"
+         style="border-color: var(--tg-line);">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+          3
+        </span>
+        <div class="flex-1">
+          <p class="font-bold text-sm">Qayta urinish</p>
+          <p class="text-xs" style="color: var(--tg-hint);">
+            Sahifani yangilash
+          </p>
+        </div>
+      </div>
+      <p class="text-xs mb-3" style="color: var(--tg-hint);">
+        Agar administrator sizga rol bergan bo'lsa — sahifani yangilang
+      </p>
+      <button onclick="reloadPage()"
+              class="btn btn-sm w-full"
+              style="background: var(--tg-line); color: var(--tg-text);">
+        <i class="fas fa-sync-alt"></i>
+        <span>Yangilash</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ALOQA USULLARI
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(6, 182, 212, 0.15);">
+      <i class="fas fa-headset text-accent"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Aloqa usullari
+    </h3>
+  </div>
+
+  <div class="space-y-2">
+    <!-- Telegram -->
+    <a href="https://t.me/digion_support"
+       target="_blank"
+       class="flex items-center gap-3 p-3 rounded-xl transition-all card-hover"
+       style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-[#229ED9] flex items-center justify-center flex-shrink-0">
+        <i class="fab fa-telegram text-white text-lg"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Telegram qo'llab-quvvatlash</p>
+        <p class="text-xs" style="color: var(--tg-hint);">
+          @digion_support
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </a>
+
+    <!-- Telefon -->
+    <a href="tel:+998901234567"
+       class="flex items-center gap-3 p-3 rounded-xl transition-all card-hover"
+       style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-success flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-phone text-white text-lg"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Telefon</p>
+        <p class="text-xs" style="color: var(--tg-hint);">
+          +998 90 123 45 67
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </a>
+
+    <!-- Email -->
+    <a href="mailto:support@digion.uz"
+       class="flex items-center gap-3 p-3 rounded-xl transition-all card-hover"
+       style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-warm flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-envelope text-white text-lg"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Email</p>
+        <p class="text-xs" style="color: var(--tg-hint);">
+          support@digion.uz
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </a>
+
+    <!-- Veb sayt -->
+    <a href="https://digion.uz"
+       target="_blank"
+       class="flex items-center gap-3 p-3 rounded-xl transition-all card-hover"
+       style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-globe text-white text-lg"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Veb sayt</p>
+        <p class="text-xs" style="color: var(--tg-hint);">
+          digion.uz
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FAQ (Ko'p so'raladigan savollar)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(124, 58, 237, 0.15);">
+      <i class="fas fa-question-circle text-secondary"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Ko'p so'raladigan savollar
+    </h3>
+  </div>
+
+  <div class="space-y-2">
+    <!-- FAQ 1 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Nega talaba profili kerak?
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed" style="color: var(--tg-hint);">
+        Uyga vazifalarni ko'rish va topshirish, testlarni yechish,
+        natijalarni kuzatish uchun <b>talaba profili</b> zarur.
+        Profilsiz siz kursga to'liq kirisha olmaysiz.
+      </div>
+    </details>
+
+    <!-- FAQ 2 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Rol qanday o'zgartiriladi?
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed" style="color: var(--tg-hint);">
+        Faqat <b>administrator</b> rol o'zgartira oladi.
+        Adminga murojaat qiling va <code class="px-1 rounded bg-black/10">talaba</code>
+        roli berishni so'rang.
+      </div>
+    </details>
+
+    <!-- FAQ 3 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Qancha vaqt kutish kerak?
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed" style="color: var(--tg-hint);">
+        Odatda <b>5 daqiqadan 1 soatgacha</b>.
+        Ish vaqtida (09:00 - 18:00) — tezroq.
+        Agar uzoq kutsangiz — qo'shimcha murojaat qiling.
+      </div>
+    </details>
+
+    <!-- FAQ 4 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Guruhga qanday qo'shilaman?
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed" style="color: var(--tg-hint);">
+        Guruhga qo'shish ham <b>administrator</b> tomonidan amalga oshiriladi.
+        Kursni tanlang va adminga murojaat qiling.
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FEEDBACK
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(245, 158, 11, 0.15);">
+      <i class="fas fa-comment-dots text-warm"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Fikr-mulohaza
+    </h3>
+  </div>
+
+  <p class="text-xs mb-3" style="color: var(--tg-hint);">
+    Muammoni boshqacha hal qilishni istaysizmi? Fikringizni yuboring.
+  </p>
+
+  <div class="mb-3">
+    <textarea
+      id="feedbackText"
+      class="textarea"
+      rows="3"
+      placeholder="Muammo yoki taklifingizni yozing..."
+      maxlength="500"
+      oninput="updateFeedbackCount()"
+    ></textarea>
+    <div class="text-right text-xs mt-1" style="color: var(--tg-hint);">
+      <span id="feedbackCount">0</span>/500
+    </div>
+  </div>
+
+  <button onclick="submitFeedback()"
+          class="btn btn-sm w-full"
+          style="background: linear-gradient(135deg, #F59E0B, #F43F5E); color: white;">
+    <i class="fas fa-paper-plane"></i>
+    <span>Yuborish</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DEBUG INFO (faqat DEBUG=True da)
+     ═══════════════════════════════════════════════════════════ -->
+{% if debug %}
+<div class="card mb-4 animate-slide-up"
+     style="border-left: 4px solid #F59E0B;">
+  <details class="group">
+    <summary class="flex items-center justify-between cursor-pointer list-none">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-bug text-warm"></i>
+        <p class="font-bold text-sm">Debug ma'lumotlari</p>
+      </div>
+      <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+    </summary>
+    <div class="mt-3 text-xs font-mono space-y-1" style="color: var(--tg-hint);">
+      <p><b>User ID:</b> {{ user.pk|default:"—" }}</p>
+      <p><b>Username:</b> {{ user.username|default:"—" }}</p>
+      <p><b>Phone:</b> {{ user.phone_number|default:"—" }}</p>
+      <p><b>Role:</b> {{ user.role|default:"—" }}</p>
+      <p><b>Active:</b> {{ user.is_active|yesno:"yes,no" }}</p>
+      <p><b>Student profile:</b>
+        {% if user.student_profile %}✅ Ha{% else %}❌ Yo'q{% endif %}
+      </p>
+      <p><b>Telegram chat_id:</b>
+        {{ user.telegram_link.chat_id|default:"—" }}
+      </p>
+    </div>
+  </details>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     PASTKI QISM
+     ═══════════════════════════════════════════════════════════ -->
+<div class="text-center py-6">
+  <p class="text-xs mb-2" style="color: var(--tg-hint);">
+    Yordam kerakmi?
+  </p>
+  <button onclick="contactAdmin()"
+          class="text-sm font-bold text-gradient">
+    👨‍💼 Adminga murojaat qilish
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     YASHIRIN MA'LUMOTLAR
+     ═══════════════════════════════════════════════════════════ -->
+<input type="hidden" id="userIdInput" value="{{ user.pk|default:'' }}">
+<input type="hidden" id="tgUserIdInput" value="">
+
+{% endblock %}
+
+{% block extra_js %}
+// ═══════════════════════════════════════════════════════════
+// KONFIGURATSIYA
+// ═══════════════════════════════════════════════════════════
+const ADMIN_BOT = 'digion_support';
+const SUPPORT_BOT = 'digion_bot';
+const SUPPORT_EMAIL = 'support@digion.uz';
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(function init() {
+  // Telegram user_id ni hidden input ga yozish
+  const tgUser = getTgUser();
+  if (tgUser) {
+    document.getElementById('tgUserIdInput').value = tgUser.id || '';
+  }
+
+  // Log
+  console.log('📄 No profile page', {
+    user_id: document.getElementById('userIdInput').value,
+    tg_user_id: document.getElementById('tgUserIdInput').value,
+    tg_user: tgUser,
+  });
+
+  // Haptic
+  hapticNotify('warning');
+})();
+
+// ═══════════════════════════════════════════════════════════
+// ADMINGA MUROJAAT
+// ═══════════════════════════════════════════════════════════
+function contactAdmin() {
+  haptic('medium');
+
+  const tgUser = getTgUser();
+  const userName = tgUser
+    ? `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim()
+    : 'Foydalanuvchi';
+  const userPhone = '{{ user.phone_number|default:"" }}';
+  const userId = '{{ user.pk|default:"" }}';
+
+  // Adminga xabar matni
+  const message = encodeURIComponent(
+    `👋 Assalomu alaykum!\n\n` +
+    `📌 Muammo: Talaba profili yo'q\n\n` +
+    `👤 Ism: ${userName}\n` +
+    `📱 Telefon: ${userPhone}\n` +
+    `🆔 User ID: ${userId}\n\n` +
+    `Iltimos, menga "talaba" roli bering.`
+  );
+
+  const url = `https://t.me/${ADMIN_BOT}?text=${message}`;
+
+  showConfirm(
+    '👨‍💼 Adminga murojaat qilasizmi?\n\n' +
+    'Sizning ma\'lumotlaringiz avtomatik yuboriladi.'
+  ).then((ok) => {
+    if (ok) {
+      openTelegramLink(url);
+      hapticNotify('success');
+      showToast('Adminga xabar ochilmoqda...', 'success');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOTNI QAYTA OCHISH
+// ═══════════════════════════════════════════════════════════
+function reopenBot() {
+  haptic('medium');
+
+  showConfirm(
+    '🤖 Botni qayta ochasizmi?\n\n' +
+    'Botda telefon raqamingizni qaytadan yuboring.'
+  ).then((ok) => {
+    if (ok) {
+      openTelegramLink(`https://t.me/${SUPPORT_BOT}?start=relink`);
+      hapticNotify('success');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAHIFANI YANGILASH
+// ═══════════════════════════════════════════════════════════
+function reloadPage() {
+  haptic('light');
+  showLoading('Yangilanmoqda...');
+
+  setTimeout(() => {
+    hideLoading();
+    location.reload();
+  }, 500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// FEEDBACK
+// ═══════════════════════════════════════════════════════════
+function updateFeedbackCount() {
+  const textarea = document.getElementById('feedbackText');
+  const counter = document.getElementById('feedbackCount');
+  if (textarea && counter) {
+    counter.textContent = textarea.value.length;
+  }
+}
+
+async function submitFeedback() {
+  const textarea = document.getElementById('feedbackText');
+  const text = (textarea?.value || '').trim();
+
+  if (text.length < 10) {
+    hapticNotify('error');
+    showToast('Kamida 10 belgi yozing', 'warning');
+    textarea?.focus();
+    return;
+  }
+
+  haptic('medium');
+  showLoading('Yuborilmoqda...');
+
+  try {
+    // TODO: Backend endpoint
+    // const res = await tgFetch('/api/feedback/', {
+    //   method: 'POST',
+    //   body: { text, user_id: '{{ user.pk }}' },
+    // });
+
+    // Hozircha Telegram orqali adminga yuboramiz
+    const message = encodeURIComponent(
+      `💬 Fikr-mulohaza (No Profile)\n\n` +
+      `User: ${document.getElementById('userIdInput').value}\n\n` +
+      `${text}`
+    );
+
+    hideLoading();
+    openTelegramLink(`https://t.me/${ADMIN_BOT}?text=${message}`);
+
+    hapticNotify('success');
+    showToast('Fikringiz yuborilmoqda...', 'success');
+
+    // Tozalash
+    textarea.value = '';
+    updateFeedbackCount();
+  } catch (err) {
+    hideLoading();
+    hapticNotify('error');
+    showToast('Xatolik: ' + err.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  // R — reload
+  if (e.key === 'r' && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'TEXTAREA') {
+    reloadPage();
+  }
+  // A — admin
+  if (e.key === 'a' && e.altKey) {
+    e.preventDefault();
+    contactAdmin();
+  }
+  // Esc — modal yopish
+  if (e.key === 'Escape') {
+    closeModal();
+    closeBottomSheet();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// AUTO-RELOAD (har 60 sekundda tekshirish)
+// ═══════════════════════════════════════════════════════════
+// Agar admin sizga rol bergunicha kutsangiz
+let autoCheckCount = 0;
+const MAX_AUTO_CHECKS = 5; // 5 daqiqa
+
+setTimeout(() => {
+  if (autoCheckCount >= MAX_AUTO_CHECKS) return;
+
+  autoCheckCount++;
+  console.log(`🔄 Auto-check ${autoCheckCount}/${MAX_AUTO_CHECKS}`);
+
+  // Fon rejimida tekshirish
+  tgFetch(window.location.href, { method: 'HEAD' })
+    .then((res) => {
+      if (res.ok) {
+        // Hali ham no_profile bo'lsa — hech narsa qilmaymiz
+      }
+    })
+    .catch(() => {});
+}, 60000);
+
+// ═══════════════════════════════════════════════════════════
+// TELEGRAM THEME SYNC
+// ═══════════════════════════════════════════════════════════
+tg?.onEvent?.('themeChanged', () => {
+  console.log('🎨 Theme changed:', tg.colorScheme);
+});
+
+// ═══════════════════════════════════════════════════════════
+// GREETING
+// ═══════════════════════════════════════════════════════════
+(function greet() {
+  const tgUser = getTgUser();
+  if (tgUser?.first_name) {
+    console.log(`👋 Salom, ${tgUser.first_name}!`);
+  }
+})();
+{% endblock %}

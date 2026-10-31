@@ -1,0 +1,364 @@
+{% extends 'admin_user/base.html' %}
+
+{% block title %}Boshqaruv paneli | LearnCraft Admin{% endblock %}
+
+{% block content %}
+<!-- Xush kelibsiz va sana -->
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+    <div>
+        <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white">Xush kelibsiz, Admin!</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Bugungi sana: {% now "j-F Y" %} | Hafta kuni: {% now "l" %}</p>
+    </div>
+    <div class="mt-3 md:mt-0 flex gap-2">
+        <a href="{% url 'admin_courses' %}" class="px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-all hover:translate-y-[-2px]">
+            <i class="fas fa-plus mr-1"></i> Yangi kurs
+        </a>
+        <button class="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-medium hover:bg-gray-300 dark:hover:bg-slate-600 transition-all hover:translate-y-[-2px]">
+            <i class="fas fa-download mr-1"></i> Hisobot
+        </button>
+    </div>
+</div>
+
+<!-- Asosiy statistika kartalari (6 ta) -->
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+    <div class="stat-card neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="stat-icon w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-xl"><i class="fas fa-users"></i></div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">O‘quvchilar</p>
+                <p class="stat-value text-xl font-bold">{{ total_students|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="stat-icon w-10 h-10 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-xl"><i class="fas fa-user-friends"></i></div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Ota-onalar</p>
+                <p class="stat-value text-xl font-bold">{{ total_parents|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="stat-icon w-10 h-10 rounded-xl bg-warm/20 text-warm flex items-center justify-center text-xl"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">O‘qituvchilar</p>
+                <p class="stat-value text-xl font-bold">{{ total_teachers|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="stat-icon w-10 h-10 rounded-xl bg-accent/20 text-accent flex items-center justify-center text-xl"><i class="fas fa-inbox"></i></div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Yangi so‘rovlar</p>
+                <p class="stat-value text-xl font-bold">{{ pending_requests|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="stat-icon w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl"><i class="fas fa-book"></i></div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Darslar</p>
+                <p class="stat-value text-xl font-bold">{{ total_lessons|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="stat-icon w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl"><i class="fas fa-question-circle"></i></div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Testlar</p>
+                <p class="stat-value text-xl font-bold">{{ total_quizzes|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafiklar qatori -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    <!-- Haftalik faollik (chiziqli) -->
+    <div class="neo-card p-5 lg:col-span-2">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-primary"></i> Haftalik platforma faolligi</h3>
+        <div class="h-72">
+            <canvas id="weeklyActivityChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Foydalanuvchilar taqsimoti (doughnut) -->
+    <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-chart-pie text-accent"></i> Foydalanuvchilar</h3>
+        <div class="h-64">
+            <canvas id="userDistributionChart"></canvas>
+        </div>
+        <div class="mt-4 space-y-2">
+            <div class="flex items-center justify-between text-sm">
+                <span class="flex items-center gap-2"><i class="fas fa-circle text-primary"></i> O‘quvchilar</span>
+                <span class="font-semibold">{{ total_students|default:"0" }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="flex items-center gap-2"><i class="fas fa-circle text-rose"></i> Ota-onalar</span>
+                <span class="font-semibold">{{ total_parents|default:"0" }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <span class="flex items-center gap-2"><i class="fas fa-circle text-warm"></i> O‘qituvchilar</span>
+                <span class="font-semibold">{{ total_teachers|default:"0" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Qo'shimcha grafiklar qatori -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+    <!-- Topshiriqlar bajarilishi (bar) -->
+    <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-tasks text-emerald-600"></i> Topshiriqlar bajarilishi</h3>
+        <div class="h-64">
+            <canvas id="taskCompletionChart"></canvas>
+        </div>
+    </div>
+
+    <!-- O'quvchilar o'sishi (line) -->
+    <div class="neo-card p-5">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-user-plus text-primary"></i> O‘quvchilar o‘sishi</h3>
+        <div class="h-64">
+            <canvas id="studentGrowthChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- So'nggi so'rovlar jadvali -->
+<div class="neo-card p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-inbox text-primary"></i> So‘nggi ota-ona so‘rovlari</h3>
+        <a href="{% url 'admin_parent_requests' %}" class="text-sm text-primary hover:underline">Barchasini ko‘rish</a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-xs text-gray-500 uppercase border-b dark:border-slate-700">
+                    <th class="py-2 pr-4">Ota-ona</th>
+                    <th class="py-2 pr-4">Talaba</th>
+                    <th class="py-2 pr-4">Dars</th>
+                    <th class="py-2 pr-4">Holat</th>
+                    <th class="py-2 pr-4">Sana</th>
+                    <th class="py-2 pr-4">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in latest_requests %}
+                <tr class="table-row-hover border-b dark:border-slate-700/50">
+                    <td class="py-3 pr-4 font-medium">{{ req.parent.phone_number }}</td>
+                    <td class="py-3 pr-4">{{ req.student.user.get_full_name }}</td>
+                    <td class="py-3 pr-4">{{ req.lesson.title }}</td>
+                    <td class="py-3 pr-4">
+                        {% if req.status == 'pending' %}
+                            <span class="badge bg-yellow-100 text-yellow-700">Kutilmoqda</span>
+                        {% elif req.status == 'approved' %}
+                            <span class="badge bg-green-100 text-green-700">Tasdiqlangan</span>
+                        {% else %}
+                            <span class="badge bg-red-100 text-red-600">Rad etilgan</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 pr-4 text-xs">{{ req.created_at|date:"d.m.Y H:i" }}</td>
+                    <td class="py-3 pr-4">
+                        {% if req.status == 'pending' %}
+                            <a href="#" class="text-primary hover:underline mr-2">Tasdiqlash</a>
+                            <a href="#" class="text-rose hover:underline">Rad etish</a>
+                        {% else %}
+                            <span class="text-gray-400">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="py-4 text-center text-gray-500">So‘rovlar yo‘q</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Yaqinlashayotgan darslar -->
+<div class="neo-card p-5 mb-6">
+    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-calendar-alt text-primary"></i> Yaqinlashayotgan darslar</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {% for lesson in upcoming_lessons %}
+        <div class="p-4 rounded-xl bg-gray-50 dark:bg-slate-800/50 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold">{{ lesson.title }}</span>
+                <span class="badge bg-primary/20 text-primary">{{ lesson.date|date:"d.m.Y" }}</span>
+            </div>
+            <p class="text-xs text-gray-500">{{ lesson.course.title }}</p>
+            <p class="text-xs text-gray-400 mt-1"><i class="fas fa-users"></i> {{ lesson.group.name }}</p>
+        </div>
+        {% empty %}
+        <p class="col-span-full text-center text-gray-500 py-4">Yaqinlashayotgan darslar yo‘q</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- So'nggi SMS xabarlar -->
+<div class="neo-card p-5 mb-6">
+    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-sms text-accent"></i> So‘nggi SMS xabarlar</h3>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-xs text-gray-500 uppercase border-b dark:border-slate-700">
+                    <th class="py-2 pr-4">Telefon</th>
+                    <th class="py-2 pr-4">Holat</th>
+                    <th class="py-2 pr-4">Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sms in recent_sms_logs %}
+                <tr class="table-row-hover border-b dark:border-slate-700/50">
+                    <td class="py-3 pr-4 font-medium">{{ sms.phone_number }}</td>
+                    <td class="py-3 pr-4">
+                        {% if sms.status == 'sent' %}
+                            <span class="badge bg-green-100 text-green-700">Yuborildi</span>
+                        {% elif sms.status == 'failed' %}
+                            <span class="badge bg-red-100 text-red-600">Xato</span>
+                        {% else %}
+                            <span class="badge bg-yellow-100 text-yellow-700">Kutilmoqda</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 pr-4 text-xs">{{ sms.sent_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="py-4 text-center text-gray-500">SMS yuborilmagan</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tezkor havolalar -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+    <a href="{% url 'admin_courses' %}" class="neo-card p-5 flex items-center gap-4 hover:shadow-lg cursor-pointer transition-all hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-2xl"><i class="fas fa-book"></i></div>
+        <div>
+            <p class="font-semibold">Kurslarni boshqarish</p>
+            <p class="text-xs text-gray-500">Yangi kurslar qo‘shish, tahrirlash</p>
+        </div>
+    </a>
+    <a href="{% url 'admin_tasks' %}" class="neo-card p-5 flex items-center gap-4 hover:shadow-lg cursor-pointer transition-all hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-accent/20 text-accent flex items-center justify-center text-2xl"><i class="fas fa-tasks"></i></div>
+        <div>
+            <p class="font-semibold">Topshiriqlar</p>
+            <p class="text-xs text-gray-500">Vazifalar va ularning bajarilishi</p>
+        </div>
+    </a>
+    <a href="{% url 'admin_quizzes' %}" class="neo-card p-5 flex items-center gap-4 hover:shadow-lg cursor-pointer transition-all hover:-translate-y-1">
+        <div class="w-12 h-12 rounded-xl bg-warm/20 text-warm flex items-center justify-center text-2xl"><i class="fas fa-question-circle"></i></div>
+        <div>
+            <p class="font-semibold">Testlar</p>
+            <p class="text-xs text-gray-500">Quizlar va savollarni boshqarish</p>
+        </div>
+    </a>
+</div>
+
+<!-- Oxirgi faolliklar -->
+<div class="neo-card p-5">
+    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i class="fas fa-history text-primary"></i> Oxirgi faolliklar</h3>
+    <div class="space-y-3">
+        {% for activity in recent_activities %}
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50">
+            <i class="fas fa-sign-in-alt text-primary"></i>
+            <div class="flex-1">
+                <p class="text-sm font-medium">{{ activity.user.phone_number }}</p>
+                <p class="text-xs text-gray-500">{{ activity.login_time|date:"d.m.Y H:i" }}</p>
+            </div>
+            <span class="badge bg-primary/20 text-primary">Kirish</span>
+        </div>
+        {% empty %}
+        <p class="text-center text-gray-500 py-4">Faollik yo‘q</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Haftalik faollik grafigi
+    if (document.getElementById('weeklyActivityChart')) {
+        new Chart(document.getElementById('weeklyActivityChart'), {
+            type: 'line',
+            data: {
+                labels: ['Dush', 'Sesh', 'Chor', 'Pay', 'Juma', 'Shan', 'Yak'],
+                datasets: [{
+                    label: 'Faol foydalanuvchilar',
+                    data: [120, 150, 180, 170, 200, 220, 210],
+                    borderColor: '#4F46E5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#4F46E5',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // Foydalanuvchilar taqsimoti
+    if (document.getElementById('userDistributionChart')) {
+        new Chart(document.getElementById('userDistributionChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['O‘quvchilar', 'Ota-onalar', 'O‘qituvchilar'],
+                datasets: [{
+                    data: [
+                        {{ total_students|default:"0" }},
+                        {{ total_parents|default:"0" }},
+                        {{ total_teachers|default:"0" }}
+                    ],
+                    backgroundColor: ['#4F46E5', '#F43F5E', '#F59E0B'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // Topshiriqlar bajarilishi (bar)
+    if (document.getElementById('taskCompletionChart')) {
+        new Chart(document.getElementById('taskCompletionChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Bajarildi', 'Kutilmoqda', 'Kechikkan'],
+                datasets: [{
+                    label: 'Topshiriqlar soni',
+                    data: [45, 20, 5],
+                    backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                    borderRadius: 8
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // O'quvchilar o'sishi (line)
+    if (document.getElementById('studentGrowthChart')) {
+        new Chart(document.getElementById('studentGrowthChart'), {
+            type: 'line',
+            data: {
+                labels: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun'],
+                datasets: [{
+                    label: 'Yangi o‘quvchilar',
+                    data: [5, 12, 18, 25, 30, 40],
+                    borderColor: '#2563EB',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#2563EB'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+</script>
+{% endblock %}

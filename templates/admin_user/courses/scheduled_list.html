@@ -1,0 +1,192 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-1">📅 Qo'lda yuboriladigan vazifalar</h3>
+      <p class="text-muted mb-0">
+        Vazifani tayyorlab, kerakli paytda guruhga qo'lda yuboring
+      </p>
+    </div>
+    <a href="{% url 'courses_admin:group_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Guruhlar
+    </a>
+  </div>
+
+  <!-- Statistika -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small">Jami</div>
+          <div class="fs-3 fw-bold">{{ stats.total }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm border-start border-warning border-4">
+        <div class="card-body">
+          <div class="text-muted small">Bugun</div>
+          <div class="fs-3 fw-bold text-warning">{{ stats.today }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm border-start border-info border-4">
+        <div class="card-body">
+          <div class="text-muted small">Ertaga</div>
+          <div class="fs-3 fw-bold text-info">{{ stats.tomorrow }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm border-start border-success border-4">
+        <div class="card-body">
+          <div class="text-muted small">Bu hafta</div>
+          <div class="fs-3 fw-bold text-success">{{ stats.this_week }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtrlar -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-2">
+        <div class="col-md-3">
+          <select name="group" class="form-select">
+            <option value="">Barcha guruhlar</option>
+            {% for g in groups %}
+              <option value="{{ g.pk }}" {% if group_filter == g.pk|stringformat:"s" %}selected{% endif %}>
+                {{ g.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select name="course" class="form-select">
+            <option value="">Barcha kurslar</option>
+            {% for c in courses %}
+              <option value="{{ c.pk }}" {% if course_filter == c.pk|stringformat:"s" %}selected{% endif %}>
+                {{ c.title }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input type="date" name="from" class="form-control" value="{{ date_from }}">
+        </div>
+        <div class="col-md-2">
+          <input type="date" name="to" class="form-control" value="{{ date_to }}">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-funnel"></i> Filtrlash
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Jadval -->
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Sana</th>
+            <th>Guruh</th>
+            <th>Dars</th>
+            <th>Vazifa</th>
+            <th class="text-center">Talabalar</th>
+            <th>Amal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ item.lesson_date|date:"d.m.Y" }}</div>
+              <small class="text-muted">
+                {{ item.lesson_date|date:"l" }}
+              </small>
+            </td>
+            <td>
+              <a href="{% url 'courses_admin:group_detail' item.group.pk %}"
+                 class="fw-semibold text-decoration-none">
+                {{ item.group.name }}
+              </a>
+            </td>
+            <td>
+              <div class="small">{{ item.lesson.lesson_number }}-dars</div>
+              <div class="text-muted small">{{ item.lesson.title|truncatechars:40 }}</div>
+            </td>
+            <td>
+              {% if item.lesson.homework %}
+                <span class="badge bg-success-subtle text-success">
+                  📌 {{ item.lesson.homework.title|truncatechars:30 }}
+                </span>
+              {% else %}
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <span class="badge bg-info-subtle text-info">
+                👥 {{ item.students_count }}
+              </span>
+            </td>
+            <td>
+              <form method="post" action="{% url 'courses_admin:group_lesson_send_homework' group_pk=item.group.pk gl_pk=item.pk %}"
+                    onsubmit="return confirm('Uyga vazifani shu guruhga hozir yuborasizmi?')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-primary"
+                        {% if not item.lesson.homework.is_approved %}disabled title="Avval uyga vazifani tasdiqlang"{% endif %}>
+                  Qo'lda yuborish
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              <div class="text-muted">
+                <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                <p>Qo'lda yuboriladigan yoki qayta yuboriladigan vazifalar yo'q</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if is_paginated %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">‹</a>
+        </li>
+      {% endif %}
+      <li class="page-item active">
+        <span class="page-link">
+          {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </span>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">›</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
+{% endblock %}

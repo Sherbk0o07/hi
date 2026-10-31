@@ -1,0 +1,125 @@
+{% extends '../base.html' %}
+
+{% block student %}
+<div class="w-full max-w-2xl mx-auto px-4 py-6 md:py-10 my-auto">
+
+  <style>
+    .quiz-radio { display: none; }
+
+    .timer-ring {
+      stroke-dasharray: 94;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .quiz-radio:checked + .option-label {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .quiz-radio:checked + .option-label .option-letter {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+    }
+  </style>
+
+  <div class="neo-card w-full p-5 sm:p-8 animate-fade-in">
+
+    <!-- Sarlavha: Progress va Taymer -->
+    <div class="flex items-center justify-between mb-6 sm:mb-8">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <span class="text-sm sm:text-base font-bold text-primary">{{ current_question_num }} / {{ total_questions }}</span>
+        <div class="w-28 sm:w-40 h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500" style="width: {{ progress_percentage }}%;"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 text-primary">
+        <svg width="32" height="32" viewBox="0 0 36 36" class="sm:w-[36px] sm:h-[36px]">
+          <circle cx="18" cy="18" r="15" stroke="currentColor" stroke-width="3" fill="none" class="text-gray-200 dark:text-slate-700"/>
+          <circle id="timerRing" cx="18" cy="18" r="15" stroke="#4F46E5" stroke-width="3" fill="none" stroke-linecap="round" class="timer-ring" transform="rotate(-90 18 18)"/>
+        </svg>
+        <span id="timerNum" class="text-sm sm:text-base font-bold">30s</span>
+      </div>
+    </div>
+
+    <!-- Savol rasmi (agar mavjud bo'lsa) -->
+    {% if question.image %}
+    <div class="mb-6 sm:mb-8 flex justify-center">
+      <img src="{{ question.image.url }}" alt="Savol rasmi"
+           class="w-full max-w-xs sm:max-w-sm md:max-w-md rounded-2xl shadow-lg object-cover"
+           style="max-height: 220px;">
+    </div>
+    {% endif %}
+
+    <!-- Savol matni -->
+    <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white mb-6 sm:mb-8 text-center leading-tight">
+      {{ question.text }}
+    </h2>
+
+    <form method="POST" action="{% url 'quiz_take' quiz.id %}" id="quizForm">
+      {% csrf_token %}
+
+      <div class="space-y-3 sm:space-y-4">
+        {% for option in options %}
+        <div>
+          <input type="radio" name="selected_option" id="opt_{{ forloop.counter }}" value="{{ option.id }}" class="quiz-radio" required>
+          <label for="opt_{{ forloop.counter }}" class="option-label flex items-center gap-3 bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 rounded-2xl p-3 sm:p-4 font-medium text-sm sm:text-base text-gray-700 dark:text-gray-200 cursor-pointer transition-all duration-200 hover:border-primary dark:hover:border-primary hover:bg-indigo-50/50 dark:hover:bg-slate-700/50">
+            <span class="option-letter flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-gray-300 font-bold text-sm sm:text-base transition-all duration-200">
+              {{ forloop.counter }}
+            </span>
+            {{ option.text }}
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="flex items-center justify-between mt-8 sm:mt-10">
+        <a href="{% url 'quiz_take' quiz.id %}?restart=1" class="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 text-sm sm:text-base font-bold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
+          <i class="fas fa-rotate-left"></i> Qaytadan boshlash
+        </a>
+        <button type="submit" class="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white text-sm sm:text-base font-bold shadow-lg shadow-primary/30 transition-transform duration-200 hover:-translate-y-1 hover:shadow-primary/50">
+          {% if is_last_question %}Yakunlash{% else %}Keyingi{% endif %} <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+      <br><br>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 30 soniyalik taymer: vaqt tugasa, forma o'zi yuboriladi
+  // (agar hech narsa tanlanmagan bo'lsa, "selected_option" bo'sh boradi va backend uni xato deb hisoblaydi)
+  (function () {
+    var timeLeft = 30;
+    var circumference = 94;
+    var ring = document.getElementById("timerRing");
+    var numEl = document.getElementById("timerNum");
+    var form = document.getElementById("quizForm");
+
+    var interval = setInterval(function () {
+      timeLeft -= 1;
+      if (numEl) numEl.textContent = timeLeft + "s";
+      if (ring) ring.style.strokeDashoffset = circumference * (1 - timeLeft / 30);
+      if (timeLeft <= 10 && numEl) numEl.classList.add("text-red-500");
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        // hech qanday variant tanlanmagan bo'lsa ham forma yuborilishi uchun
+        // "required" atributini olib tashlaymiz
+        var radios = form.querySelectorAll(".quiz-radio");
+        radios.forEach(function (r) { r.required = false; });
+        form.submit();
+      }
+    }, 1000);
+
+    // forma normal yuborilganda taymerni to'xtatamiz
+    form.addEventListener("submit", function () {
+      clearInterval(interval);
+    });
+  })();
+</script>
+{% endblock student %}

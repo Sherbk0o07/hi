@@ -1,0 +1,462 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="uz" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}Ota-ona paneli | LearnCraft{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#14b8a6',
+                        secondary: '#2563eb',
+                        accent: '#06B6D4',
+                        warm: '#F59E0B',
+                        rose: '#F43F5E',
+                    },
+                    animation: {
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.4s ease-out',
+                        'pulse-soft': 'pulseSoft 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'slide-in-up': 'slideInUp 0.6s ease-out',
+                        'bounce-tap': 'bounceTap 0.35s ease',
+                        'icon-pulse': 'iconPulse 1.5s infinite',
+                    },
+                    keyframes: {
+                        slideDown: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        pulseSoft: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.8' } },
+                        float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-8px)' } },
+                        glow: { '0%': { boxShadow: '0 0 15px rgba(20,184,166,0.4)' }, '100%': { boxShadow: '0 0 30px rgba(20,184,166,0.8)' } },
+                        scaleIn: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+                        slideInUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        bounceTap: { '0%': { transform: 'scale(1)' }, '35%': { transform: 'scale(0.85)' }, '70%': { transform: 'scale(1.08)' }, '100%': { transform: 'scale(1)' } },
+                        iconPulse: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.15)' } },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #14b8a6 0%, #2563eb 100%);
+            margin: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .dark body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: floatParticle linear infinite;
+            opacity: 0.3;
+        }
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; }
+        .dark .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; }
+
+        .neo-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .dark .neo-card {
+            background: rgba(30, 35, 50, 0.92);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .neo-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dark .glass-card {
+            background: rgba(30, 35, 50, 0.92);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .badge {
+            padding: 0.2rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .progress-animated {
+            animation: progressAnimation 2s ease-out;
+        }
+        @keyframes progressAnimation { from { width: 0; } }
+
+        .sidebar-item {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(135deg, #14b8a6, #2563eb);
+            transform: scaleY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-item:hover {
+            background: rgba(20, 184, 166, 0.08);
+            transform: translateX(5px);
+        }
+        .sidebar-item:hover::before {
+            transform: scaleY(1);
+        }
+        .sidebar-item i {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .sidebar-item:hover i {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .stat-card:hover .stat-icon { transform: rotate(10deg) scale(1.1); }
+        .stat-icon { transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+
+        .mobile-nav-item {
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mobile-nav-active {
+            background: rgba(20, 184, 166, 0.12) !important;
+            box-shadow: 0 0 18px rgba(20, 184, 166, 0.35);
+            border-radius: 16px;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .table-row-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .table-row-hover:hover {
+            background: rgba(20, 184, 166, 0.05);
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-800 dark:text-gray-100 transition-colors duration-300">
+    <div class="particles" id="particles"></div>
+
+    <!-- HEADER -->
+    <header class="relative z-30 flex items-center justify-between px-5 py-3 m-3 mb-0 rounded-2xl glass-card shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-xl shadow-lg animate-pulse-glow">
+                {% block header_logo %}F{% endblock %}
+            </div>
+            <div>
+                <h1 class="font-bold text-lg md:text-xl">{% block header_title %}Farzandingiz: Jasur Karimov{% endblock %}</h1>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{% block header_subtitle %}Frontend-24 · ID: 1042{% endblock %}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 md:gap-4">
+            <div class="hidden md:flex relative">
+                <input type="text" placeholder="Izlash..." class="pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 border-none outline-none focus:ring-2 focus:ring-primary/40 text-sm w-56 transition-all duration-300">
+                <i class="fas fa-search absolute left-4 top-3 text-gray-400 text-sm"></i>
+            </div>
+
+            <button id="notificationBtn" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center relative hover:bg-gray-200 dark:hover:bg-slate-600 transition-all duration-300">
+                <i class="far fa-bell text-lg"></i>
+                <span class="absolute -top-1 -right-1 w-5 h-5 bg-rose text-white text-xs rounded-full flex items-center justify-center">2</span>
+            </button>
+
+            <div class="relative">
+                <button id="profileBtn" class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all duration-300">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" class="w-full h-full p-1">
+                    </div>
+                    <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                </button>
+                <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-56 glass-card rounded-2xl p-3 shadow-2xl z-50 animate-slide-down">
+                    <a href="#" class="block px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-sm transition-all duration-200"><i class="far fa-user mr-2"></i> Profil</a>
+                    <a href="#" class="block px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-sm transition-all duration-200"><i class="fas fa-cog mr-2"></i> Sozlamalar</a>
+                    <hr class="my-1 dark:border-slate-700">
+                    <a href="#" class="block px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-sm text-rose transition-all duration-200"><i class="fas fa-sign-out-alt mr-2"></i> Chiqish</a>
+                </div>
+            </div>
+
+            <button id="darkToggle" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-slate-600 transition-all duration-300">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ASOSIY QISM -->
+    <div class="relative z-10 flex-1 flex flex-col md:flex-row">
+        <!-- SIDEBAR -->
+        <aside class="hidden md:flex flex-col w-72 m-3 mt-3 rounded-3xl neo-card p-5">
+            <div class="flex items-center gap-3 mb-2 px-2">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-black text-lg shadow-lg shadow-primary/30 animate-pulse-glow">LC</div>
+                <div>
+                    <p class="font-extrabold text-gray-900 dark:text-white text-lg leading-tight">LearnCraft</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Ota-ona paneli</p>
+                </div>
+            </div>
+
+            <div class="px-2 mb-4">
+                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    <span>Umumiy progress</span>
+                    <span>{{ overall_progress|default:"72" }}%</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div class="progress-animated h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width: {{ overall_progress|default:'72' }}%"></div>
+                </div>
+            </div>
+
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-4 px-2">Asosiy</div>
+            <nav class="space-y-1 mb-4">
+                <a href="{% url 'parent_dashboard' %}" class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-2xl {% if request.path == '/parent/dashboard/' %}bg-gradient-to-r from-primary to-secondary text-white shadow-md shadow-primary/30{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800{% endif %}">
+                    <i class="fas fa-home w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
+                    <i class="fas fa-child w-5 text-center"></i>
+                    <span>Farzandlar</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
+                    <i class="fas fa-tasks w-5 text-center"></i>
+                    <span>Topshiriqlar</span>
+                </a>
+                <a href="{% url 'parent_questions' %}" class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-2xl {% if request.path == '/parent/savol-javob/' %}bg-gradient-to-r from-primary to-secondary text-white shadow-md shadow-primary/30{% else %}text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800{% endif %}">
+                    <i class="fas fa-question-circle w-5 text-center"></i>
+                    <span>Savol-javob</span>
+                    {% if pending_request_count > 0 %}
+                        <span class="ml-auto badge bg-yellow-100 text-yellow-700">{{ pending_request_count }} so‘rov</span>
+                    {% elif approved_request_count > 0 %}
+                        <span class="ml-auto badge bg-green-100 text-green-700">{{ approved_request_count }} ochiq</span>
+                    {% else %}
+                        <span class="ml-auto text-xs text-gray-400"><i class="fas fa-lock"></i></span>
+                    {% endif %}
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
+                    <i class="fas fa-sms w-5 text-center"></i>
+                    <span>SMS tarixi</span>
+                </a>
+            </nav>
+
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-2">Boshqalar</div>
+            <nav class="space-y-1">
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
+                    <i class="fas fa-cog w-5 text-center"></i>
+                    <span>Sozlamalar</span>
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-2.5 rounded-2xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800">
+                    <i class="fas fa-question-circle w-5 text-center"></i>
+                    <span>Yordam</span>
+                </a>
+            </nav>
+
+            <div class="mt-auto pt-4 border-t border-gray-200 dark:border-slate-700 space-y-2">
+                <label class="flex items-center justify-between px-4 py-2 cursor-pointer">
+                    <span class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                        <i class="fas fa-moon w-5 text-center"></i> Dark mode
+                    </span>
+                    <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                    <div class="w-9 h-5 bg-gray-300 dark:bg-primary rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                </label>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main id="mainScroll" class="flex-1 p-3 md:p-6" style="padding-bottom: calc(5rem + env(safe-area-inset-bottom));">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <!-- MOBILE NAVIGATION -->
+    <nav id="mobileNav" class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg pt-2 pb-3 z-30 border-t dark:border-slate-700 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.08)] pb-safe">
+        <div class="flex overflow-x-auto scrollbar-thin px-3 gap-2 items-end pb-1">
+            <a href="{% url 'parent_dashboard' %}" class="mobile-nav-item flex flex-col items-center justify-center min-w-[70px] flex-shrink-0 px-2 py-1.5 rounded-2xl {% if request.path == '/parent/dashboard/' %}mobile-nav-active text-primary bg-primary/10 font-semibold{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
+                <i class="fas fa-home text-2xl mb-0.5"></i>
+                <span class="text-[10px] leading-tight whitespace-nowrap">Dashboard</span>
+            </a>
+            <a href="#" class="mobile-nav-item flex flex-col items-center justify-center min-w-[70px] flex-shrink-0 px-2 py-1.5 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-primary">
+                <i class="fas fa-child text-2xl mb-0.5"></i>
+                <span class="text-[10px] leading-tight whitespace-nowrap">Farzandlar</span>
+            </a>
+            <a href="#" class="mobile-nav-item flex flex-col items-center justify-center min-w-[70px] flex-shrink-0 px-2 py-1.5 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-primary">
+                <i class="fas fa-tasks text-2xl mb-0.5"></i>
+                <span class="text-[10px] leading-tight whitespace-nowrap">Topshiriqlar</span>
+            </a>
+            <a href="{% url 'parent_questions' %}" class="mobile-nav-item flex flex-col items-center justify-center min-w-[70px] flex-shrink-0 px-2 py-1.5 rounded-2xl {% if request.path == '/parent/savol-javob/' %}mobile-nav-active text-primary bg-primary/10 font-semibold{% else %}text-gray-500 dark:text-gray-400 hover:text-primary{% endif %}">
+                <i class="fas fa-question-circle text-2xl mb-0.5"></i>
+                <span class="text-[10px] leading-tight whitespace-nowrap">Savol-javob</span>
+                {% if pending_request_count > 0 %}
+                    <span class="absolute -top-1 right-1 bg-yellow-100 text-yellow-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full">{{ pending_request_count }}</span>
+                {% elif approved_request_count > 0 %}
+                    <span class="absolute -top-1 right-1 bg-green-100 text-green-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full">✓</span>
+                {% endif %}
+            </a>
+            <a href="#" class="mobile-nav-item flex flex-col items-center justify-center min-w-[70px] flex-shrink-0 px-2 py-1.5 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-primary">
+                <i class="fas fa-sms text-2xl mb-0.5"></i>
+                <span class="text-[10px] leading-tight whitespace-nowrap">SMS tarixi</span>
+            </a>
+            <a href="#" class="mobile-nav-item flex flex-col items-center justify-center min-w-[70px] flex-shrink-0 px-2 py-1.5 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-primary">
+                <i class="fas fa-cog text-2xl mb-0.5"></i>
+                <span class="text-[10px] leading-tight whitespace-nowrap">Sozlamalar</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- MODAL -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl p-6 w-full max-w-md animate-scale-in">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Profil sozlamalari</h2>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:rotate-90"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div><label class="text-sm">Telefon raqam</label><input class="w-full mt-1 px-3 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-primary/40 transition-all duration-300" value="+998901234567"></div>
+                <div><label class="text-sm">Email</label><input class="w-full mt-1 px-3 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-primary/40 transition-all duration-300" value="ota@mail.uz"></div>
+                <button class="w-full py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg">Saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // Particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 6 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Dark mode
+        const darkToggle = document.getElementById('darkToggle');
+        const darkModeCheckbox = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+
+        function setDark(enable) {
+            html.classList.toggle('dark', enable);
+            darkToggle.innerHTML = enable ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            darkModeCheckbox.checked = enable;
+            localStorage.setItem('theme', enable ? 'dark' : 'light');
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme') === 'dark';
+            setDark(saved);
+        }
+
+        darkToggle.addEventListener('click', () => setDark(!html.classList.contains('dark')));
+        darkModeCheckbox.addEventListener('change', (e) => setDark(e.target.checked));
+        initTheme();
+
+        // Profile dropdown
+        const profileBtn = document.getElementById('profileBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                profileDropdown.classList.add('hidden');
+            }
+        });
+
+        // Modal
+        const modal = document.getElementById('settingsModal');
+        profileBtn.addEventListener('dblclick', () => modal.classList.remove('hidden'));
+        document.getElementById('closeModal').addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+        // Adjust main padding for mobile nav
+        function adjustMainPadding() {
+            const main = document.getElementById('mainScroll');
+            const nav = document.getElementById('mobileNav');
+            if (main && window.innerWidth < 768) {
+                main.style.paddingBottom = (nav ? nav.offsetHeight + 15 : 100) + 'px';
+            } else if (main) {
+                main.style.paddingBottom = '1.5rem';
+            }
+        }
+        window.addEventListener('load', adjustMainPadding);
+        window.addEventListener('resize', adjustMainPadding);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

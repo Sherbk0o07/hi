@@ -1,0 +1,2150 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}
+{% if mode == 'create' %}👥 Yangi guruh · DIGION{% else %}✏️ {{ group.name }} · Tahrirlash{% endif %}
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ROOT
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+    --gf-primary: #06b6d4;
+    --gf-primary-dark: #0891b2;
+    --gf-violet: #8b5cf6;
+    --gf-pink: #ec4899;
+    --gf-emerald: #10b981;
+    --gf-amber: #f59e0b;
+    --gf-cyan: #06b6d4;
+    --gf-header-h: 4rem;
+    --gf-max: 1400px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
+.gf-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    margin: 0;
+    padding: 0.5rem 0 3rem;
+    position: relative;
+    font-size: 14px;
+}
+.gf-page * { box-sizing: border-box; min-width: 0; }
+
+.gf-wrap {
+    width: 100%;
+    max-width: var(--gf-max);
+    margin: 0 auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+@media (min-width: 640px) { .gf-wrap { padding-left: 1rem; padding-right: 1rem; } }
+@media (min-width: 1024px) { .gf-wrap { padding-left: 1.5rem; padding-right: 1.5rem; } }
+
+.gf-glow { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0; }
+.gf-glow-1 { top: -200px; left: -200px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(6,182,212,0.3), transparent 70%); animation: gfFloat 20s ease-in-out infinite; }
+.gf-glow-2 { top: 40%; right: -250px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(139,92,246,0.2), transparent 70%); animation: gfFloat 25s ease-in-out infinite reverse; }
+.dark .gf-glow { opacity: 0.12; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes gfSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes gfSlideDown { from { transform: translateY(-14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes gfSlideRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes gfPopIn { 0% { transform: scale(0.85); opacity: 0; } 60% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes gfGradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes gfFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.05); } 66% { transform: translate(-30px, 20px) scale(0.95); } }
+@keyframes gfShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+@keyframes gfPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.75; } }
+@keyframes gfCheck { 0% { stroke-dashoffset: 100; } 100% { stroke-dashoffset: 0; } }
+@keyframes gfDotPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(6, 182, 212, 0); }
+}
+
+.anim-up { animation: gfSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-pop { animation: gfPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-right { animation: gfSlideRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.d-1 { animation-delay: 0.04s; }
+.d-2 { animation-delay: 0.08s; }
+.d-3 { animation-delay: 0.12s; }
+.d-4 { animation-delay: 0.16s; }
+.d-5 { animation-delay: 0.20s; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TOPBAR
+   ═══════════════════════════════════════════════════════════════ */
+.gf-topbar {
+    position: sticky;
+    top: var(--gf-header-h);
+    z-index: 40;
+    height: 56px;
+    background: rgba(255,255,255,0.88);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.7);
+    margin: -0.5rem -0.75rem 1rem;
+    animation: gfSlideDown 0.4s ease both;
+}
+@media (min-width: 640px) { .gf-topbar { margin: -0.5rem -1rem 1.25rem; } }
+@media (min-width: 1024px) { .gf-topbar { margin-left: -1.5rem; margin-right: -1.5rem; } }
+.dark .gf-topbar {
+    background: rgba(10,10,15,0.88);
+    border-bottom-color: rgba(30,41,59,0.7);
+}
+
+.gf-topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 0 0.75rem;
+    max-width: var(--gf-max);
+    margin: 0 auto;
+}
+@media (min-width: 640px) { .gf-topbar-inner { padding: 0 1rem; gap: 0.75rem; } }
+@media (min-width: 1024px) { .gf-topbar-inner { padding: 0 1.5rem; } }
+
+.gf-ico {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 13px;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+}
+@media (min-width: 640px) { .gf-ico { width: 36px; height: 36px; font-size: 14px; } }
+.dark .gf-ico { background: #1e293b; color: #94a3b8; }
+.gf-ico:hover {
+    background: #e2e8f0;
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 6px 14px -6px rgba(0,0,0,0.15);
+}
+.dark .gf-ico:hover { background: #334155; color: #f1f5f9; }
+.gf-ico:active { transform: scale(0.94); }
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════════════ */
+.gf-hero {
+    position: relative;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    padding: 1.5rem 1.25rem;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+    background-size: 200% 200%;
+    animation: gfGradientShift 8s ease infinite, gfSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow: 0 20px 44px -14px rgba(6, 182, 212, 0.5);
+    isolation: isolate;
+}
+@media (min-width: 640px) { .gf-hero { padding: 2rem 2.25rem; border-radius: 1.5rem; } }
+@media (min-width: 1024px) { .gf-hero { padding: 2.5rem 2.75rem; } }
+
+.gf-hero.edit {
+    background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #3b82f6 100%);
+    background-size: 200% 200%;
+    box-shadow: 0 20px 44px -14px rgba(139, 92, 246, 0.5);
+}
+
+.gf-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.2) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.12) 0%, transparent 45%);
+    pointer-events: none;
+    z-index: 1;
+}
+.gf-hero::after {
+    content: '';
+    position: absolute;
+    top: -30%; right: -15%;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.18), transparent 70%);
+    animation: gfFloat 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.gf-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+@media (min-width: 640px) { .gf-hero-content { gap: 1.5rem; flex-wrap: nowrap; } }
+
+.gf-hero-icon {
+    width: 60px; height: 60px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    animation: gfPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (min-width: 640px) { .gf-hero-icon { width: 76px; height: 76px; border-radius: 20px; font-size: 32px; } }
+.gf-hero-icon:hover { transform: scale(1.08) rotate(-6deg); }
+
+.gf-hero-title {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 1.35rem;
+    line-height: 1.25;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    word-break: break-word;
+    margin-bottom: 0.5rem;
+}
+@media (min-width: 640px) { .gf-hero-title { font-size: 1.75rem; } }
+@media (min-width: 1024px) { .gf-hero-title { font-size: 2rem; } }
+
+.gf-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.8rem;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+}
+
+.gf-hero-sub {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+.gf-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+@media (min-width: 1024px) {
+    .gf-layout { grid-template-columns: minmax(0, 1fr) 340px; gap: 1.5rem; }
+    .gf-side { position: sticky; top: calc(var(--gf-header-h) + 1rem); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARD
+   ═══════════════════════════════════════════════════════════════ */
+.gf-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1.125rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    animation: gfSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .gf-card { background: #0f172a; border-color: #1e293b; }
+.gf-card:hover {
+    box-shadow: 0 10px 32px -16px rgba(6, 182, 212, 0.15);
+    border-color: #67e8f9;
+}
+.dark .gf-card:hover { border-color: rgba(6, 182, 212, 0.4); }
+
+.gf-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+@media (min-width: 640px) { .gf-card-header { padding: 1.15rem 1.5rem; gap: 1rem; } }
+.dark .gf-card-header { border-bottom-color: #1e293b; }
+
+.gf-card-icon {
+    width: 40px; height: 40px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 6px 14px -4px currentColor;
+}
+@media (min-width: 640px) { .gf-card-icon { width: 44px; height: 44px; border-radius: 12px; font-size: 17px; } }
+
+.gf-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.3;
+    margin-bottom: 0.15rem;
+}
+@media (min-width: 640px) { .gf-card-title { font-size: 1rem; } }
+.dark .gf-card-title { color: #f1f5f9; }
+
+.gf-card-subtitle {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+.dark .gf-card-subtitle { color: #94a3b8; }
+
+.gf-card-body {
+    padding: 1.25rem;
+}
+@media (min-width: 640px) { .gf-card-body { padding: 1.5rem; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   FIELDS
+   ═══════════════════════════════════════════════════════════════ */
+.gf-field {
+    margin-bottom: 1.25rem;
+}
+.gf-field:last-child { margin-bottom: 0; }
+
+.gf-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+.dark .gf-label { color: #cbd5e1; }
+.gf-label i { font-size: 14px; }
+.gf-label .req {
+    color: #ef4444;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: auto;
+    padding: 0.15rem 0.55rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 999px;
+}
+
+.gf-input, .gf-textarea, .gf-select {
+    width: 100%;
+    padding: 0.85rem 1.1rem;
+    border-radius: 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-family: inherit;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+@media (min-width: 640px) {
+    .gf-input, .gf-textarea, .gf-select { padding: 0.95rem 1.15rem; font-size: 0.95rem; }
+}
+.dark .gf-input, .dark .gf-textarea, .dark .gf-select {
+    background: #0a0a0f;
+    border-color: #1e293b;
+    color: #f1f5f9;
+}
+.gf-input:hover, .gf-textarea:hover, .gf-select:hover {
+    border-color: #cbd5e1;
+    background: #fafbff;
+}
+.dark .gf-input:hover, .dark .gf-textarea:hover, .dark .gf-select:hover {
+    border-color: #334155;
+    background: #0f0f17;
+}
+.gf-input:focus, .gf-textarea:focus, .gf-select:focus {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 6px 16px -6px rgba(6, 182, 212, 0.2);
+    background: #fff;
+    transform: translateY(-2px);
+}
+.dark .gf-input:focus, .dark .gf-textarea:focus, .dark .gf-select:focus {
+    background: #0a0a0f;
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.25);
+}
+.gf-input.is-invalid, .gf-textarea.is-invalid, .gf-select.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+    animation: gfShake 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gf-textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.7;
+}
+@media (min-width: 640px) { .gf-textarea { min-height: 110px; } }
+
+.gf-hint {
+    font-size: 0.73rem;
+    color: #94a3b8;
+    margin-top: 0.45rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    line-height: 1.5;
+}
+.gf-hint i { margin-top: 2px; flex-shrink: 0; }
+
+.gf-error {
+    font-size: 0.76rem;
+    color: #ef4444;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    padding: 0.55rem 0.8rem;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 8px;
+    border-left: 3px solid #ef4444;
+    animation: gfShake 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gf-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+}
+@media (min-width: 640px) {
+    .gf-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COLOR PICKER
+   ═══════════════════════════════════════════════════════════════ */
+.gf-colors {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.gf-color-option {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px -4px rgba(0,0,0,0.15);
+}
+.gf-color-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.gf-color-option:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.25);
+}
+.gf-color-option.checked {
+    border-color: #0f172a;
+    box-shadow: 0 0 0 4px rgba(15,23,42,0.15), 0 8px 20px -4px rgba(0,0,0,0.3);
+    transform: scale(1.1);
+}
+.dark .gf-color-option.checked {
+    border-color: #f1f5f9;
+    box-shadow: 0 0 0 4px rgba(241,245,249,0.15);
+}
+.gf-color-option.checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 900;
+    font-size: 20px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    animation: gfCheck 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STATUS OPTIONS
+   ═══════════════════════════════════════════════════════════════ */
+.gf-status-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+@media (min-width: 640px) { .gf-status-options { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.gf-status-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.9rem 0.6rem;
+    border-radius: 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    text-align: center;
+    position: relative;
+}
+.dark .gf-status-option { background: #0a0a0f; border-color: #1e293b; color: #94a3b8; }
+.gf-status-option:hover {
+    border-color: #06b6d4;
+    background: #ecfeff;
+    transform: translateY(-2px);
+}
+.dark .gf-status-option:hover { background: rgba(6, 182, 212, 0.1); }
+.gf-status-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.gf-status-option.checked {
+    border-color: #06b6d4;
+    background: linear-gradient(135deg, #ecfeff, #cffafe);
+    color: #0e7490;
+    box-shadow: 0 4px 12px -3px rgba(6, 182, 212, 0.3);
+}
+.dark .gf-status-option.checked {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.15));
+    color: #67e8f9;
+}
+.gf-status-option i {
+    font-size: 18px;
+    transition: transform 0.3s;
+}
+.gf-status-option:hover i { transform: scale(1.15); }
+
+/* ═══════════════════════════════════════════════════════════════
+   ⭐ SCHEDULE — CHIROYLI VA KATTA
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Schedule section wrapper ─── */
+.gf-schedule-block {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1.5px dashed #cbd5e1;
+    margin-top: 1rem;
+    transition: all 0.35s;
+}
+.dark .gf-schedule-block {
+    background: linear-gradient(135deg, rgba(15,23,42,0.6) 0%, rgba(10,10,15,0.6) 100%);
+    border-color: #334155;
+}
+
+.gf-schedule-block-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed #cbd5e1;
+}
+.dark .gf-schedule-block-head { border-color: #334155; }
+.gf-schedule-block-head .icon {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 4px 10px -3px rgba(245, 158, 11, 0.5);
+}
+.gf-schedule-block-head .title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.dark .gf-schedule-block-head .title { color: #f1f5f9; }
+.gf-schedule-block-head .sub {
+    font-size: 0.72rem;
+    color: #64748b;
+}
+.dark .gf-schedule-block-head .sub { color: #94a3b8; }
+
+/* ─── Schedule type — katta kartalar ─── */
+.gf-schedule-types {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+@media (min-width: 640px) { .gf-schedule-types { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.gf-schedule-type {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 1.5rem 0.9rem 1.25rem;
+    border-radius: 1.1rem;
+    border: 2px solid #e2e8f0;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #334155;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.dark .gf-schedule-type {
+    background: linear-gradient(135deg, #0f172a, #0a0a0f);
+    border-color: #1e293b;
+    color: #cbd5e1;
+}
+.gf-schedule-type::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(6,182,212,0.08), rgba(139,92,246,0.08));
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+.gf-schedule-type:hover::before { opacity: 1; }
+.gf-schedule-type:hover {
+    border-color: #06b6d4;
+    transform: translateY(-5px);
+    box-shadow: 0 16px 32px -12px rgba(6, 182, 212, 0.4);
+}
+.gf-schedule-type > i {
+    font-size: 32px;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(6, 182, 212, 0.12);
+    color: #06b6d4;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    min-height: 60px;
+}
+.gf-schedule-type:hover > i {
+    transform: scale(1.1) rotate(-8deg);
+}
+.gf-schedule-type > span {
+    position: relative;
+    z-index: 1;
+    display: block;
+}
+.gf-schedule-type > span:nth-of-type(1) {
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+.gf-schedule-type > span:nth-of-type(2) {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.gf-schedule-type input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.gf-schedule-type.checked {
+    border-color: #06b6d4;
+    background: linear-gradient(135deg, #ecfeff, #cffafe);
+    color: #0e7490;
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15), 0 16px 32px -10px rgba(6, 182, 212, 0.5);
+    transform: translateY(-3px);
+}
+.gf-schedule-type.checked::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    box-shadow: 0 4px 12px -2px rgba(6, 182, 212, 0.6);
+    animation: gfPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 2;
+}
+.dark .gf-schedule-type.checked {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.22), rgba(59, 130, 246, 0.15));
+    color: #67e8f9;
+}
+.gf-schedule-type.checked > i {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: #fff;
+    box-shadow: 0 8px 18px -6px rgba(6, 182, 212, 0.7);
+}
+
+/* ─── Weekly schedule — katta kartalar ─── */
+.gf-schedule {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+}
+@media (min-width: 640px) {
+    .gf-schedule { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.gf-day-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.875rem;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 2px solid #e2e8f0;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+}
+.gf-day-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #06b6d4, #8b5cf6);
+    opacity: 0;
+    transition: opacity 0.35s;
+}
+.dark .gf-day-row {
+    background: linear-gradient(135deg, #0f172a, #0a0a0f);
+    border-color: #1e293b;
+}
+.gf-day-row:hover {
+    border-color: #67e8f9;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -10px rgba(6, 182, 212, 0.4);
+}
+.gf-day-row.active {
+    border-color: #06b6d4;
+    background: linear-gradient(135deg, #ecfeff, #f0fdfa);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12), 0 12px 26px -10px rgba(6, 182, 212, 0.5);
+}
+.gf-day-row.active::before { opacity: 1; }
+.dark .gf-day-row.active {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.18), rgba(20, 184, 166, 0.1));
+}
+
+.gf-day-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    min-width: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    white-space: nowrap;
+}
+.dark .gf-day-name { color: #e2e8f0; }
+
+.gf-day-name .gf-day-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    transition: all 0.4s;
+    flex-shrink: 0;
+}
+.gf-day-row.active .gf-day-dot {
+    background: #06b6d4;
+    animation: gfDotPulse 2s ease-in-out infinite;
+}
+
+.gf-time-wrap {
+    position: relative;
+    flex: 1 1 0%;
+    min-width: 0;
+    width: 100%;
+}
+
+.gf-day-time {
+    width: 100%;
+    padding: 0.75rem 2.4rem 0.75rem 1rem;
+    border-radius: 0.65rem;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    font-size: 0.98rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    color: #0f172a;
+    outline: none;
+    transition: all 0.3s;
+    min-width: 0;
+    text-align: center;
+    letter-spacing: 0.08em;
+}
+.dark .gf-day-time {
+    background: #050508;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+.gf-day-time:focus {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.18);
+    background: #fff;
+    transform: scale(1.02);
+}
+.dark .gf-day-time:focus {
+    background: #0a0a0f;
+}
+.gf-day-time::placeholder {
+    color: #cbd5e1;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+.dark .gf-day-time::placeholder { color: #475569; }
+.gf-day-row.active .gf-day-time {
+    border-color: #06b6d4;
+    background: #fff;
+    color: #0e7490;
+}
+.dark .gf-day-row.active .gf-day-time {
+    background: rgba(6, 182, 212, 0.08);
+    color: #67e8f9;
+}
+
+/* ─── Clear button ─── */
+.gf-time-clear {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%) scale(0.7);
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #dc2626;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+}
+.gf-day-row.active .gf-time-clear {
+    display: flex;
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+}
+.gf-time-clear:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: translateY(-50%) scale(1.15) rotate(90deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACTION BAR
+   ═══════════════════════════════════════════════════════════════ */
+.gf-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+@media (min-width: 640px) { .gf-actions { padding: 1.15rem 1.5rem; } }
+.dark .gf-actions { background: #0a0a0f; border-color: #1e293b; }
+
+.gf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.35rem;
+    border-radius: 0.75rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: inherit;
+    min-height: 46px;
+    position: relative;
+    overflow: hidden;
+}
+.gf-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+}
+.gf-btn:hover::before { transform: translateX(100%); }
+.gf-btn:active { transform: scale(0.97); }
+
+.gf-btn-primary {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 8px 22px -6px rgba(6, 182, 212, 0.5);
+    animation: gfGradientShift 5s ease infinite;
+}
+.gf-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -6px rgba(6, 182, 212, 0.6);
+}
+.gf-btn-secondary {
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+.gf-btn-secondary:hover { background: #f1f5f9; transform: translateY(-2px); }
+.dark .gf-btn-secondary { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+.dark .gf-btn-secondary:hover { background: #334155; }
+
+.gf-spacer { flex: 1; }
+
+@media (max-width: 640px) {
+    .gf-actions {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+    .gf-actions .gf-btn { flex: 1; padding: 0.8rem 0.9rem; font-size: 0.85rem; }
+    .gf-spacer { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR
+   ═══════════════════════════════════════════════════════════════ */
+.gf-side-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 0.875rem;
+    animation: gfSlideRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dark .gf-side-card { background: #0f172a; border-color: #1e293b; }
+
+.gf-side-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.dark .gf-side-title { color: #94a3b8; }
+
+.gf-preview-card {
+    border-radius: 0.875rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    padding: 1rem;
+    color: #fff;
+    position: relative;
+    min-height: 120px;
+}
+.gf-preview-card::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -20%;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 70%);
+    pointer-events: none;
+}
+.gf-preview-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.25);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+.gf-preview-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+    word-break: break-word;
+}
+.gf-preview-meta {
+    font-size: 0.72rem;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.gf-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+    font-size: 0.82rem;
+    gap: 0.5rem;
+}
+.dark .gf-info-row { border-color: #1e293b; }
+.gf-info-row:last-child { border-bottom: none; }
+
+.gf-info-label {
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+.dark .gf-info-label { color: #94a3b8; }
+.gf-info-value {
+    font-weight: 600;
+    color: #0f172a;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dark .gf-info-value { color: #f1f5f9; }
+
+.gf-tips {
+    padding: 1rem;
+    border-radius: 0.875rem;
+    background: linear-gradient(135deg, #ecfeff, #cffafe);
+    border: 1px solid #a5f3fc;
+}
+.dark .gf-tips {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(59, 130, 246, 0.06));
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════════ */
+.gf-toasts {
+    position: fixed;
+    top: 5rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+    max-width: 22rem;
+}
+@media (max-width: 640px) {
+    .gf-toasts { left: 0.625rem; right: 0.625rem; max-width: none; }
+}
+.gf-toast {
+    padding: 0.85rem 1rem;
+    border-radius: 0.875rem;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.35);
+    pointer-events: auto;
+    animation: gfSlideRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.gf-toast i { font-size: 15px; }
+
+.gf-mw0 { min-width: 0; }
+.gf-cl-1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="gf-page">
+
+<div class="gf-glow gf-glow-1"></div>
+<div class="gf-glow gf-glow-2"></div>
+
+<div class="gf-wrap">
+
+<!-- ═══════════════ TOPBAR ═══════════════ -->
+<div class="gf-topbar">
+    <div class="gf-topbar-inner">
+        <a href="{% url 'courses_admin:group_list' %}" class="gf-ico" title="Orqaga">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="flex-1 gf-mw0">
+            <div class="text-[9px] uppercase font-bold tracking-wider text-slate-400 leading-none mb-0.5">
+                Guruh
+            </div>
+            <div class="text-xs font-bold text-slate-900 dark:text-white gf-cl-1">
+                {% if mode == 'create' %}Yangi guruh{% else %}{{ group.name }}{% endif %}
+            </div>
+        </div>
+        {% if group and group.pk %}
+        <a href="{% url 'courses_admin:group_detail' pk=group.pk %}" class="gf-ico" title="Ko'rish">
+            <i class="fas fa-eye"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="gf-hero {% if mode == 'edit' %}edit{% endif %}">
+    <div class="gf-hero-content">
+        <div class="gf-hero-icon">
+            <i class="fas fa-users-rectangle"></i>
+        </div>
+        <div class="flex-1 gf-mw0">
+            <div class="gf-hero-badge">
+                <i class="fas {% if mode == 'create' %}fa-plus-circle{% else %}fa-pen-to-square{% endif %}"></i>
+                {% if mode == 'create' %}Yangi guruh yaratish{% else %}Guruhni tahrirlash{% endif %}
+            </div>
+            <h1 class="gf-hero-title">
+                {% if mode == 'create' %}Yangi guruh yaratish{% else %}{{ group.name }}{% endif %}
+            </h1>
+            <div class="gf-hero-sub">
+                <i class="fas fa-users"></i>
+                <span>
+                    {% if mode == 'create' %}
+                    Guruh nomi, kurs, o'qituvchi va jadvalni belgilang
+                    {% else %}
+                    {{ group.students_count|default:0 }} ta talaba · {{ group.get_status_display }}
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ FORM ERRORS ═══════════════ -->
+{% if form.non_field_errors %}
+<div style="padding: 1rem 1.15rem; border-radius: 1rem; background: linear-gradient(135deg, #fef2f2, #fee2e2); border: 1px solid #fecaca; border-left: 4px solid #ef4444; margin-bottom: 1rem;" class="anim-up">
+    <div class="flex items-start gap-3">
+        <i class="fas fa-circle-exclamation mt-0.5 text-lg text-red-600"></i>
+        <div class="flex-1">
+            <div class="font-bold mb-1 text-red-900">Xatolik</div>
+            <ul class="text-sm space-y-1 list-disc list-inside text-red-800">
+                {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════ FORM ═══════════════ -->
+<form method="post" id="groupForm" novalidate>
+    {% csrf_token %}
+
+    <div class="gf-layout">
+
+        <!-- ═══════ CHAP USTUN ═══════ -->
+        <div class="gf-mw0">
+
+            <!-- ═══ 1. ASOSIY MA'LUMOTLAR ═══ -->
+            <div class="gf-card anim-up d-1">
+                <div class="gf-card-header">
+                    <span class="gf-card-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: #06b6d4;">
+                        <i class="fas fa-info-circle"></i>
+                    </span>
+                    <div class="flex-1 gf-mw0">
+                        <div class="gf-card-title">Asosiy ma'lumotlar</div>
+                        <div class="gf-card-subtitle">Guruh nomi va kodi</div>
+                    </div>
+                </div>
+                <div class="gf-card-body">
+
+                    <!-- Name -->
+                    <div class="gf-field">
+                        <label for="id_name" class="gf-label">
+                            <i class="fas fa-users" style="color: #06b6d4;"></i>
+                            <span>Guruh nomi</span>
+                            <span class="req">Majburiy</span>
+                        </label>
+                        <input type="text"
+                               name="name"
+                               id="id_name"
+                               class="gf-input"
+                               placeholder="Masalan: B6-2025"
+                               value="{{ form.name.value|default:'' }}"
+                               maxlength="100"
+                               required>
+                        <p class="gf-hint">
+                            <i class="fas fa-lightbulb"></i>
+                            Guruh nomi qisqa va eslab qoladigan bo'lsin (masalan: B6, B7, Frontend-1)
+                        </p>
+                        {% if form.name.errors %}
+                        <div class="gf-error">
+                            <i class="fas fa-circle-exclamation"></i>
+                            {{ form.name.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Code -->
+                    <div class="gf-field">
+                        <label for="id_code" class="gf-label">
+                            <i class="fas fa-hashtag" style="color: #8b5cf6;"></i>
+                            <span>Guruh kodi</span>
+                        </label>
+                        <input type="text"
+                               name="code"
+                               id="id_code"
+                               class="gf-input"
+                               placeholder="Masalan: B6-2025 (ixtiyoriy)"
+                               value="{{ form.code.value|default:'' }}"
+                               maxlength="20">
+                        <p class="gf-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Bo'sh qoldirsangiz avtomatik yaratiladi
+                        </p>
+                        {% if form.code.errors %}
+                        <div class="gf-error">
+                            <i class="fas fa-circle-exclamation"></i>
+                            {{ form.code.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="gf-field">
+                        <label for="id_description" class="gf-label">
+                            <i class="fas fa-align-left" style="color: #06b6d4;"></i>
+                            <span>Tavsif</span>
+                        </label>
+                        <textarea name="description"
+                                  id="id_description"
+                                  class="gf-textarea"
+                                  rows="3"
+                                  placeholder="Guruh haqida qisqacha ma'lumot...">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                        <div class="gf-error">
+                            <i class="fas fa-circle-exclamation"></i>
+                            {{ form.description.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ 2. KURS VA O'QITUVCHI ═══ -->
+            <div class="gf-card anim-up d-2">
+                <div class="gf-card-header">
+                    <span class="gf-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #8b5cf6;">
+                        <i class="fas fa-chalkboard-user"></i>
+                    </span>
+                    <div class="flex-1 gf-mw0">
+                        <div class="gf-card-title">Kurs va o'qituvchi</div>
+                        <div class="gf-card-subtitle">Qaysi kurs, kim olib boradi</div>
+                    </div>
+                </div>
+                <div class="gf-card-body">
+
+                    <div class="gf-row">
+                        <!-- Course -->
+                        <div class="gf-field">
+                            <label for="id_course" class="gf-label">
+                                <i class="fas fa-book" style="color: #6366f1;"></i>
+                                <span>Kurs</span>
+                            </label>
+                            <select name="course" id="id_course" class="gf-select">
+                                <option value="">— Kurs tanlanmagan —</option>
+                                {% for c in courses %}
+                                <option value="{{ c.pk }}"
+                                        {% if form.course.value|stringformat:"s" == c.pk|stringformat:"s" %}selected{% endif %}>
+                                    {{ c.title|truncatechars:50 }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <p class="gf-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Guruh qaysi kursga tegishli
+                            </p>
+                            {% if form.course.errors %}
+                            <div class="gf-error">
+                                <i class="fas fa-circle-exclamation"></i>
+                                {{ form.course.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Teacher -->
+                        <div class="gf-field">
+                            <label for="id_teacher" class="gf-label">
+                                <i class="fas fa-user-tie" style="color: #8b5cf6;"></i>
+                                <span>O'qituvchi</span>
+                            </label>
+                            <select name="teacher" id="id_teacher" class="gf-select">
+                                <option value="">— O'qituvchi tanlanmagan —</option>
+                                {% for t in teachers %}
+                                <option value="{{ t.pk }}"
+                                        {% if form.teacher.value|stringformat:"s" == t.pk|stringformat:"s" %}selected{% endif %}>
+                                    {{ t.get_full_name|default:t.phone_number }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <p class="gf-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Guruhni olib boradigan o'qituvchi
+                            </p>
+                            {% if form.teacher.errors %}
+                            <div class="gf-error">
+                                <i class="fas fa-circle-exclamation"></i>
+                                {{ form.teacher.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Lessons start date -->
+                    <div class="gf-field">
+                        <label for="id_lessons_start_date" class="gf-label">
+                            <i class="fas fa-calendar-plus" style="color: #10b981;"></i>
+                            <span>Darslar boshlanish sanasi</span>
+                        </label>
+                        <input type="date"
+                               name="lessons_start_date"
+                               id="id_lessons_start_date"
+                               class="gf-input"
+                               value="{% if form.lessons_start_date.value %}{{ form.lessons_start_date.value|date:'Y-m-d' }}{% endif %}">
+                        <p class="gf-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Bu sanadan boshlab darslar jadval bo'yicha taqsimlanadi
+                        </p>
+                        {% if form.lessons_start_date.errors %}
+                        <div class="gf-error">
+                            <i class="fas fa-circle-exclamation"></i>
+                            {{ form.lessons_start_date.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ 3. JADVAL ═══ -->
+            <div class="gf-card anim-up d-3">
+                <div class="gf-card-header">
+                    <span class="gf-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #f59e0b;">
+                        <i class="fas fa-clock"></i>
+                    </span>
+                    <div class="flex-1 gf-mw0">
+                        <div class="gf-card-title">Haftalik jadval</div>
+                        <div class="gf-card-subtitle">Har kun uchun vaqtni belgilang</div>
+                    </div>
+                </div>
+                <div class="gf-card-body">
+
+                    <!-- Schedule type -->
+                    <div class="gf-field">
+                        <label class="gf-label">
+                            <i class="fas fa-calendar-week" style="color: #06b6d4;"></i>
+                            <span>Dars kunlari turi</span>
+                            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 500; margin-left: auto;">
+                                Qaysi kunlari dars bo'ladi?
+                            </span>
+                        </label>
+                        <div class="gf-schedule-types">
+                            <label class="gf-schedule-type {% if form.schedule_type.value == 'odd' or not form.schedule_type.value %}checked{% endif %}">
+                                <input type="radio" name="schedule_type" value="odd"
+                                       {% if form.schedule_type.value == 'odd' or not form.schedule_type.value %}checked{% endif %}>
+                                <i class="fas fa-calendar-day"></i>
+                                <span>Toq kunlar</span>
+                                <span>Du · Ch · Ju</span>
+                            </label>
+                            <label class="gf-schedule-type {% if form.schedule_type.value == 'even' %}checked{% endif %}">
+                                <input type="radio" name="schedule_type" value="even"
+                                       {% if form.schedule_type.value == 'even' %}checked{% endif %}>
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Juft kunlar</span>
+                                <span>Se · Pa · Sha</span>
+                            </label>
+                            <label class="gf-schedule-type {% if form.schedule_type.value == 'custom' %}checked{% endif %}">
+                                <input type="radio" name="schedule_type" value="custom"
+                                       {% if form.schedule_type.value == 'custom' %}checked{% endif %}>
+                                <i class="fas fa-sliders"></i>
+                                <span>Qo'lda</span>
+                                <span>O'zingiz belgilang</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Weekly schedule block -->
+                    <div class="gf-schedule-block">
+                        <div class="gf-schedule-block-head">
+                            <span class="icon">
+                                <i class="fas fa-hourglass-half"></i>
+                            </span>
+                            <div class="flex-1 gf-mw0">
+                                <div class="title">Haftalik dars vaqtlari</div>
+                                <div class="sub">Har kun uchun vaqtni kiriting (24 soat formatida)</div>
+                            </div>
+                        </div>
+
+                        <div class="gf-schedule">
+
+                            <!-- Dushanba -->
+                            <div class="gf-day-row {% if form.schedule_monday.value %}active{% endif %}" data-day="monday">
+                                <div class="gf-day-name">
+                                    <span class="gf-day-dot"></span>
+                                    <span>Dushanba</span>
+                                </div>
+                                <div class="gf-time-wrap">
+                                    <input type="text" name="schedule_monday" id="id_schedule_monday"
+                                           class="gf-day-time" placeholder="14:00" maxlength="10"
+                                           value="{{ form.schedule_monday.value|default:'' }}"
+                                           autocomplete="off">
+                                    <button type="button" class="gf-time-clear" onclick="gfClearTime(this)" title="Tozalash">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Seshanba -->
+                            <div class="gf-day-row {% if form.schedule_tuesday.value %}active{% endif %}" data-day="tuesday">
+                                <div class="gf-day-name">
+                                    <span class="gf-day-dot"></span>
+                                    <span>Seshanba</span>
+                                </div>
+                                <div class="gf-time-wrap">
+                                    <input type="text" name="schedule_tuesday" id="id_schedule_tuesday"
+                                           class="gf-day-time" placeholder="14:00" maxlength="10"
+                                           value="{{ form.schedule_tuesday.value|default:'' }}"
+                                           autocomplete="off">
+                                    <button type="button" class="gf-time-clear" onclick="gfClearTime(this)" title="Tozalash">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Chorshanba -->
+                            <div class="gf-day-row {% if form.schedule_wednesday.value %}active{% endif %}" data-day="wednesday">
+                                <div class="gf-day-name">
+                                    <span class="gf-day-dot"></span>
+                                    <span>Chorshanba</span>
+                                </div>
+                                <div class="gf-time-wrap">
+                                    <input type="text" name="schedule_wednesday" id="id_schedule_wednesday"
+                                           class="gf-day-time" placeholder="14:00" maxlength="10"
+                                           value="{{ form.schedule_wednesday.value|default:'' }}"
+                                           autocomplete="off">
+                                    <button type="button" class="gf-time-clear" onclick="gfClearTime(this)" title="Tozalash">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Payshanba -->
+                            <div class="gf-day-row {% if form.schedule_thursday.value %}active{% endif %}" data-day="thursday">
+                                <div class="gf-day-name">
+                                    <span class="gf-day-dot"></span>
+                                    <span>Payshanba</span>
+                                </div>
+                                <div class="gf-time-wrap">
+                                    <input type="text" name="schedule_thursday" id="id_schedule_thursday"
+                                           class="gf-day-time" placeholder="14:00" maxlength="10"
+                                           value="{{ form.schedule_thursday.value|default:'' }}"
+                                           autocomplete="off">
+                                    <button type="button" class="gf-time-clear" onclick="gfClearTime(this)" title="Tozalash">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Juma -->
+                            <div class="gf-day-row {% if form.schedule_friday.value %}active{% endif %}" data-day="friday">
+                                <div class="gf-day-name">
+                                    <span class="gf-day-dot"></span>
+                                    <span>Juma</span>
+                                </div>
+                                <div class="gf-time-wrap">
+                                    <input type="text" name="schedule_friday" id="id_schedule_friday"
+                                           class="gf-day-time" placeholder="14:00" maxlength="10"
+                                           value="{{ form.schedule_friday.value|default:'' }}"
+                                           autocomplete="off">
+                                    <button type="button" class="gf-time-clear" onclick="gfClearTime(this)" title="Tozalash">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Shanba -->
+                            <div class="gf-day-row {% if form.schedule_saturday.value %}active{% endif %}" data-day="saturday">
+                                <div class="gf-day-name">
+                                    <span class="gf-day-dot"></span>
+                                    <span>Shanba</span>
+                                </div>
+                                <div class="gf-time-wrap">
+                                    <input type="text" name="schedule_saturday" id="id_schedule_saturday"
+                                           class="gf-day-time" placeholder="14:00" maxlength="10"
+                                           value="{{ form.schedule_saturday.value|default:'' }}"
+                                           autocomplete="off">
+                                    <button type="button" class="gf-time-clear" onclick="gfClearTime(this)" title="Tozalash">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Yakshanba -->
+                            <div class="gf-day-row {% if form.schedule_sunday.value %}active{% endif %}" data-day="sunday">
+                                <div class="gf-day-name">
+                                    <span class="gf-day-dot"></span>
+                                    <span>Yakshanba</span>
+                                </div>
+                                <div class="gf-time-wrap">
+                                    <input type="text" name="schedule_sunday" id="id_schedule_sunday"
+                                           class="gf-day-time" placeholder="14:00" maxlength="10"
+                                           value="{{ form.schedule_sunday.value|default:'' }}"
+                                           autocomplete="off">
+                                    <button type="button" class="gf-time-clear" onclick="gfClearTime(this)" title="Tozalash">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <p class="gf-hint" style="margin-top: 1rem;">
+                            <i class="fas fa-lightbulb" style="color: #f59e0b;"></i>
+                            <span>
+                                <strong>Tez kiritish:</strong> "14" → 14:00 · "1430" → 14:30 · "9" → 09:00
+                            </span>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ 4. SOZLAMALAR ═══ -->
+            <div class="gf-card anim-up d-4">
+                <div class="gf-card-header">
+                    <span class="gf-card-icon" style="background: linear-gradient(135deg, #ec4899, #db2777); color: #ec4899;">
+                        <i class="fas fa-sliders-h"></i>
+                    </span>
+                    <div class="flex-1 gf-mw0">
+                        <div class="gf-card-title">Sozlamalar</div>
+                        <div class="gf-card-subtitle">Limit, holat, rang va muddatlar</div>
+                    </div>
+                </div>
+                <div class="gf-card-body">
+
+                    <!-- Max students + Room -->
+                    <div class="gf-row">
+                        <div class="gf-field">
+                            <label for="id_max_students" class="gf-label">
+                                <i class="fas fa-users" style="color: #ec4899;"></i>
+                                <span>Maksimal talabalar</span>
+                            </label>
+                            <input type="number"
+                                   name="max_students"
+                                   id="id_max_students"
+                                   class="gf-input"
+                                   value="{{ form.max_students.value|default:'20' }}"
+                                   min="1" max="200">
+                            {% if form.max_students.errors %}
+                            <div class="gf-error">
+                                <i class="fas fa-circle-exclamation"></i>
+                                {{ form.max_students.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="gf-field">
+                            <label for="id_room" class="gf-label">
+                                <i class="fas fa-door-open" style="color: #10b981;"></i>
+                                <span>Xona</span>
+                            </label>
+                            <input type="text"
+                                   name="room"
+                                   id="id_room"
+                                   class="gf-input"
+                                   placeholder="Masalan: 302-xona"
+                                   value="{{ form.room.value|default:'' }}"
+                                   maxlength="100">
+                            {% if form.room.errors %}
+                            <div class="gf-error">
+                                <i class="fas fa-circle-exclamation"></i>
+                                {{ form.room.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="gf-field">
+                        <label class="gf-label">
+                            <i class="fas fa-flag" style="color: #06b6d4;"></i>
+                            <span>Holat</span>
+                        </label>
+                        <div class="gf-status-options">
+                            <label class="gf-status-option {% if form.status.value == 'active' or not form.status.value %}checked{% endif %}">
+                                <input type="radio" name="status" value="active"
+                                       {% if form.status.value == 'active' or not form.status.value %}checked{% endif %}>
+                                <i class="fas fa-play-circle" style="color: #10b981;"></i>
+                                <span>Aktiv</span>
+                            </label>
+                            <label class="gf-status-option {% if form.status.value == 'paused' %}checked{% endif %}">
+                                <input type="radio" name="status" value="paused"
+                                       {% if form.status.value == 'paused' %}checked{% endif %}>
+                                <i class="fas fa-pause-circle" style="color: #f59e0b;"></i>
+                                <span>To'xtatilgan</span>
+                            </label>
+                            <label class="gf-status-option {% if form.status.value == 'finished' %}checked{% endif %}">
+                                <input type="radio" name="status" value="finished"
+                                       {% if form.status.value == 'finished' %}checked{% endif %}>
+                                <i class="fas fa-check-circle" style="color: #6366f1;"></i>
+                                <span>Tugagan</span>
+                            </label>
+                            <label class="gf-status-option {% if form.status.value == 'archived' %}checked{% endif %}">
+                                <input type="radio" name="status" value="archived"
+                                       {% if form.status.value == 'archived' %}checked{% endif %}>
+                                <i class="fas fa-archive" style="color: #94a3b8;"></i>
+                                <span>Arxiv</span>
+                            </label>
+                        </div>
+                        {% if form.status.errors %}
+                        <div class="gf-error">
+                            <i class="fas fa-circle-exclamation"></i>
+                            {{ form.status.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Color -->
+                    <div class="gf-field">
+                        <label class="gf-label">
+                            <i class="fas fa-palette" style="color: #8b5cf6;"></i>
+                            <span>Guruh rangi</span>
+                        </label>
+                        <div class="gf-colors">
+                            {% for color_val, color_name in color_options %}
+                            <label class="gf-color-option {% if form.color.value == color_val or not form.color.value and color_val == '#06b6d4' %}checked{% endif %}"
+                                   style="background: linear-gradient(135deg, {{ color_val }}, {{ color_val }}dd);"
+                                   title="{{ color_name }}">
+                                <input type="radio" name="color" value="{{ color_val }}"
+                                       {% if form.color.value == color_val or not form.color.value and color_val == '#06b6d4' %}checked{% endif %}>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% if form.color.errors %}
+                        <div class="gf-error">
+                            <i class="fas fa-circle-exclamation"></i>
+                            {{ form.color.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Start / End dates -->
+                    <div class="gf-row">
+                        <div class="gf-field">
+                            <label for="id_start_date" class="gf-label">
+                                <i class="fas fa-play-circle" style="color: #10b981;"></i>
+                                <span>Boshlanish</span>
+                            </label>
+                            <input type="date"
+                                   name="start_date"
+                                   id="id_start_date"
+                                   class="gf-input"
+                                   value="{% if form.start_date.value %}{{ form.start_date.value|date:'Y-m-d' }}{% endif %}">
+                            {% if form.start_date.errors %}
+                            <div class="gf-error">
+                                <i class="fas fa-circle-exclamation"></i>
+                                {{ form.start_date.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="gf-field">
+                            <label for="id_end_date" class="gf-label">
+                                <i class="fas fa-stop-circle" style="color: #f43f5e;"></i>
+                                <span>Tugash</span>
+                            </label>
+                            <input type="date"
+                                   name="end_date"
+                                   id="id_end_date"
+                                   class="gf-input"
+                                   value="{% if form.end_date.value %}{{ form.end_date.value|date:'Y-m-d' }}{% endif %}">
+                            {% if form.end_date.errors %}
+                            <div class="gf-error">
+                                <i class="fas fa-circle-exclamation"></i>
+                                {{ form.end_date.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ═══ ACTIONS ═══ -->
+            <div class="gf-actions">
+                <button type="submit" class="gf-btn gf-btn-primary">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{% if mode == 'create' %}Guruh yaratish{% else %}Saqlash{% endif %}</span>
+                </button>
+
+                <div class="gf-spacer"></div>
+
+                <a href="{% url 'courses_admin:group_list' %}" class="gf-btn gf-btn-secondary">
+                    <i class="fas fa-times"></i>
+                    <span>Bekor qilish</span>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- ═══════ O'NG USTUN — SIDEBAR ═══════ -->
+        <aside class="gf-side">
+
+            <!-- ═══ PREVIEW ═══ -->
+            <div class="gf-side-card">
+                <div class="gf-side-title">
+                    <i class="fas fa-eye" style="color: #06b6d4;"></i>
+                    <span>Jonli ko'rinish</span>
+                </div>
+
+                <div class="gf-preview-card" id="gfPreviewCard">
+                    <div class="gf-preview-avatar" id="gfPreviewAvatar">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="gf-preview-name" id="gfPreviewName">
+                        {% if group %}{{ group.name }}{% else %}Yangi guruh{% endif %}
+                    </div>
+                    <div class="gf-preview-meta" id="gfPreviewMeta">
+                        <i class="fas fa-users"></i>
+                        <span>0 talaba</span>
+                        <span>·</span>
+                        <span id="gfPreviewStatus">Aktiv</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MA'LUMOT ═══ -->
+            <div class="gf-side-card">
+                <div class="gf-side-title">
+                    <i class="fas fa-info-circle" style="color: #8b5cf6;"></i>
+                    <span>Guruh haqida</span>
+                </div>
+
+                <div class="gf-info-row">
+                    <span class="gf-info-label">
+                        <i class="fas fa-users text-[10px]"></i>
+                        Talabalar
+                    </span>
+                    <span class="gf-info-value">
+                        {% if group %}{{ group.students_count|default:0 }}{% else %}0{% endif %}
+                    </span>
+                </div>
+
+                <div class="gf-info-row">
+                    <span class="gf-info-label">
+                        <i class="fas fa-book text-[10px]"></i>
+                        Kurs
+                    </span>
+                    <span class="gf-info-value gf-cl-1" id="gfInfoCourse">
+                        {% if group.course %}{{ group.course.title|truncatechars:18 }}{% else %}—{% endif %}
+                    </span>
+                </div>
+
+                <div class="gf-info-row">
+                    <span class="gf-info-label">
+                        <i class="fas fa-user-tie text-[10px]"></i>
+                        O'qituvchi
+                    </span>
+                    <span class="gf-info-value gf-cl-1" id="gfInfoTeacher">
+                        {% if group.teacher %}{{ group.teacher.get_full_name|default:group.teacher.phone_number|truncatechars:18 }}{% else %}—{% endif %}
+                    </span>
+                </div>
+
+                <div class="gf-info-row">
+                    <span class="gf-info-label">
+                        <i class="fas fa-clock text-[10px]"></i>
+                        Jadval
+                    </span>
+                    <span class="gf-info-value gf-cl-1" id="gfInfoSchedule">
+                        {% if group.schedule %}Belgilangan{% else %}—{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- ═══ MASLAHAT ═══ -->
+            <div class="gf-side-card">
+                <div class="gf-side-title">
+                    <i class="fas fa-lightbulb" style="color: #f59e0b;"></i>
+                    <span>Maslahat</span>
+                </div>
+                <div class="gf-tips">
+                    <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                        {% if mode == 'create' %}
+                        Guruh yaratgandan keyin <strong>dars jadvalini</strong> belgilang va <strong>darslarni avtomatik taqsimlang</strong>.
+                        {% else %}
+                        Jadvalni o'zgartirsangiz, <strong>darslarni qayta taqsimlash</strong> kerak bo'lishi mumkin.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- ═══ QAYTISH ═══ -->
+            <a href="{% url 'courses_admin:group_list' %}"
+               class="gf-btn gf-btn-secondary" style="width: 100%; justify-content: center;">
+                <i class="fas fa-arrow-left"></i>
+                <span>Guruhlar ro'yxatiga</span>
+            </a>
+
+        </aside>
+
+    </div>
+</form>
+
+</div>
+
+<!-- Toasts -->
+<div id="gfToastWrap" class="gf-toasts"></div>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function gfToast(message, type = 'success') {
+    const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+    const bgs = {
+        success: 'linear-gradient(135deg,#059669,#10b981)',
+        error: 'linear-gradient(135deg,#e11d48,#f43f5e)',
+        info: 'linear-gradient(135deg,#06b6d4,#0891b2)'
+    };
+    const el = document.createElement('div');
+    el.className = 'gf-toast';
+    el.style.background = bgs[type] || bgs.info;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span class="flex-1">${message}</span>`;
+    document.getElementById('gfToastWrap').appendChild(el);
+
+    setTimeout(() => {
+        el.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(30px)';
+        setTimeout(() => el.remove(), 400);
+    }, 3000);
+}
+window.gfToast = gfToast;
+
+// ═══════════════════════════════════════════════════════════════
+// STATUS SELECTOR
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.gf-status-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) {
+            radio.checked = true;
+            document.querySelectorAll('.gf-status-option').forEach(o => o.classList.remove('checked'));
+            this.classList.add('checked');
+        }
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// SCHEDULE TYPE SELECTOR
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.gf-schedule-type').forEach(opt => {
+    opt.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) {
+            radio.checked = true;
+            document.querySelectorAll('.gf-schedule-type').forEach(o => o.classList.remove('checked'));
+            this.classList.add('checked');
+
+            gfApplyScheduleType(radio.value);
+        }
+    });
+});
+
+function gfApplyScheduleType(type) {
+    const timeInputs = {
+        monday: document.querySelector('[name="schedule_monday"]'),
+        tuesday: document.querySelector('[name="schedule_tuesday"]'),
+        wednesday: document.querySelector('[name="schedule_wednesday"]'),
+        thursday: document.querySelector('[name="schedule_thursday"]'),
+        friday: document.querySelector('[name="schedule_friday"]'),
+        saturday: document.querySelector('[name="schedule_saturday"]'),
+        sunday: document.querySelector('[name="schedule_sunday"]'),
+    };
+
+    Object.values(timeInputs).forEach(inp => { if (inp) inp.value = ''; });
+
+    if (type === 'odd') {
+        ['monday', 'wednesday', 'friday'].forEach(day => {
+            if (timeInputs[day]) timeInputs[day].value = '14:00';
+        });
+    } else if (type === 'even') {
+        ['tuesday', 'thursday', 'saturday'].forEach(day => {
+            if (timeInputs[day]) timeInputs[day].value = '14:00';
+        });
+    }
+
+    gfUpdateDayRows();
+    gfUpdatePreview();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DAY ROW ACTIVE STATE
+// ═══════════════════════════════════════════════════════════════
+function gfUpdateDayRows() {
+    document.querySelectorAll('.gf-day-row').forEach(row => {
+        const input = row.querySelector('.gf-day-time');
+        if (input && input.value.trim()) {
+            row.classList.add('active');
+        } else {
+            row.classList.remove('active');
+        }
+    });
+}
+
+document.querySelectorAll('.gf-day-time').forEach(input => {
+    input.addEventListener('input', gfUpdateDayRows);
+    input.addEventListener('focus', () => {
+        const row = input.closest('.gf-day-row');
+        if (row) row.classList.add('active');
+    });
+    input.addEventListener('blur', () => {
+        setTimeout(gfUpdateDayRows, 200);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// CLEAR TIME
+// ═══════════════════════════════════════════════════════════════
+function gfClearTime(btn) {
+    const row = btn.closest('.gf-day-row');
+    const input = row?.querySelector('.gf-day-time');
+    if (input) {
+        input.value = '';
+        row.classList.remove('active');
+        input.focus();
+    }
+}
+window.gfClearTime = gfClearTime;
+
+// ═══════════════════════════════════════════════════════════════
+// COLOR SELECTOR
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.gf-color-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) {
+            radio.checked = true;
+            document.querySelectorAll('.gf-color-option').forEach(o => o.classList.remove('checked'));
+            this.classList.add('checked');
+
+            const color = radio.value;
+            const avatar = document.getElementById('gfPreviewAvatar');
+            if (avatar) {
+                avatar.style.background = `linear-gradient(135deg, ${color}, ${color}cc)`;
+            }
+            const previewCard = document.getElementById('gfPreviewCard');
+            if (previewCard) {
+                previewCard.style.background = `linear-gradient(135deg, ${color}, ${color}bb)`;
+            }
+        }
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE PREVIEW
+// ═══════════════════════════════════════════════════════════════
+const gfForm = document.getElementById('groupForm');
+
+function gfUpdatePreview() {
+    const nameInput = document.querySelector('[name="name"]');
+    const nameEl = document.getElementById('gfPreviewName');
+    if (nameInput && nameEl) {
+        nameEl.textContent = nameInput.value.trim() || 'Yangi guruh';
+    }
+
+    const courseSelect = document.querySelector('[name="course"]');
+    const courseEl = document.getElementById('gfInfoCourse');
+    if (courseSelect && courseEl) {
+        const text = courseSelect.options[courseSelect.selectedIndex]?.text || '—';
+        courseEl.textContent = text.replace('— Kurs tanlanmagan —', '—').substring(0, 22);
+    }
+
+    const teacherSelect = document.querySelector('[name="teacher"]');
+    const teacherEl = document.getElementById('gfInfoTeacher');
+    if (teacherSelect && teacherEl) {
+        const text = teacherSelect.options[teacherSelect.selectedIndex]?.text || '—';
+        teacherEl.textContent = text.replace('— O\'qituvchi tanlanmagan —', '—').substring(0, 22);
+    }
+
+    const statusRadio = document.querySelector('input[name="status"]:checked');
+    const statusEl = document.getElementById('gfPreviewStatus');
+    if (statusRadio && statusEl) {
+        const statusLabels = {
+            'active': 'Aktiv',
+            'paused': 'To\'xtatilgan',
+            'finished': 'Tugagan',
+            'archived': 'Arxiv'
+        };
+        statusEl.textContent = statusLabels[statusRadio.value] || 'Aktiv';
+    }
+
+    let scheduleCount = 0;
+    document.querySelectorAll('.gf-day-time').forEach(inp => {
+        if (inp.value.trim()) scheduleCount++;
+    });
+    const scheduleEl = document.getElementById('gfInfoSchedule');
+    if (scheduleEl) {
+        scheduleEl.textContent = scheduleCount > 0
+            ? `${scheduleCount} kun belgilangan`
+            : '—';
+    }
+}
+
+gfForm?.addEventListener('input', gfUpdatePreview);
+gfForm?.addEventListener('change', gfUpdatePreview);
+gfUpdatePreview();
+
+// ═══════════════════════════════════════════════════════════════
+// TIME INPUT VALIDATION
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.gf-day-time').forEach(input => {
+    input.addEventListener('blur', function() {
+        const val = this.value.trim();
+        if (!val) return;
+
+        if (/^\d{1,2}$/.test(val)) {
+            const h = parseInt(val, 10);
+            if (h >= 0 && h < 24) {
+                this.value = String(h).padStart(2, '0') + ':00';
+            }
+        }
+        else if (/^\d{3,4}$/.test(val)) {
+            const h = val.length === 3 ? val.substring(0, 1) : val.substring(0, 2);
+            const m = val.length === 3 ? val.substring(1) : val.substring(2);
+            const hNum = parseInt(h, 10);
+            const mNum = parseInt(m, 10);
+            if (hNum >= 0 && hNum < 24 && mNum >= 0 && mNum < 60) {
+                this.value = String(hNum).padStart(2, '0') + ':' + String(mNum).padStart(2, '0');
+            }
+        }
+
+        gfUpdateDayRows();
+        gfUpdatePreview();
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// FORM VALIDATION
+// ═══════════════════════════════════════════════════════════════
+gfForm?.addEventListener('submit', function(e) {
+    let hasError = false;
+    const nameInput = document.querySelector('[name="name"]');
+
+    if (nameInput && !nameInput.value.trim()) {
+        nameInput.classList.add('is-invalid');
+        gfToast("Guruh nomini kiriting!", 'error');
+        hasError = true;
+    }
+
+    if (hasError) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+document.querySelectorAll('.gf-input, .gf-select, .gf-textarea').forEach(inp => {
+    inp.addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// CTRL+S
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        gfForm.submit();
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// DOM READY
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+    gfUpdateDayRows();
+
+    const colorRadio = document.querySelector('input[name="color"]:checked');
+    if (colorRadio) {
+        const avatar = document.getElementById('gfPreviewAvatar');
+        const card = document.getElementById('gfPreviewCard');
+        if (avatar) avatar.style.background = `linear-gradient(135deg, ${colorRadio.value}, ${colorRadio.value}cc)`;
+        if (card) card.style.background = `linear-gradient(135deg, ${colorRadio.value}, ${colorRadio.value}bb)`;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+﻿{% comment %}
+Partial: Uyga vazifa kartochkasi
+Foydalanish: {% include 'student/_homework_card.html' with item=item %}
+{% endcomment %}
+
+<div class="hw-item homework-card neo-card relative overflow-hidden cursor-pointer animate-slide-up"
+     data-status="{{ item.status }}"
+     data-search="{{ item.search_text }}"
+     data-lesson-number="{{ item.lesson.number }}"
+     data-deadline-ts="{{ item.deadline_ts }}"
+     data-difficulty="{{ item.homework.difficulty|default:'medium' }}"
+     onclick="openHomeworkDetail({{ item.homework.id|default:0 }}, '{{ item.gl_id }}')">
+
+  <!-- Top bar -->
+  <div class="absolute top-0 left-0 right-0 h-1
+    {% if item.status == 'missed' %}bg-gradient-to-r from-rose-500 via-red-500 to-pink-500
+    {% elif item.status == 'new' %}bg-gradient-to-r from-primary via-secondary to-pink-500
+    {% elif item.status == 'graded' %}bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500
+    {% elif item.status == 'pending' %}bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500
+    {% else %}bg-gradient-to-r from-slate-400 to-gray-500{% endif %}"></div>
+
+  <div class="p-3 md:p-4">
+    <!-- Header: Lesson number + Course + Title -->
+    <div class="flex items-start gap-3 mb-2.5">
+      <div class="relative flex-shrink-0">
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-black text-base bg-gradient-to-br from-primary/15 to-secondary/10 text-primary border-2 border-primary/20">
+          {{ item.lesson.number }}
+        </div>
+        {% if item.status == 'new' %}
+        <span class="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
+        {% elif item.status == 'missed' %}
+        <span class="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
+        {% endif %}
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <p class="text-[9px] md:text-[10px] uppercase tracking-wider font-black text-gray-400 truncate">
+          {{ item.course.title|truncatechars:30 }}
+        </p>
+        <h3 class="font-black text-sm leading-tight mt-0.5 line-clamp-2">
+          {{ item.lesson.title }}
+        </h3>
+        <p class="text-[10px] text-gray-500 mt-0.5 flex items-center gap-1">
+          <i data-lucide="users" class="w-3 h-3"></i>
+          <span class="truncate">{{ item.group.name }}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Badges row -->
+    <div class="flex items-center flex-wrap gap-1.5 mb-2.5">
+      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wide uppercase
+        {% if item.status_color == 'success' %}bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/30
+        {% elif item.status_color == 'warm' %}bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30
+        {% elif item.status_color == 'rose' %}bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30
+        {% elif item.status_color == 'primary' %}bg-primary/15 text-primary border border-primary/30
+        {% else %}bg-gray-500/15 text-gray-500 border border-gray-500/30{% endif %}">
+        {{ item.status_icon }} {{ item.status_text }}
+      </span>
+
+      {% if item.homework.difficulty %}
+      <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold
+        {% if item.homework.difficulty == 'easy' %}bg-green-500/15 text-green-600
+        {% elif item.homework.difficulty == 'hard' %}bg-rose-500/15 text-rose-600
+        {% else %}bg-amber-500/15 text-amber-600{% endif %}">
+        {{ item.homework.difficulty_emoji }} {{ item.homework.difficulty_display }}
+      </span>
+      {% endif %}
+
+      {% if item.homework.estimated_minutes %}
+      <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 text-[9px] font-bold">
+        ⏱️ {{ item.homework.estimated_minutes }}m
+      </span>
+      {% endif %}
+
+      {% if item.is_urgent %}
+      <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
+        ⚡ SHOSHILINCH
+      </span>
+      {% endif %}
+    </div>
+
+    {% if item.has_homework %}
+    <!-- Homework title -->
+    <div class="p-2.5 rounded-xl mb-2.5 bg-gray-50 dark:bg-slate-800/60 border border-gray-200/60 dark:border-slate-700/60">
+      <div class="flex items-start gap-2">
+        <i data-lucide="notebook-pen" class="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5"></i>
+        <div class="flex-1 min-w-0">
+          <p class="text-[11px] font-semibold line-clamp-2 text-gray-700 dark:text-gray-200">
+            {{ item.homework.title }}
+          </p>
+          {% if item.homework.short_description %}
+          <p class="text-[10px] text-gray-500 mt-0.5 line-clamp-2">
+            {{ item.homework.short_description }}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini stats -->
+    <div class="grid grid-cols-3 gap-1.5 mb-2.5">
+      <div class="text-center p-1.5 rounded-lg bg-gray-50 dark:bg-slate-800/40">
+        <p class="text-[8px] uppercase text-gray-400 font-bold">Muddat</p>
+        <p class="text-[11px] font-black {% if item.status == 'missed' %}text-rose-500{% else %}text-gray-700 dark:text-gray-200{% endif %}">
+          {% if item.deadline %}{{ item.deadline|date:"d.m" }}{% else %}—{% endif %}
+        </p>
+      </div>
+      <div class="text-center p-1.5 rounded-lg bg-gray-50 dark:bg-slate-800/40">
+        <p class="text-[8px] uppercase text-gray-400 font-bold">Ball</p>
+        <p class="text-[11px] font-black text-primary">
+          {% if item.submission.score is not None %}{{ item.submission.score }}/{{ item.homework.max_score }}{% else %}0/{{ item.homework.max_score }}{% endif %}
+        </p>
+      </div>
+      <div class="text-center p-1.5 rounded-lg bg-gray-50 dark:bg-slate-800/40">
+        <p class="text-[8px] uppercase text-gray-400 font-bold">🪙</p>
+        <p class="text-[11px] font-black text-yellow-600 dark:text-yellow-500">+{{ item.homework.coins_reward }}</p>
+      </div>
+    </div>
+
+    {% if item.deadline_relative %}
+    <div class="flex items-center justify-center gap-1 mb-2.5 text-[10px] font-bold {% if item.is_urgent %}text-rose-500{% else %}text-gray-500{% endif %}">
+      <i data-lucide="clock" class="w-3 h-3"></i> {{ item.deadline_relative }}
+    </div>
+    {% endif %}
+
+    <!-- CTA button -->
+    <button onclick="event.stopPropagation(); openHomeworkDetail({{ item.homework.id }}, '{{ item.gl_id }}')"
+      class="w-full py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98]
+        {% if item.status == 'new' %}bg-gradient-to-r from-primary via-secondary to-pink-500 text-white shadow-lg shadow-primary/40
+        {% elif item.status == 'graded' %}bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/40
+        {% elif item.status == 'pending' %}bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/40
+        {% elif item.status == 'missed' %}bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/40
+        {% else %}bg-gradient-to-r from-gray-400 to-gray-500 text-white{% endif %}">
+      {% if item.status == 'new' %}<i data-lucide="play" class="w-3.5 h-3.5"></i> Boshlash
+      {% elif item.status == 'graded' %}<i data-lucide="eye" class="w-3.5 h-3.5"></i> Natija
+      {% elif item.status == 'pending' %}<i data-lucide="clock" class="w-3.5 h-3.5"></i> Tekshirilmoqda
+      {% elif item.status == 'missed' %}<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Bajarish
+      {% else %}<i data-lucide="eye" class="w-3.5 h-3.5"></i> {{ item.status_cta }}{% endif %}
+    </button>
+    {% else %}
+    <div class="text-center py-4 rounded-xl bg-gray-50 dark:bg-slate-800/40 border-2 border-dashed border-gray-200 dark:border-slate-700">
+      <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-1 text-gray-300 dark:text-gray-600"></i>
+      <p class="text-[10px] text-gray-400 font-medium">Vazifa yo'q</p>
+    </div>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,266 @@
+﻿{% extends 'admin_user/base.html' %}
+
+{% block title %}Ota-onalar | Admin Panel{% endblock %}
+
+{% block content %}
+<!-- Sarlavha va statistika -->
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Boshqaruv &middot; Foydalanuvchilar</p>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">Ota-onalar</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Barcha ota-onalar ro‘yxati va boshqaruvi</p>
+    </div>
+    <a href="{% url 'admin_parent_create' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold shadow-sm hover:bg-primary/90 hover:shadow-md transition-all w-fit">
+        <i class="fas fa-user-plus text-xs"></i> Yangi ota-ona
+    </a>
+</div>
+
+<!-- Statistika kartalari -->
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
+    <div class="neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary flex items-center justify-center text-xl">
+                <i class="fas fa-user-friends"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Jami ota-onalar</p>
+                <p class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{{ total_parents|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center text-xl">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Faol so‘rovlar</p>
+                <p class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{{ pending_requests_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 flex items-center justify-center text-xl">
+                <i class="fas fa-sms"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">SMS yuborilgan</p>
+                <p class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{{ sms_sent_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtr va qidiruv -->
+<div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 p-4 md:p-5 mb-6 shadow-sm">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="relative md:col-span-2">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
+            </div>
+            <input type="text" name="search" id="parentSearchInput" value="{{ search }}" placeholder="Ism, familiya yoki telefon raqami..."
+                   class="w-full pl-11 pr-4 py-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary/40"
+                   autocomplete="off">
+        </div>
+        <select name="sort" class="w-full py-3 pl-4 pr-9 rounded-xl border text-sm outline-none cursor-pointer bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200">
+            <option value="name" {% if sort == 'name' %}selected{% endif %}>Ism bo‘yicha</option>
+            <option value="children" {% if sort == 'children' %}selected{% endif %}>Bolalar soni</option>
+            <option value="requests" {% if sort == 'requests' %}selected{% endif %}>So‘rovlar soni</option>
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Yangi qo‘shilgan</option>
+        </select>
+        <button type="submit" class="px-6 py-3 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all">
+            <i class="fas fa-filter mr-1"></i> Filtrlash
+        </button>
+    </form>
+</div>
+
+<!-- Ota-onalar jadvali -->
+<div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 p-4 md:p-5 shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-xs text-gray-500 dark:text-gray-400 uppercase border-b dark:border-slate-700">
+                    <th class="py-3 pr-4">Ota-ona</th>
+                    <th class="py-3 pr-4">Telefon</th>
+                    <th class="py-3 pr-4">Farzandlar</th>
+                    <th class="py-3 pr-4">So‘rovlar</th>
+                    <th class="py-3 pr-4">SMS holati</th>
+                    <th class="py-3 pr-4 text-right">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for parent in parents %}
+                <tr class="border-b dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                    <td class="py-3 pr-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-teal-500 to-blue-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                {{ parent.first_name|first|upper }}{{ parent.last_name|first|upper }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">{{ parent.get_full_name }}</p>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500">ID: {{ parent.pk }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 pr-4 text-gray-600 dark:text-gray-300">{{ parent.phone_number }}</td>
+                    <td class="py-3 pr-4">
+                        {% if parent.children %}
+                            <div class="flex flex-col gap-1">
+                                {% for child in parent.children %}
+                                <span class="badge bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+                                    {{ child.user.get_full_name|default:child.user.phone_number }}
+                                </span>
+                                {% endfor %}
+                                {% if parent.children_count > 5 %}
+                                <span class="text-[10px] text-gray-400">+{{ parent.children_count|add:"-5" }} ta boshqa</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <span class="text-gray-400 dark:text-gray-500 text-xs">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 pr-4">
+                        <span class="badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                            {{ parent.question_requests.count }} ta
+                        </span>
+                    </td>
+                    <td class="py-3 pr-4">
+                        {% if parent.last_sms %}
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ parent.last_sms.sent_at|date:"d.m.Y" }}</span>
+                            <span class="badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">Yuborilgan</span>
+                        {% else %}
+                            <span class="text-xs text-gray-400 dark:text-gray-500">Yuborilmagan</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 pr-4 text-right">
+                        <div class="flex items-center justify-end gap-1">
+                            <a href="{% url 'admin_parent_detail' parent.pk %}" class="w-8 h-8 inline-flex items-center justify-center bg-gray-100 dark:bg-slate-700 rounded-lg text-xs text-gray-600 dark:text-gray-300 hover:bg-primary hover:text-white transition-all" title="Ko'rish">
+                                <i class="far fa-eye"></i>
+                            </a>
+                            <button type="button" class="w-8 h-8 inline-flex items-center justify-center bg-gray-100 dark:bg-slate-700 rounded-lg text-xs text-gray-600 dark:text-gray-300 hover:bg-cyan-500 hover:text-white transition-all sms-btn"
+                                    data-phone="{{ parent.phone_number }}" title="SMS yuborish">
+                                <i class="fas fa-sms"></i>
+                            </button>
+                            <a href="#" class="w-8 h-8 inline-flex items-center justify-center bg-gray-100 dark:bg-slate-700 rounded-lg text-xs text-gray-600 dark:text-gray-300 hover:bg-amber-500 hover:text-white transition-all" title="Tahrirlash">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="py-8 text-center text-gray-500 dark:text-gray-400">Ota-onalar topilmadi</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="mt-6 flex items-center justify-between">
+        <span class="text-sm text-gray-500 dark:text-gray-400">Sahifa {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&sort={{ sort }}" class="px-4 py-2 bg-gray-100 dark:bg-slate-700 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">Oldingi</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&sort={{ sort }}" class="px-4 py-2 bg-gray-100 dark:bg-slate-700 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">Keyingi</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- SMS modal oynasi -->
+<div id="smsModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">SMS yuborish</h3>
+            <button id="closeSmsModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Qabul qiluvchi: <span id="smsPhone" class="font-semibold"></span></p>
+        <textarea id="smsMessage" rows="4" class="w-full px-4 py-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary/40" placeholder="Xabar matni..."></textarea>
+        <div class="flex gap-2 mt-4">
+            <button id="sendSmsBtn" class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all">Yuborish</button>
+            <button id="cancelSmsBtn" class="px-6 py-2.5 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-300 dark:hover:bg-slate-600 transition-all">Bekor qilish</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Avtomatik qidiruv
+    const searchInput = document.getElementById('parentSearchInput');
+    if (searchInput) {
+        let debounceTimer;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('search', this.value.trim());
+                window.location.href = currentUrl.toString();
+            }, 500);
+        });
+    }
+
+    // SMS modal
+    const smsModal = document.getElementById('smsModal');
+    const smsPhone = document.getElementById('smsPhone');
+    const smsMessage = document.getElementById('smsMessage');
+    const closeSmsModal = document.getElementById('closeSmsModal');
+    const cancelSmsBtn = document.getElementById('cancelSmsBtn');
+    const sendSmsBtn = document.getElementById('sendSmsBtn');
+    const smsBtns = document.querySelectorAll('.sms-btn');
+
+    smsBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const phone = this.dataset.phone;
+            smsPhone.textContent = phone;
+            smsModal.classList.remove('hidden');
+            smsMessage.focus();
+        });
+    });
+
+    function closeModal() {
+        smsModal.classList.add('hidden');
+        smsMessage.value = '';
+    }
+
+    closeSmsModal.addEventListener('click', closeModal);
+    cancelSmsBtn.addEventListener('click', closeModal);
+    smsModal.addEventListener('click', function(e) {
+        if (e.target === smsModal) closeModal();
+    });
+
+    sendSmsBtn.addEventListener('click', function() {
+        const phone = smsPhone.textContent;
+        const message = smsMessage.value.trim();
+        if (!message) {
+            alert('Xabar matnini kiriting');
+            return;
+        }
+        // SMS yuborish uchun AJAX yoki form yuborish
+        fetch('/admin/sms-yuborish/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ phone: phone, message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('SMS yuborildi!');
+            closeModal();
+        })
+        .catch(error => {
+            alert('Xatolik yuz berdi');
+        });
+    });
+});
+</script>
+{% endblock %}

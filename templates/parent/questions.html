@@ -1,0 +1,88 @@
+﻿{% extends 'parent/base.html' %}
+
+{% block title %}Savol-javob | LearnCraft{% endblock %}
+
+{% block header_title %}Savol-javob bo‘limi{% endblock %}
+{% block header_subtitle %}Farzandingizga dars mavzulari bo‘yicha savol berish uchun ruxsat so‘rang{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 gap-6">
+    {% for child in children %}
+    <div class="neo-card p-5">
+        <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+            <i class="fas fa-user-graduate text-primary"></i> {{ child.user.get_full_name }}
+        </h3>
+
+        <!-- Darslar ro'yxati -->
+        {% for lesson in lessons %}
+        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-slate-800/50 mb-3">
+            <div class="flex-1">
+                <p class="font-semibold">{{ lesson.title }}</p>
+                <p class="text-sm text-gray-500">{{ lesson.date|date:"d.m.Y" }} · {{ lesson.course.title }}</p>
+            </div>
+
+            <div class="mt-3 md:mt-0">
+                {% if lesson.parent_request %}
+                    {% if lesson.parent_request.status == 'approved' %}
+                        <!-- Tasdiqlangan: savollarni ko'rish -->
+                        <button class="btn-show-questions bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 transition-all"
+                                data-questions-id="questions-{{ lesson.id }}">
+                            <i class="fas fa-eye mr-1"></i> Savollarni ko'rish
+                        </button>
+                        <div id="questions-{{ lesson.id }}" class="hidden mt-3">
+                            <div class="space-y-3">
+                                {% for q in lesson.approved_questions %}
+                                <div class="p-3 bg-white dark:bg-slate-700 rounded-xl">
+                                    <p class="font-medium">{{ forloop.counter }}. {{ q.question_text }}</p>
+                                    {% if q.answer_text %}
+                                    <p class="text-sm text-gray-500 mt-1"><strong>Javob:</strong> {{ q.answer_text }}</p>
+                                    {% endif %}
+                                </div>
+                                {% empty %}
+                                <p class="text-sm text-gray-500">Bu dars uchun hali savol kiritilmagan.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% elif lesson.parent_request.status == 'pending' %}
+                        <span class="badge bg-yellow-100 text-yellow-700">Kutilmoqda</span>
+                    {% else %}
+                        <span class="badge bg-red-100 text-red-600">Rad etilgan</span>
+                    {% endif %}
+                {% else %}
+                    <!-- So'rov yuborish tugmasi -->
+                    <form method="post" action="{% url 'parent_questions' %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
+                        <input type="hidden" name="student_id" value="{{ child.id }}">
+                        <button type="submit" class="bg-primary/10 text-primary px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/20 transition-all">
+                            <i class="fas fa-paper-plane mr-1"></i> Ruxsat so‘rash
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-gray-500">Hozircha darslar mavjud emas.</p>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div class="neo-card p-8 text-center">
+        <p class="text-gray-500">Farzandingiz topilmadi.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.btn-show-questions').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.questionsId;
+            const targetDiv = document.getElementById(targetId);
+            if (targetDiv) {
+                targetDiv.classList.toggle('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}

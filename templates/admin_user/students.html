@@ -1,0 +1,223 @@
+﻿{% extends 'admin_user/base.html' %}
+
+{% block title %}O‘quvchilar | Admin Panel{% endblock %}
+
+{% block content %}
+<!-- Sarlavha va yangi o'quvchi -->
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Boshqaruv &middot; Foydalanuvchilar</p>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">O‘quvchilar</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Barcha o‘quvchilar ro‘yxati va boshqaruvi</p>
+    </div>
+    <a href="{% url 'admin_student_create' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold shadow-sm hover:bg-primary/90 hover:shadow-md transition-all w-fit">
+        <i class="fas fa-user-plus text-xs"></i> Yangi o‘quvchi
+    </a>
+</div>
+
+<!-- Statistika kartalari -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+    <div class="neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary flex items-center justify-center text-xl">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Jami o‘quvchilar</p>
+                <p class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{{ page_obj.paginator.count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center text-xl">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Faol</p>
+                <p class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{{ active_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 flex items-center justify-center text-xl">
+                <i class="fas fa-snowflake"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Muzlatilgan</p>
+                <p class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{{ frozen_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="neo-card p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 flex items-center justify-center text-xl">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Bitirgan</p>
+                <p class="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{{ graduated_count|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter paneli -->
+<div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 p-4 md:p-5 mb-6 shadow-sm">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="relative md:col-span-2">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400 dark:text-gray-500 text-sm"></i>
+            </div>
+            <input type="text" name="search" id="studentSearchInput" value="{{ search }}" placeholder="Ism, familiya yoki telefon raqami..."
+                   class="w-full pl-11 pr-4 py-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary/40 dark:focus:ring-primary/40"
+                   autocomplete="off">
+        </div>
+        <select name="status" class="w-full py-3 pl-4 pr-9 rounded-xl border text-sm outline-none cursor-pointer bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary/40 dark:focus:ring-primary/40">
+            <option value="all" {% if status == 'all' %}selected{% endif %}>Barcha holatlar</option>
+            {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select name="group" class="w-full py-3 pl-4 pr-9 rounded-xl border text-sm outline-none cursor-pointer bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary/40 dark:focus:ring-primary/40">
+            <option value="all" {% if selected_group == 'all' %}selected{% endif %}>Barcha guruhlar</option>
+            {% for group in groups %}
+            <option value="{{ group.id }}" {% if selected_group == group.id|stringformat:"s" %}selected{% endif %}>{{ group.name }}</option>
+            {% endfor %}
+        </select>
+        <div class="md:col-span-4 flex gap-2">
+            <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all">
+                <i class="fas fa-filter mr-1"></i> Filtrlash
+            </button>
+            <a href="{% url 'admin_students' %}" class="px-6 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+                <i class="fas fa-times mr-1"></i> Tozalash
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- O'quvchilar ro'yxati -->
+<div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 p-4 md:p-5 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-lg text-gray-900 dark:text-white">Ro‘yxat</h3>
+        <span class="text-xs font-semibold text-gray-400 dark:text-gray-500">{{ page_obj.paginator.count }} ta o‘quvchi</span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-xs text-gray-500 dark:text-gray-400 uppercase border-b dark:border-slate-700">
+                    <th class="py-3 pr-4">Ism</th>
+                    <th class="py-3 pr-4">Telefon</th>
+                    <th class="py-3 pr-4">Guruhlar</th>
+                    <th class="py-3 pr-4">Holat</th>
+                    <th class="py-3 pr-4">Balance</th>
+                    <th class="py-3 pr-4">Coin</th>
+                    <th class="py-3 pr-4 text-right">Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr class="border-b dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                    <td class="py-3 pr-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                {{ student.user.first_name|first|upper }}{{ student.user.last_name|first|upper }}
+                            </div>
+                            <div>
+                                <a href="{% url 'admin_student_detail' student.pk %}" class="font-semibold text-gray-800 dark:text-gray-100 hover:text-primary dark:hover:text-primary transition-colors">
+                                    {{ student.user.get_full_name }}
+                                </a>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500">ID: {{ student.pk }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 pr-4 text-gray-600 dark:text-gray-300">{{ student.user.phone_number }}</td>
+                    <td class="py-3 pr-4">
+                        <div class="flex flex-wrap gap-1">
+                            {% for group in student.groups.all %}
+                            <span class="badge bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">{{ group.name }}</span>
+                            {% empty %}
+                            <span class="text-gray-400 dark:text-gray-500 text-xs">—</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td class="py-3 pr-4">
+                        {% if student.status == 'active' %}
+                            <span class="badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"><i class="fas fa-circle text-[6px] mr-1"></i>Aktiv</span>
+                        {% elif student.status == 'frozen' %}
+                            <span class="badge bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300"><i class="fas fa-snowflake mr-1"></i>Muzlatilgan</span>
+                        {% elif student.status == 'graduated' %}
+                            <span class="badge bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"><i class="fas fa-graduation-cap mr-1"></i>Bitirgan</span>
+                        {% else %}
+                            <span class="badge bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"><i class="fas fa-ban mr-1"></i>Ketib qolgan</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 pr-4 font-semibold text-gray-700 dark:text-gray-200">{{ student.balance }}</td>
+                    <td class="py-3 pr-4">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 text-xs font-bold">
+                            <i class="fas fa-coins text-[10px]"></i> {{ student.coins }}
+                        </span>
+                    </td>
+                    <td class="py-3 pr-4 text-right">
+                        <div class="flex items-center justify-end gap-1">
+                            <a href="{% url 'admin_student_detail' student.pk %}"
+                               class="w-8 h-8 inline-flex items-center justify-center bg-gray-100 dark:bg-slate-700 rounded-lg text-xs text-gray-600 dark:text-gray-300 hover:bg-primary hover:text-white transition-all" title="Ko'rish">
+                                <i class="far fa-eye"></i>
+                            </a>
+                            <a href="#"
+                               class="w-8 h-8 inline-flex items-center justify-center bg-gray-100 dark:bg-slate-700 rounded-lg text-xs text-gray-600 dark:text-gray-300 hover:bg-amber-500 hover:text-white transition-all" title="Tahrirlash">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="py-8 text-center text-gray-500 dark:text-gray-400">O‘quvchilar topilmadi</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span class="text-sm text-gray-500 dark:text-gray-400">Sahifa {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status }}&group={{ selected_group }}"
+               class="px-4 py-2 bg-gray-100 dark:bg-slate-700 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+                <i class="fas fa-chevron-left mr-1"></i> Oldingi
+            </a>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status }}&group={{ selected_group }}"
+               class="px-4 py-2 bg-gray-100 dark:bg-slate-700 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+                Keyingi <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('studentSearchInput');
+    if (searchInput) {
+        let debounceTimer;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('search', this.value.trim());
+                window.location.href = currentUrl.toString();
+            }, 500);
+        });
+    }
+});
+</script>
+{% endblock %}

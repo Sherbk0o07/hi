@@ -1,0 +1,56 @@
+﻿{% extends 'admin_user/base.html' %}
+
+{% block title %}Ota-ona qo‘shish | Admin Panel{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Foydalanuvchilar &middot; Ota-onalar</p>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">
+            {% if form.instance.pk %}Ota-onani tahrirlash{% else %}Yangi ota-ona qo‘shish{% endif %}
+        </h2>
+    </div>
+    <a href="{% url 'admin_parents' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+        <i class="fas fa-arrow-left text-xs"></i> Ro‘yxatga qaytish
+    </a>
+</div>
+
+{% if form.non_field_errors %}
+<div class="rounded-xl bg-rose-50 text-rose-600 p-4 text-sm mb-4 border border-rose-200">
+    <ul class="list-disc list-inside">
+        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 p-4 md:p-5 shadow-sm max-w-2xl">
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Ism *</label>
+            <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" class="mt-1 w-full px-4 py-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary/40">
+            {% if form.first_name.errors %}<p class="text-xs text-rose-500 mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Familiya *</label>
+            <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" class="mt-1 w-full px-4 py-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary/40">
+            {% if form.last_name.errors %}<p class="text-xs text-rose-500 mt-1">{{ form.last_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Telefon raqam *</label>
+            <input type="text" name="phone_number" value="{{ form.phone_number.value|default:'' }}" class="mt-1 w-full px-4 py-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary/40">
+            {% if form.phone_number.errors %}<p class="text-xs text-rose-500 mt-1">{{ form.phone_number.errors.0 }}</p>{% endif %}
+        </div>
+        {% if not form.instance.pk %}
+        <div>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Parol (ixtiyoriy)</label>
+            <input type="password" name="password" class="mt-1 w-full px-4 py-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-primary/40">
+        </div>
+        {% endif %}
+        <div class="flex gap-2 pt-2">
+            <button type="submit" class="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all">Saqlash</button>
+            <a href="{% url 'admin_parents' %}" class="px-6 py-2.5 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-300 dark:hover:bg-slate-600 transition-all">Bekor qilish</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

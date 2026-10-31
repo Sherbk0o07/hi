@@ -1,0 +1,99 @@
+{% extends '../base.html' %}
+
+{% block student %}
+<div class="w-full max-w-2xl mx-auto px-4 py-6 md:py-10 my-auto">
+  <div class="neo-card w-full p-5 sm:p-8 animate-fade-in">
+
+    {% if result %}
+      <div class="text-center mb-6">
+        <div class="relative w-36 h-36 sm:w-40 sm:h-40 mx-auto mb-4">
+          <svg width="100%" height="100%" viewBox="0 0 150 150" style="transform: rotate(-90deg);">
+            <circle cx="75" cy="75" r="62" stroke="#E5E7EB" stroke-width="12" fill="none"/>
+            <circle cx="75" cy="75" r="62"
+                    stroke="{% if pct >= 80 %}#16A34A{% elif pct >= 50 %}#4F46E5{% else %}#DC2626{% endif %}"
+                    stroke-width="12" fill="none" stroke-linecap="round"
+                    stroke-dasharray="389.6"
+                    stroke-dashoffset="{{ ring_offset }}"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-3xl font-black text-gray-900 dark:text-white">{{ pct }}%</span>
+            <span class="text-xs font-bold text-gray-400 tracking-wide">NATIJA</span>
+          </div>
+        </div>
+        <h2 class="text-xl font-extrabold text-gray-900 dark:text-white mb-1">
+          {% if pct >= 80 %}Ajoyib natija! 🎉{% elif pct >= 50 %}Yaxshi harakat! 👍{% else %}Yana urinib ko'ring 💪{% endif %}
+        </h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ quiz.title }}</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mb-8">
+        <div class="bg-gray-50 dark:bg-slate-800 rounded-2xl p-3 text-center">
+          <div class="text-lg font-black text-gray-900 dark:text-white">{{ result.correct_answers }}/{{ quiz.total_questions }}</div>
+          <div class="text-[11px] font-bold text-gray-400 mt-1">TO'G'RI JAVOB</div>
+        </div>
+        <div class="bg-gray-50 dark:bg-slate-800 rounded-2xl p-3 text-center">
+          <div class="text-lg font-black text-gray-900 dark:text-white">{{ result.total_score }}</div>
+          <div class="text-[11px] font-bold text-gray-400 mt-1">TO'PLANGAN BALL</div>
+        </div>
+        <div class="bg-gray-50 dark:bg-slate-800 rounded-2xl p-3 text-center">
+          <div class="text-lg font-black text-gray-900 dark:text-white">{{ quiz.max_score }}</div>
+          <div class="text-[11px] font-bold text-gray-400 mt-1">MAKSIMAL BALL</div>
+        </div>
+      </div>
+
+      <p class="text-xs font-bold text-gray-400 tracking-wide mb-3 uppercase">Savollar bo'yicha ko'rib chiqish</p>
+      <div class="space-y-3 mb-8">
+        {% for ans in answers %}
+        <div class="border border-gray-200 dark:border-slate-700 rounded-2xl p-3">
+          <div class="flex items-start gap-2 mb-2">
+            <span class="flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-black {% if ans.is_correct %}bg-green-600{% else %}bg-red-600{% endif %}">
+              {% if ans.is_correct %}✓{% else %}✕{% endif %}
+            </span>
+            <span class="text-sm font-bold text-gray-800 dark:text-gray-100">{{ forloop.counter }}. {{ ans.question.text }}</span>
+          </div>
+          <div class="pl-7 text-xs text-gray-500 dark:text-gray-400">
+            {% if ans.selected_option %}
+              Sizning javobingiz:
+              <span class="{% if ans.is_correct %}text-green-600{% else %}text-red-600{% endif %} font-bold">{{ ans.selected_option.text }}</span>
+            {% else %}
+              <span class="text-red-600 font-bold">Javob berilmadi</span>
+            {% endif %}
+            {% if not ans.is_correct %}
+              <br>To'g'ri javob:
+              <span class="text-green-600 font-bold">
+                {% for opt in ans.question.options.all %}{% if opt.is_correct %}{{ opt.text }}{% endif %}{% endfor %}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if coins_awarded %}
+      <div class="mb-6 rounded-2xl bg-green-50 dark:bg-green-900/40 p-4 text-center border border-green-100 dark:border-green-800">
+        <p class="text-sm font-bold text-green-800 dark:text-green-200">Sizga <span class="text-primary">{{ coins_awarded }}</span> coin berildi!</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Bu faqat birinchi marta testni topshirganingiz uchun berildi.</p>
+      </div>
+      {% endif %}
+      <div class="flex gap-3">
+        <a href="{% url 'quiz_take' quiz.id %}?restart=1" class="flex-1 text-center px-6 py-3 rounded-2xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
+          ↺ Qaytadan topshirish
+        </a>
+        <a href="{% url 'quiz_list' %}" class="flex-1 text-center px-6 py-3 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-bold shadow-lg shadow-primary/30 hover:-translate-y-0.5 transition-transform">
+          Testlarga qaytish
+        </a>
+      </div>
+
+    {% else %}
+      <div class="text-center py-16">
+        <div class="text-4xl mb-3">🙈</div>
+        <p class="text-gray-500 dark:text-gray-400">Bu test uchun natija topilmadi.</p>
+        <a href="{% url 'quiz_take' quiz.id %}" class="inline-block mt-4 px-6 py-3 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-bold">
+          Testni boshlash
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock student %}

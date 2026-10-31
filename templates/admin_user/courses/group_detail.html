@@ -1,0 +1,1885 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}👥 {{ group.name }} · DIGION{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ROOT VARIABLES
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+    --gd-primary: #06b6d4;
+    --gd-violet: #8b5cf6;
+    --gd-emerald: #10b981;
+    --gd-amber: #f59e0b;
+    --gd-rose: #f43f5e;
+    --gd-pink: #ec4899;
+    --gd-header-h: 4rem;
+    --gd-max: 1400px;
+}
+
+.gd-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    margin: 0;
+    padding: 0.5rem 0 3rem;
+    position: relative;
+    font-size: 14px;
+    isolation: isolate;
+}
+.gd-page * { box-sizing: border-box; min-width: 0; }
+
+.gd-wrap {
+    width: 100%;
+    max-width: var(--gd-max);
+    margin: 0 auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+@media (min-width: 640px) { .gd-wrap { padding-left: 1rem; padding-right: 1rem; } }
+@media (min-width: 1024px) { .gd-wrap { padding-left: 1.5rem; padding-right: 1.5rem; } }
+
+/* GLOWS */
+.gd-glow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: -1;
+}
+.gd-glow-1 {
+    top: -200px; left: -200px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(6,182,212,0.4), transparent 70%);
+    animation: gdFloat 20s ease-in-out infinite;
+}
+.gd-glow-2 {
+    top: 40%; right: -250px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(139,92,246,0.35), transparent 70%);
+    animation: gdFloat 25s ease-in-out infinite reverse;
+}
+.gd-glow-3 {
+    bottom: -250px; left: 30%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(236,72,153,0.25), transparent 70%);
+    animation: gdFloat 30s ease-in-out infinite;
+}
+.dark .gd-glow { opacity: 0.15; }
+
+/* ANIMATIONS */
+@keyframes gdSlideUp {
+    from { transform: translateY(30px) scale(0.98); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes gdSlideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes gdSlideRight {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes gdSlideLeft {
+    from { transform: translateX(-30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes gdPopIn {
+    0% { transform: scale(0.7); opacity: 0; }
+    60% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes gdGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+@keyframes gdFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.05); }
+    66% { transform: translate(-30px, 30px) scale(0.95); }
+}
+@keyframes gdFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gdShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+@keyframes gdBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.anim-up { animation: gdSlideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-right { animation: gdSlideRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.d-1 { animation-delay: 0.05s; }
+.d-2 { animation-delay: 0.10s; }
+.d-3 { animation-delay: 0.15s; }
+.d-4 { animation-delay: 0.20s; }
+
+/* TOPBAR */
+.gd-topbar {
+    position: sticky;
+    top: var(--gd-header-h);
+    z-index: 40;
+    height: 60px;
+    background: rgba(255,255,255,0.85);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.7);
+    margin: -0.5rem -0.75rem 1.25rem;
+    animation: gdSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (min-width: 640px) { .gd-topbar { margin: -0.5rem -1rem 1.5rem; } }
+@media (min-width: 1024px) { .gd-topbar { margin-left: -1.5rem; margin-right: -1.5rem; } }
+.dark .gd-topbar { background: rgba(10,10,15,0.85); border-bottom-color: rgba(30,41,59,0.7); }
+
+.gd-topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 0 0.75rem;
+    max-width: var(--gd-max);
+    margin: 0 auto;
+}
+@media (min-width: 640px) { .gd-topbar-inner { padding: 0 1rem; gap: 0.75rem; } }
+@media (min-width: 1024px) { .gd-topbar-inner { padding: 0 1.5rem; } }
+
+.gd-ico {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 14px;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+.dark .gd-ico { background: #1e293b; color: #94a3b8; }
+.gd-ico::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(6,182,212,0.3), transparent 70%);
+    transform: scale(0);
+    transition: transform 0.5s;
+}
+.gd-ico:hover::before { transform: scale(3); }
+.gd-ico:hover {
+    background: #e2e8f0;
+    color: #06b6d4;
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 8px 18px -6px rgba(6, 182, 212, 0.4);
+}
+.dark .gd-ico:hover { background: #334155; color: #67e8f9; }
+
+.gd-ico.danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    box-shadow: 0 8px 18px -6px rgba(220, 38, 38, 0.4);
+}
+
+/* HERO */
+.gd-hero {
+    position: relative;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    padding: 1.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 35%, #8b5cf6 70%, #ec4899 100%);
+    background-size: 300% 300%;
+    animation: gdGradientShift 12s ease infinite, gdSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow: 0 25px 50px -15px rgba(6, 182, 212, 0.5);
+    isolation: isolate;
+}
+@media (min-width: 640px) { .gd-hero { padding: 2.5rem 2.5rem; border-radius: 1.75rem; } }
+@media (min-width: 1024px) { .gd-hero { padding: 3rem 3rem; } }
+
+.gd-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(circle at 15% 25%, rgba(255,255,255,0.25) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(255,255,255,0.15) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 1;
+}
+.gd-hero::after {
+    content: '';
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 65%);
+    animation: gdFloat 10s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.gd-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+@media (min-width: 640px) { .gd-hero-content { gap: 2rem; flex-wrap: nowrap; } }
+
+.gd-hero-icon {
+    width: 70px; height: 70px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.25);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    animation: gdPopIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (min-width: 640px) { .gd-hero-icon { width: 90px; height: 90px; border-radius: 24px; font-size: 40px; } }
+.gd-hero-icon:hover { transform: scale(1.1) rotate(-8deg); }
+
+.gd-hero-title {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    line-height: 1.15;
+    color: #fff;
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 0.2);
+    word-break: break-word;
+    margin-bottom: 0.65rem;
+    letter-spacing: -0.02em;
+}
+@media (min-width: 640px) { .gd-hero-title { font-size: 2.25rem; } }
+@media (min-width: 1024px) { .gd-hero-title { font-size: 2.6rem; } }
+
+.gd-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem;
+    background: rgba(255, 255, 255, 0.25);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+}
+
+.gd-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.85rem;
+}
+.gd-hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+}
+.gd-hero-meta span i {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+}
+
+/* STATS */
+.gd-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+@media (min-width: 640px) { .gd-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; } }
+
+.gd-stat {
+    position: relative;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 1.25rem;
+    padding: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+.dark .gd-stat { background: #0f172a; border-color: #1e293b; }
+
+.gd-stat::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gd-stat:hover::after { transform: scaleX(1); }
+.gd-stat:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 20px 40px -15px rgba(6, 182, 212, 0.3);
+    border-color: #67e8f9;
+}
+
+.gd-stat-icon {
+    width: 50px; height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #fff;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gd-stat:hover .gd-stat-icon { transform: scale(1.12) rotate(-6deg); }
+
+.gd-stat-icon.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+.gd-stat-icon.violet { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.gd-stat-icon.emerald { background: linear-gradient(135deg, #10b981, #059669); }
+.gd-stat-icon.amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+.gd-stat-info { min-width: 0; flex: 1; }
+.gd-stat-value {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1;
+    font-family: 'Space Grotesk', sans-serif;
+}
+@media (min-width: 640px) { .gd-stat-value { font-size: 1.9rem; } }
+.dark .gd-stat-value { color: #f1f5f9; }
+.gd-stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-top: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.dark .gd-stat-label { color: #94a3b8; }
+
+/* LAYOUT */
+.gd-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+@media (min-width: 1024px) {
+    .gd-layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 1.75rem; }
+}
+
+/* CARD */
+.gd-card {
+    position: relative;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 1.25rem;
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .gd-card { background: #0f172a; border-color: #1e293b; }
+.gd-card:hover {
+    box-shadow: 0 20px 40px -18px rgba(6, 182, 212, 0.2);
+    border-color: #67e8f9;
+}
+
+.gd-card-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.15rem 1.5rem;
+    border-bottom: 1.5px solid #f1f5f9;
+    background: linear-gradient(135deg, rgba(248,250,252,0.5), rgba(255,255,255,0.5));
+}
+@media (min-width: 640px) { .gd-card-header { padding: 1.35rem 1.75rem; } }
+.dark .gd-card-header {
+    border-bottom-color: #1e293b;
+    background: linear-gradient(135deg, rgba(15,23,42,0.5), rgba(10,10,15,0.5));
+}
+
+.gd-card-icon {
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gd-card:hover .gd-card-icon { transform: scale(1.1) rotate(-6deg); }
+@media (min-width: 640px) { .gd-card-icon { width: 50px; height: 50px; border-radius: 14px; font-size: 20px; } }
+
+.gd-card-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.15rem;
+    font-family: 'Space Grotesk', sans-serif;
+}
+@media (min-width: 640px) { .gd-card-title { font-size: 1.15rem; } }
+.dark .gd-card-title { color: #f1f5f9; }
+
+.gd-card-subtitle {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+.dark .gd-card-subtitle { color: #94a3b8; }
+
+.gd-card-body { padding: 1.5rem; }
+@media (min-width: 640px) { .gd-card-body { padding: 1.75rem; } }
+
+/* SCHEDULE */
+.gd-schedule {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.875rem;
+}
+@media (min-width: 640px) { .gd-schedule { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .gd-schedule { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.gd-schedule-item {
+    position: relative;
+    padding: 1rem 0.75rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #ecfeff, #f0fdfa);
+    border: 2px solid #67e8f9;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+.dark .gd-schedule-item {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(20, 184, 166, 0.1));
+    border-color: rgba(6, 182, 212, 0.4);
+}
+.gd-schedule-item:hover {
+    transform: translateY(-5px) scale(1.03);
+    border-color: #06b6d4;
+    box-shadow: 0 15px 30px -12px rgba(6, 182, 212, 0.5);
+}
+
+.gd-schedule-day {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #0e7490;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+}
+.dark .gd-schedule-day { color: #67e8f9; }
+.gd-schedule-time {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #0f172a;
+    font-family: 'JetBrains Mono', monospace;
+}
+.dark .gd-schedule-time { color: #f1f5f9; }
+
+/* EMPTY */
+.gd-empty {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 1rem;
+    border: 2px dashed #cbd5e1;
+}
+.dark .gd-empty { background: #0a0a0f; border-color: #334155; }
+.gd-empty i {
+    font-size: 40px;
+    opacity: 0.35;
+    display: block;
+    margin-bottom: 0.75rem;
+    animation: gdBounce 2s ease-in-out infinite;
+}
+
+/* STUDENT ROW */
+.gd-student-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1.5px solid #e2e8f0;
+    margin-bottom: 0.65rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    animation: gdSlideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dark .gd-student-row {
+    background: linear-gradient(135deg, #0f172a, #0a0a0f);
+    border-color: #1e293b;
+}
+.gd-student-row::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #06b6d4, #8b5cf6, #ec4899);
+    transform: scaleY(0);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top;
+}
+.gd-student-row:hover::before { transform: scaleY(1); }
+.gd-student-row:hover {
+    background: linear-gradient(135deg, #ecfeff, #f0fdfa);
+    border-color: #67e8f9;
+    transform: translateX(5px);
+    box-shadow: 0 10px 24px -10px rgba(6, 182, 212, 0.3);
+}
+
+.gd-avatar {
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    box-shadow: 0 6px 16px -4px rgba(6, 182, 212, 0.4);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gd-student-row:hover .gd-avatar { transform: scale(1.1) rotate(-6deg); }
+
+.gd-student-info { flex: 1; min-width: 0; }
+.gd-student-name {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dark .gd-student-name { color: #f1f5f9; }
+.gd-student-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.dark .gd-student-meta { color: #94a3b8; }
+
+/* LESSON ROW */
+.gd-lesson-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border-radius: 1rem;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    margin-bottom: 0.65rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    animation: gdSlideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dark .gd-lesson-row { background: #0a0a0f; border-color: #1e293b; }
+.gd-lesson-row:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    transform: translateX(5px);
+}
+.gd-lesson-row.completed {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border-color: #6ee7b7;
+}
+.dark .gd-lesson-row.completed {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.gd-lesson-num {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gd-lesson-row.completed .gd-lesson-num {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+.gd-lesson-row:hover .gd-lesson-num { transform: scale(1.1) rotate(-6deg); }
+
+.gd-lesson-info { flex: 1; min-width: 0; }
+.gd-lesson-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dark .gd-lesson-title { color: #f1f5f9; }
+.gd-lesson-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.dark .gd-lesson-meta { color: #94a3b8; }
+
+.gd-lesson-status {
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.gd-lesson-status.pending { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+.gd-lesson-status.done { background: rgba(16, 185, 129, 0.15); color: #059669; }
+
+/* BUTTONS */
+.gd-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.35rem;
+    border-radius: 0.875rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
+    min-height: 44px;
+    overflow: hidden;
+}
+.gd-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+.gd-btn:hover::before { transform: translateX(100%); }
+.gd-btn:active { transform: scale(0.96); }
+
+.gd-btn-primary {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 8px 22px -6px rgba(6, 182, 212, 0.5);
+    animation: gdGradientShift 5s ease infinite;
+}
+.gd-btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -8px rgba(6, 182, 212, 0.7);
+}
+
+.gd-btn-secondary {
+    background: #fff;
+    color: #475569;
+    border: 1.5px solid #e2e8f0;
+}
+.gd-btn-secondary:hover {
+    background: #f8fafc;
+    transform: translateY(-3px);
+    border-color: #06b6d4;
+    color: #06b6d4;
+}
+.dark .gd-btn-secondary {
+    background: #1e293b;
+    color: #cbd5e1;
+    border-color: #334155;
+}
+.dark .gd-btn-secondary:hover {
+    background: #334155;
+    color: #67e8f9;
+    border-color: #06b6d4;
+}
+
+.gd-btn-sm {
+    padding: 0.55rem 0.95rem;
+    font-size: 0.78rem;
+    min-height: 36px;
+    border-radius: 0.65rem;
+}
+
+/* SIDEBAR */
+.gd-side-card {
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .gd-side-card { background: #0f172a; border-color: #1e293b; }
+.gd-side-card:hover {
+    box-shadow: 0 15px 35px -15px rgba(6, 182, 212, 0.2);
+    border-color: #67e8f9;
+}
+
+.gd-side-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.dark .gd-side-title { color: #94a3b8; }
+.gd-side-title i { font-size: 14px; }
+
+.gd-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed #e2e8f0;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+}
+.dark .gd-info-row { border-color: #1e293b; }
+.gd-info-row:last-child { border-bottom: none; }
+
+.gd-info-label {
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    font-weight: 500;
+}
+.dark .gd-info-label { color: #94a3b8; }
+.gd-info-label i {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+.gd-info-value {
+    font-weight: 700;
+    color: #0f172a;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dark .gd-info-value { color: #f1f5f9; }
+
+.gd-progress {
+    height: 10px;
+    background: #f1f5f9;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.75rem;
+}
+.dark .gd-progress { background: #1e293b; }
+.gd-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899);
+    background-size: 200% 100%;
+    border-radius: 999px;
+    animation: gdGradientShift 4s ease infinite;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+.gd-progress-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: gdShimmer 2s infinite;
+}
+
+/* TOAST */
+.gd-toasts {
+    position: fixed;
+    top: 5rem;
+    right: 1rem;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    pointer-events: none;
+    max-width: 24rem;
+}
+@media (max-width: 640px) { .gd-toasts { left: 0.625rem; right: 0.625rem; max-width: none; } }
+.gd-toast {
+    padding: 1rem 1.15rem;
+    border-radius: 1rem;
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+    animation: gdSlideRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.gd-toast i { font-size: 18px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ⭐ MODAL — TEPADAN TUSHIRILGAN (header'dan past)
+   ═══════════════════════════════════════════════════════════════ */
+.gd-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    z-index: 9998;
+    display: none;
+    align-items: flex-start;                    /* ⭐ Tepadan */
+    justify-content: center;
+    padding: 5rem 1rem 1.5rem;                  /* ⭐ Tepa 5rem (header + joy) */
+    overflow-y: auto;
+    animation: gdFadeIn 0.3s ease;
+    -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 640px) {
+    .gd-modal-backdrop { padding: 6rem 1rem 2rem; }   /* ⭐ Tablet */
+}
+@media (min-width: 1024px) {
+    .gd-modal-backdrop { padding: 7rem 1rem 2rem; }   /* ⭐ Desktop */
+}
+.gd-modal-backdrop.open { display: flex; }
+
+.gd-modal {
+    background: #fff;
+    border-radius: 1.5rem;
+    width: 100%;
+    max-width: 620px;
+    max-height: calc(100vh - 8rem);             /* ⭐ Header hisobga olingan */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.6);
+    animation: gdPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+    margin: 0 auto;
+}
+@media (min-width: 640px) {
+    .gd-modal { max-height: calc(100vh - 9rem); }
+}
+@media (min-width: 1024px) {
+    .gd-modal { max-height: calc(100vh - 10rem); }
+}
+.dark .gd-modal { background: #0f172a; }
+
+/* ⭐ HEAD — sticky */
+.gd-modal-head {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 1.5rem 1.75rem 1.25rem;
+    background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.gd-modal-head::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -20%;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 70%);
+    pointer-events: none;
+}
+.gd-modal-head-icon {
+    position: relative;
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.25);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.gd-modal-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    font-family: 'Space Grotesk', sans-serif;
+}
+.gd-modal-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.9);
+    margin-top: 0.15rem;
+    font-weight: 500;
+}
+
+.gd-modal-close {
+    position: relative;
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gd-modal-close:hover {
+    background: rgba(255,255,255,0.35);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.gd-modal-search {
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1.5px solid #f1f5f9;
+    position: relative;
+    background: #fafbff;
+    flex-shrink: 0;
+}
+.dark .gd-modal-search {
+    border-color: #1e293b;
+    background: #0a0a0f;
+}
+
+.gd-modal-search input {
+    width: 100%;
+    padding: 0.9rem 1.15rem 0.9rem 2.85rem;
+    border-radius: 0.875rem;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    font-size: 0.95rem;
+    color: #0f172a;
+    outline: none;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .gd-modal-search input { background: #0f172a; border-color: #1e293b; color: #f1f5f9; }
+.gd-modal-search input:focus {
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 5px rgba(6, 182, 212, 0.15);
+    transform: translateY(-2px);
+}
+
+.gd-modal-search-icon {
+    position: absolute;
+    left: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 15px;
+    pointer-events: none;
+    transition: color 0.3s;
+}
+.gd-modal-search:focus-within .gd-modal-search-icon { color: #06b6d4; }
+
+/* ⭐ BODY — scroll */
+.gd-modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0.85rem 1.25rem;
+    min-height: 120px;
+    max-height: 50vh;                           /* ⭐ Ekranning yarmidan oshmasin */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.gd-modal-body::-webkit-scrollbar { width: 8px; }
+.gd-modal-body::-webkit-scrollbar-track { background: transparent; }
+.gd-modal-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #06b6d4, #8b5cf6);
+    border-radius: 4px;
+}
+
+.gd-student-option {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.85rem 1rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 2px solid transparent;
+    margin-bottom: 0.4rem;
+    position: relative;
+    overflow: hidden;
+}
+.gd-student-option::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #06b6d4, #8b5cf6);
+    transform: scaleY(0);
+    transition: transform 0.3s;
+    transform-origin: top;
+}
+.gd-student-option:hover {
+    background: linear-gradient(135deg, #ecfeff, #f0fdfa);
+    border-color: #67e8f9;
+    transform: translateX(3px);
+}
+.gd-student-option:hover::before { transform: scaleY(1); }
+.dark .gd-student-option:hover { background: rgba(6, 182, 212, 0.1); }
+.gd-student-option.selected {
+    background: linear-gradient(135deg, #ecfeff, #cffafe);
+    border-color: #06b6d4;
+    box-shadow: 0 8px 20px -8px rgba(6, 182, 212, 0.4);
+}
+.gd-student-option.selected::before { transform: scaleY(1); }
+.dark .gd-student-option.selected {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.15));
+}
+
+.gd-opt-avatar {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gd-student-option:hover .gd-opt-avatar { transform: scale(1.1) rotate(-6deg); }
+
+.gd-opt-info { flex: 1; min-width: 0; }
+.gd-opt-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dark .gd-opt-name { color: #f1f5f9; }
+.gd-opt-phone {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.dark .gd-opt-phone { color: #94a3b8; }
+
+.gd-opt-check {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 2px solid #e2e8f0;
+}
+.gd-student-option.selected .gd-opt-check {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: #fff;
+    border-color: #06b6d4;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px -2px rgba(6, 182, 212, 0.5);
+}
+
+/* ⭐ FOOT — sticky */
+.gd-modal-foot {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 1.25rem 1.75rem 1.5rem;
+    border-top: 1.5px solid #f1f5f9;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafbff;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.dark .gd-modal-foot {
+    border-color: #1e293b;
+    background: #0a0a0f;
+}
+
+.gd-modal-counter {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+}
+.dark .gd-modal-counter { color: #94a3b8; }
+.gd-modal-counter strong {
+    color: #06b6d4;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.gd-modal-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+.gd-modal-empty i {
+    font-size: 42px;
+    opacity: 0.35;
+    display: block;
+    margin-bottom: 0.85rem;
+    animation: gdBounce 2s ease-in-out infinite;
+}
+
+/* UTILITY */
+.gd-mw0 { min-width: 0; }
+.gd-cl-1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="gd-page">
+
+<div class="gd-glow gd-glow-1"></div>
+<div class="gd-glow gd-glow-2"></div>
+<div class="gd-glow gd-glow-3"></div>
+
+<div class="gd-wrap">
+
+<!-- TOPBAR -->
+<div class="gd-topbar">
+    <div class="gd-topbar-inner">
+        <a href="{% url 'courses_admin:group_list' %}" class="gd-ico" title="Orqaga">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="flex-1 gd-mw0">
+            <div class="text-[9px] uppercase font-bold tracking-wider text-slate-400 leading-none mb-0.5">
+                Guruh
+            </div>
+            <div class="text-xs font-bold text-slate-900 dark:text-white gd-cl-1">
+                {{ group.name }}
+            </div>
+        </div>
+        <a href="{% url 'courses_admin:group_edit' pk=group.pk %}" class="gd-ico" title="Tahrirlash">
+            <i class="fas fa-pen"></i>
+        </a>
+        <button type="button" class="gd-ico danger" onclick="gdDeleteGroup()" title="O'chirish">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</div>
+
+<!-- HERO -->
+<div class="gd-hero">
+    <div class="gd-hero-content">
+        <div class="gd-hero-icon">
+            <i class="fas fa-users-rectangle"></i>
+        </div>
+        <div class="flex-1 gd-mw0">
+            <div class="gd-hero-badge">
+                <i class="fas fa-circle-check"></i>
+                {{ group.get_status_display }}
+            </div>
+            <h1 class="gd-hero-title">{{ group.name }}</h1>
+            <div class="gd-hero-meta">
+                {% if group.code %}<span><i class="fas fa-hashtag"></i> {{ group.code }}</span>{% endif %}
+                {% if group.course %}<span><i class="fas fa-book"></i> {{ group.course.title|truncatechars:40 }}</span>{% endif %}
+                {% if group.teacher %}<span><i class="fas fa-user-tie"></i> {{ group.teacher.get_full_name|default:group.teacher.phone_number }}</span>{% endif %}
+                {% if group.room %}<span><i class="fas fa-door-open"></i> {{ group.room }}</span>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="gd-stats">
+    <div class="gd-stat anim-up d-1">
+        <div class="gd-stat-icon cyan"><i class="fas fa-users"></i></div>
+        <div class="gd-stat-info">
+            <div class="gd-stat-value" data-count="{{ stats.total_students }}">0</div>
+            <div class="gd-stat-label">Talabalar</div>
+        </div>
+    </div>
+    <div class="gd-stat anim-up d-2">
+        <div class="gd-stat-icon violet"><i class="fas fa-book-open"></i></div>
+        <div class="gd-stat-info">
+            <div class="gd-stat-value" data-count="{{ stats.total_lessons }}">0</div>
+            <div class="gd-stat-label">Darslar</div>
+        </div>
+    </div>
+    <div class="gd-stat anim-up d-3">
+        <div class="gd-stat-icon emerald"><i class="fas fa-check-circle"></i></div>
+        <div class="gd-stat-info">
+            <div class="gd-stat-value" data-count="{{ stats.completed_lessons }}">0</div>
+            <div class="gd-stat-label">O'tilgan</div>
+        </div>
+    </div>
+    <div class="gd-stat anim-up d-4">
+        <div class="gd-stat-icon amber"><i class="fas fa-chart-line"></i></div>
+        <div class="gd-stat-info">
+            <div class="gd-stat-value"><span data-count="{{ stats.progress_percent }}">0</span>%</div>
+            <div class="gd-stat-label">Progress</div>
+        </div>
+    </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="gd-layout">
+
+    <div class="gd-mw0">
+
+        <!-- JADVAL -->
+        <div class="gd-card anim-up d-1">
+            <div class="gd-card-header">
+                <span class="gd-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="fas fa-clock"></i>
+                </span>
+                <div class="flex-1 gd-mw0">
+                    <div class="gd-card-title">Haftalik jadval</div>
+                    <div class="gd-card-subtitle">{{ schedule_items|length }} kun belgilangan</div>
+                </div>
+                <button type="button" class="gd-btn gd-btn-secondary gd-btn-sm" onclick="gdGenerateLessons()">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>Darslarni taqsimlash</span>
+                </button>
+            </div>
+            <div class="gd-card-body">
+                {% if schedule_items %}
+                <div class="gd-schedule">
+                    {% for item in schedule_items %}
+                    <div class="gd-schedule-item">
+                        <div class="gd-schedule-day">{{ item.day_name }}</div>
+                        <div class="gd-schedule-time">{{ item.time }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="gd-empty">
+                    <i class="fas fa-calendar-xmark"></i>
+                    Jadval belgilanmagan.
+                    <a href="{% url 'courses_admin:group_edit' pk=group.pk %}" style="color: #06b6d4; font-weight: 700;">
+                        Tahrirlash →
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- TALABALAR -->
+        <div class="gd-card anim-up d-2">
+            <div class="gd-card-header">
+                <span class="gd-card-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                    <i class="fas fa-users"></i>
+                </span>
+                <div class="flex-1 gd-mw0">
+                    <div class="gd-card-title">Talabalar</div>
+                    <div class="gd-card-subtitle">{{ stats.total_students }} / {{ stats.max_students }} ta</div>
+                </div>
+                <button type="button" class="gd-btn gd-btn-primary gd-btn-sm" onclick="gdOpenAddModal()">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Qo'shish</span>
+                </button>
+            </div>
+            <div class="gd-card-body">
+                {% if students %}
+                    <div id="gdStudentsList">
+                        {% for student in students %}
+                        <div class="gd-student-row" style="animation-delay: {{ forloop.counter0 }}00ms;">
+                            <div class="gd-avatar">
+                                {{ student.user.first_name|first|default:"?" }}{{ student.user.last_name|first|default:"" }}
+                            </div>
+                            <div class="gd-student-info">
+                                <div class="gd-student-name">
+                                    {{ student.user.get_full_name|default:student.user.phone_number }}
+                                </div>
+                                <div class="gd-student-meta">
+                                    <span><i class="fas fa-star" style="color: #f59e0b;"></i> {{ student.total_score_annot|default:0 }} ball</span>
+                                    <span><i class="fas fa-check" style="color: #10b981;"></i> {{ student.submissions_count_annot|default:0 }} topshiriq</span>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    class="gd-btn gd-btn-secondary gd-btn-sm"
+                                    onclick="gdRemoveStudent({{ student.id }}, '{{ student.user.get_full_name|default:student.user.phone_number|escapejs }}')"
+                                    title="Chiqarish">
+                                <i class="fas fa-user-minus"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                <div class="gd-empty">
+                    <i class="fas fa-user-plus"></i>
+                    Hali talabalar yo'q.
+                    <button type="button"
+                            onclick="gdOpenAddModal()"
+                            style="color: #06b6d4; font-weight: 800; background: none; border: none; cursor: pointer; margin-top: 0.5rem; display: block; margin-left: auto; margin-right: auto;">
+                        Birinchi talabani qo'shish →
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- DARSLAR -->
+        <div class="gd-card anim-up d-3">
+            <div class="gd-card-header">
+                <span class="gd-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="fas fa-book-open"></i>
+                </span>
+                <div class="flex-1 gd-mw0">
+                    <div class="gd-card-title">Darslar</div>
+                    <div class="gd-card-subtitle">{{ stats.completed_lessons }} / {{ stats.total_lessons }} tugallangan</div>
+                </div>
+            </div>
+            <div class="gd-card-body">
+                {% if lessons %}
+                    {% for item in lessons %}
+                    <div class="gd-lesson-row {% if item.is_completed %}completed{% endif %}"
+                         style="animation-delay: {{ forloop.counter0 }}0ms;">
+                        <div class="gd-lesson-num">
+                            {% if item.is_completed %}<i class="fas fa-check"></i>{% else %}{{ item.order_in_group }}{% endif %}
+                        </div>
+                        <div class="gd-lesson-info">
+                            <div class="gd-lesson-title">{{ item.lesson.title }}</div>
+                            <div class="gd-lesson-meta">
+                                {% if item.lesson_date %}<span><i class="fas fa-calendar"></i> {{ item.lesson_date|date:"d.m.Y" }}</span>{% endif %}
+                                {% if item.lesson.topic %}<span><i class="fas fa-tag"></i> {{ item.lesson.topic }}</span>{% endif %}
+                            </div>
+                        </div>
+                        <span class="gd-lesson-status {% if item.is_completed %}done{% else %}pending{% endif %}">
+                            {% if item.is_completed %}O'tilgan{% else %}Rejalashtirilgan{% endif %}
+                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if item.lesson.homework %}
+                                <span class="small text-muted">
+                                    {% if item.homework_status == 'sent' %}
+                                        Yuborildi
+                                    {% elif item.homework_status == 'sending' %}
+                                        Yuborilmoqda
+                                    {% elif item.homework_status == 'partial' %}
+                                        Qisman yuborildi
+                                    {% elif item.homework_status == 'failed' %}
+                                        Xatolik
+                                    {% else %}
+                                        Qo'lda yuborishga tayyor
+                                    {% endif %}
+                                </span>
+                                {% if item.homework_status != 'sent' and item.homework_status != 'sending' %}
+                                    <form method="post" action="{% url 'courses_admin:group_lesson_send_homework' group_pk=group.pk gl_pk=item.pk %}"
+                                          onsubmit="return confirm('Uyga vazifani shu guruhga hozir yuborasizmi?')">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="btn btn-sm btn-primary"
+                                                {% if not item.lesson.homework.is_approved %}disabled title="Avval uyga vazifani tasdiqlang"{% endif %}>
+                                            Qo'lda yuborish
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <a class="btn btn-sm btn-outline-primary"
+                                   href="{% url 'courses_admin:homework_form' lesson_pk=item.lesson.pk %}">
+                                    Vazifa tayyorlash
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="gd-empty">
+                    <i class="fas fa-book"></i>
+                    Darslar hali taqsimlanmagan.
+                    <button type="button" onclick="gdGenerateLessons()"
+                            style="color: #06b6d4; font-weight: 800; background: none; border: none; cursor: pointer; margin-top: 0.5rem; display: block; margin-left: auto; margin-right: auto;">
+                        Darslarni taqsimlash →
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="gd-side">
+
+        <div class="gd-side-card anim-right d-1">
+            <div class="gd-side-title">
+                <i class="fas fa-info-circle" style="color: #06b6d4;"></i>
+                <span>Asosiy ma'lumot</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-hashtag"></i> Kod</span>
+                <span class="gd-info-value">{{ group.code|default:"—" }}</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-flag"></i> Holat</span>
+                <span class="gd-info-value">{{ group.get_status_display }}</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-book"></i> Kurs</span>
+                <span class="gd-info-value gd-cl-1">{% if group.course %}{{ group.course.title|truncatechars:20 }}{% else %}—{% endif %}</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-user-tie"></i> O'qituvchi</span>
+                <span class="gd-info-value gd-cl-1">{% if group.teacher %}{{ group.teacher.get_full_name|default:group.teacher.phone_number|truncatechars:20 }}{% else %}—{% endif %}</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-door-open"></i> Xona</span>
+                <span class="gd-info-value">{{ group.room|default:"—" }}</span>
+            </div>
+        </div>
+
+        <div class="gd-side-card anim-right d-2">
+            <div class="gd-side-title">
+                <i class="fas fa-chart-pie" style="color: #8b5cf6;"></i>
+                <span>Sig'im</span>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+                <span style="font-size: 0.9rem; font-weight: 800; color: #0f172a;" class="dark:text-white">
+                    {{ stats.total_students }} / {{ stats.max_students }}
+                </span>
+                <span style="font-size: 0.85rem; font-weight: 900; color: #06b6d4;">
+                    {{ stats.capacity_percent }}%
+                </span>
+            </div>
+            <div class="gd-progress">
+                <div class="gd-progress-bar" style="width: 0;" data-width="{{ stats.capacity_percent }}"></div>
+            </div>
+        </div>
+
+        <div class="gd-side-card anim-right d-3">
+            <div class="gd-side-title">
+                <i class="fas fa-star" style="color: #f59e0b;"></i>
+                <span>Ko'rsatkichlar</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-star"></i> O'rtacha ball</span>
+                <span class="gd-info-value">{{ stats.average_score }}</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-coins"></i> Jami coin</span>
+                <span class="gd-info-value">{{ stats.total_coins }}</span>
+            </div>
+            <div class="gd-info-row">
+                <span class="gd-info-label"><i class="fas fa-calendar-week"></i> Hafta</span>
+                <span class="gd-info-value">{{ stats.active_week }}</span>
+            </div>
+        </div>
+
+        <div class="gd-side-card anim-right d-4">
+            <div class="gd-side-title">
+                <i class="fas fa-bolt" style="color: #ec4899;"></i>
+                <span>Tezkor amallar</span>
+            </div>
+            <a href="{% url 'courses_admin:group_edit' pk=group.pk %}"
+               class="gd-btn gd-btn-secondary" style="width: 100%; margin-bottom: 0.6rem; justify-content: flex-start;">
+                <i class="fas fa-pen"></i>
+                <span>Tahrirlash</span>
+            </a>
+            <button type="button" class="gd-btn gd-btn-secondary" onclick="gdGenerateLessons()"
+                    style="width: 100%; margin-bottom: 0.6rem; justify-content: flex-start;">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>Darslarni taqsimlash</span>
+            </button>
+            <button type="button" class="gd-btn gd-btn-primary" onclick="gdOpenAddModal()"
+                    style="width: 100%; justify-content: center;">
+                <i class="fas fa-user-plus"></i>
+                <span>Talaba qo'shish</span>
+            </button>
+        </div>
+
+    </aside>
+
+</div>
+
+</div>
+
+<!-- ═══════════════ MODAL — TALABA QO'SHISH ═══════════════ -->
+<div class="gd-modal-backdrop" id="gdAddModal" onclick="if(event.target===this) gdCloseAddModal()">
+    <div class="gd-modal">
+        <div class="gd-modal-head">
+            <div class="gd-modal-head-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="flex-1 gd-mw0">
+                <div class="gd-modal-title">Talaba qo'shish</div>
+                <div class="gd-modal-subtitle">Ism yoki telefon bo'yicha qidiring</div>
+            </div>
+            <button type="button" class="gd-modal-close" onclick="gdCloseAddModal()">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="gd-modal-search">
+            <i class="fas fa-search gd-modal-search-icon"></i>
+            <input type="text" id="gdSearchInput"
+                   placeholder="Ism yoki telefon raqamni kiriting..."
+                   autocomplete="off"
+                   oninput="gdFilterStudents(this.value)">
+        </div>
+
+        <div class="gd-modal-body" id="gdStudentList">
+            <!-- JS orqali to'ldiriladi -->
+        </div>
+
+        <div class="gd-modal-foot">
+            <div class="gd-modal-counter">
+                <strong id="gdSelectedCount">0</strong> ta tanlandi
+            </div>
+            <div class="flex gap-2">
+                <button type="button" class="gd-btn gd-btn-secondary gd-btn-sm" onclick="gdCloseAddModal()">
+                    Bekor qilish
+                </button>
+                <button type="button" class="gd-btn gd-btn-primary gd-btn-sm" onclick="gdConfirmAdd()" id="gdConfirmBtn" disabled>
+                    <i class="fas fa-check"></i>
+                    <span>Qo'shish</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ available_students_json|json_script:"gdStudentsData" }}
+
+<div id="gdToastWrap" class="gd-toasts"></div>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+function gdCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+
+function gdToast(message, type = 'success') {
+    const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+    const bgs = {
+        success: 'linear-gradient(135deg,#059669,#10b981)',
+        error: 'linear-gradient(135deg,#e11d48,#f43f5e)',
+        info: 'linear-gradient(135deg,#06b6d4,#0891b2)'
+    };
+    const el = document.createElement('div');
+    el.className = 'gd-toast';
+    el.style.background = bgs[type] || bgs.info;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span class="flex-1">${message}</span>`;
+    document.getElementById('gdToastWrap').appendChild(el);
+
+    setTimeout(() => {
+        el.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(40px)';
+        setTimeout(() => el.remove(), 400);
+    }, 3000);
+}
+window.gdToast = gdToast;
+
+function gdAnimateCounters() {
+    document.querySelectorAll('[data-count]').forEach(el => {
+        const target = parseInt(el.dataset.count, 10) || 0;
+        if (target === 0) { el.textContent = '0'; return; }
+        const duration = 1500;
+        const startTime = performance.now();
+        function tick(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(target * eased);
+            if (progress < 1) requestAnimationFrame(tick);
+            else el.textContent = target;
+        }
+        requestAnimationFrame(tick);
+    });
+}
+
+function gdAnimateProgressBars() {
+    document.querySelectorAll('.gd-progress-bar[data-width]').forEach(bar => {
+        setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 300);
+    });
+}
+
+let gdAllStudents = [];
+let gdSelectedIds = new Set();
+
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const el = document.getElementById('gdStudentsData');
+        if (el) gdAllStudents = JSON.parse(el.textContent) || [];
+    } catch (e) { gdAllStudents = []; }
+
+    setTimeout(() => {
+        gdAnimateCounters();
+        gdAnimateProgressBars();
+    }, 200);
+});
+
+function gdOpenAddModal() {
+    document.getElementById('gdAddModal').classList.add('open');
+    document.getElementById('gdSearchInput').value = '';
+    gdSelectedIds.clear();
+    gdUpdateSelectedCount();
+    gdRenderStudents(gdAllStudents);
+    setTimeout(() => document.getElementById('gdSearchInput').focus(), 150);
+    document.body.style.overflow = 'hidden';
+}
+
+function gdCloseAddModal() {
+    document.getElementById('gdAddModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function gdFilterStudents(query) {
+    query = (query || '').toLowerCase().trim();
+    if (!query) { gdRenderStudents(gdAllStudents); return; }
+    const filtered = gdAllStudents.filter(s =>
+        (s.name || '').toLowerCase().includes(query) ||
+        (s.phone || '').toLowerCase().includes(query)
+    );
+    gdRenderStudents(filtered);
+}
+
+function gdRenderStudents(list) {
+    const container = document.getElementById('gdStudentList');
+    if (!list.length) {
+        container.innerHTML = `<div class="gd-modal-empty"><i class="fas fa-user-slash"></i>Hech narsa topilmadi</div>`;
+        return;
+    }
+    container.innerHTML = list.map((s, idx) => `
+        <div class="gd-student-option ${gdSelectedIds.has(s.id) ? 'selected' : ''}"
+             onclick="gdToggleStudent(${s.id}, this)"
+             style="animation: gdSlideLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: ${idx * 20}ms;">
+            <div class="gd-opt-avatar">${s.avatar || '?'}</div>
+            <div class="gd-opt-info">
+                <div class="gd-opt-name">${gdEscape(s.name)}</div>
+                ${s.phone ? `<div class="gd-opt-phone"><i class="fas fa-phone"></i> ${gdEscape(s.phone)}</div>` : ''}
+            </div>
+            <div class="gd-opt-check"><i class="fas fa-check"></i></div>
+        </div>
+    `).join('');
+}
+
+function gdEscape(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function gdToggleStudent(id, el) {
+    if (gdSelectedIds.has(id)) gdSelectedIds.delete(id);
+    else gdSelectedIds.add(id);
+    if (el) el.classList.toggle('selected', gdSelectedIds.has(id));
+    gdUpdateSelectedCount();
+}
+
+function gdUpdateSelectedCount() {
+    const count = gdSelectedIds.size;
+    document.getElementById('gdSelectedCount').textContent = count;
+    document.getElementById('gdConfirmBtn').disabled = count === 0;
+}
+
+function gdConfirmAdd() {
+    if (gdSelectedIds.size === 0) return;
+    const btn = document.getElementById('gdConfirmBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Qo\'shilmoqda...</span>';
+
+    const ids = Array.from(gdSelectedIds);
+    let completed = 0, successCount = 0, errors = [];
+
+    function sendNext() {
+        if (completed >= ids.length) {
+            if (successCount > 0) {
+                gdToast(`${successCount} ta talaba qo'shildi${errors.length ? `, ${errors.length} ta xato` : ''}`, successCount === ids.length ? 'success' : 'info');
+                gdCloseAddModal();
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                gdToast(errors[0] || "Hech narsa qo'shilmadi", 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            return;
+        }
+        const sid = ids[completed];
+        completed++;
+        fetch("{% url 'courses_admin:group_add_student' pk=group.pk %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': gdCsrf(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ 'student_id': sid }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) successCount++;
+            else errors.push(data.error || 'Xatolik');
+            sendNext();
+        })
+        .catch(e => { errors.push("Tarmoq xatosi"); sendNext(); });
+    }
+    sendNext();
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') gdCloseAddModal();
+});
+
+window.gdOpenAddModal = gdOpenAddModal;
+window.gdCloseAddModal = gdCloseAddModal;
+window.gdFilterStudents = gdFilterStudents;
+window.gdToggleStudent = gdToggleStudent;
+window.gdConfirmAdd = gdConfirmAdd;
+
+function gdDeleteGroup() {
+    if (!confirm("Bu guruhni o'chirmoqchimisiz?\n\nBu amalni qaytarib bo'lmaydi!")) return;
+    fetch("{% url 'courses_admin:group_delete' pk=group.pk %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': gdCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            gdToast(data.message || "Guruh o'chirildi", 'success');
+            setTimeout(() => window.location.href = "{% url 'courses_admin:group_list' %}", 800);
+        } else {
+            if (data.requires_confirm) {
+                if (confirm(data.error + "\n\nBaribir o'chirasizmi?")) {
+                    fetch("{% url 'courses_admin:group_delete' pk=group.pk %}", {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': gdCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+                        body: new URLSearchParams({ 'force': '1' }),
+                    })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.success) {
+                            gdToast(d.message, 'success');
+                            setTimeout(() => window.location.href = "{% url 'courses_admin:group_list' %}", 800);
+                        } else gdToast(d.error || "Xatolik", 'error');
+                    });
+                }
+            } else gdToast(data.error || "Xatolik", 'error');
+        }
+    })
+    .catch(e => gdToast("Tarmoq xatosi", 'error'));
+}
+window.gdDeleteGroup = gdDeleteGroup;
+
+function gdGenerateLessons() {
+    if (!confirm("Darslarni jadval bo'yicha avtomatik taqsimlaysizmi?")) return;
+    gdToast("Darslar taqsimlanmoqda...", 'info');
+    fetch("{% url 'courses_admin:group_generate_lessons' pk=group.pk %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': gdCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            gdToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else gdToast(data.error || "Xatolik", 'error');
+    })
+    .catch(e => gdToast("Tarmoq xatosi", 'error'));
+}
+window.gdGenerateLessons = gdGenerateLessons;
+
+function gdRemoveStudent(studentId, name) {
+    if (!confirm(`"${name}" ni guruhdan chiqarasizmi?`)) return;
+    fetch("{% url 'courses_admin:group_remove_student' pk=group.pk student_id=0 %}".replace('0', studentId), {
+        method: 'POST',
+        headers: { 'X-CSRFToken': gdCsrf(), 'X-Requested-With': 'XMLHttpRequest' },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            gdToast(data.message, 'success');
+            setTimeout(() => window.location.reload(), 800);
+        } else gdToast(data.error || "Xatolik", 'error');
+    })
+    .catch(e => gdToast("Tarmoq xatosi", 'error'));
+}
+window.gdRemoveStudent = gdRemoveStudent;
+
+</script>
+{% endblock %}

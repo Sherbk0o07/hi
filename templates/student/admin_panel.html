@@ -1,0 +1,329 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin Panel — O‘quv Markaz</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4F46E5',
+            secondary: '#7C3AED',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #0b1120; color: #e2e8f0; }
+    .neo-card { background: #1e293b; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); border-radius: 1.5rem; transition: all 0.25s; }
+    .neo-card:hover { transform: translateY(-3px); box-shadow: 0 15px 35px -8px rgba(0,0,0,0.7); }
+    .glass-card { background: rgba(15,23,42,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(71,85,105,0.6); }
+    .sidebar-link.active { background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white; box-shadow: 0 6px 16px rgba(79,70,229,0.4); }
+    .badge-active { background: #065f46; color: #6ee7b7; }
+    .badge-inactive { background: #7f1d1d; color: #fca5a5; }
+    .badge-pending { background: #78350f; color: #fcd34d; }
+    table th, table td { padding: 0.75rem 1rem; }
+  </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="w-64 flex flex-col neo-card m-3 rounded-3xl p-5 overflow-y-auto">
+  <div class="flex items-center gap-2 mb-6">
+    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-black text-lg">A</div>
+    <div>
+      <h2 class="font-bold">Admin Panel</h2>
+      <p class="text-xs text-gray-400">O‘quv markaz</p>
+    </div>
+  </div>
+  <nav class="flex-1 space-y-1">
+    <a href="#" onclick="showSection('dashboard')" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-th-large"></i><span>Dashboard</span>
+    </a>
+    <a href="#" onclick="showSection('users')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-users"></i><span>Foydalanuvchilar</span>
+    </a>
+    <a href="#" onclick="showSection('students')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-user-graduate"></i><span>Talabalar</span>
+    </a>
+    <a href="#" onclick="showSection('teachers')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-chalkboard-teacher"></i><span>O‘qituvchilar</span>
+    </a>
+    <a href="#" onclick="showSection('quizzes')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-file-alt"></i><span>Testlar</span>
+    </a>
+    <a href="#" onclick="showSection('questions')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-question-circle"></i><span>Savollar</span>
+    </a>
+    <a href="#" onclick="showSection('permissions')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-lock-open"></i><span>Ruxsatlar</span>
+    </a>
+    <a href="#" onclick="showSection('results')" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:bg-slate-700 transition">
+      <i class="fas fa-chart-bar"></i><span>Natijalar</span>
+    </a>
+  </nav>
+  <div class="mt-6 pt-4 border-t border-slate-700 text-xs text-gray-500">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">A</div>
+      <div>
+        <p class="font-medium text-gray-300">{{ user.first_name }}</p>
+        <p class="text-xs">Admin</p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="flex-1 flex flex-col overflow-hidden">
+  <header class="flex items-center justify-between px-6 py-4 mx-4 mt-4 rounded-2xl glass-card">
+    <h1 class="text-xl font-bold" id="sectionTitle">📊 Dashboard</h1>
+    <button onclick="location.href='/logout/'" class="text-gray-400 hover:text-white"><i class="fas fa-sign-out-alt"></i> Chiqish</button>
+  </header>
+
+  <main class="flex-1 p-6 overflow-y-auto" id="mainContent">
+    <!-- Bo'limlar JS orqali yuklanadi -->
+  </main>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div id="modalOverlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div class="glass-card rounded-3xl w-full max-w-2xl p-6 animate-scale-in max-h-[85vh] overflow-y-auto relative" id="modalContent">
+    <!-- Modal yopish tugmasi -->
+  </div>
+</div>
+
+<script>
+  // Django'dan kelgan ma'lumotlar JSON formatda
+  const DATA = {
+    users: {{ users_json|safe }},
+    students: {{ students_json|safe }},
+    teachers: {{ teachers_json|safe }},
+    quizzes: {{ quizzes_json|safe }},
+    questions: {{ questions_json|safe }},
+    permissions: {{ permissions_json|safe }},
+    results: {{ results_json|safe }},
+  };
+
+  // Bo'limlarni almashtirish
+  function showSection(section) {
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    const activeLink = document.querySelector(`[onclick="showSection('${section}')"]`);
+    if(activeLink) activeLink.classList.add('active');
+    document.getElementById('sectionTitle').innerHTML = sectionTitle(section);
+    const main = document.getElementById('mainContent');
+    switch(section) {
+      case 'dashboard': main.innerHTML = renderDashboard(); initCharts(); break;
+      case 'users': main.innerHTML = renderUsers(); break;
+      case 'students': main.innerHTML = renderStudents(); break;
+      case 'teachers': main.innerHTML = renderTeachers(); break;
+      case 'quizzes': main.innerHTML = renderQuizzes(); break;
+      case 'questions': main.innerHTML = renderQuestions(); break;
+      case 'permissions': main.innerHTML = renderPermissions(); break;
+      case 'results': main.innerHTML = renderResults(); break;
+    }
+  }
+
+  function sectionTitle(s) {
+    const titles = {dashboard:'📊 Dashboard', users:'👥 Foydalanuvchilar', students:'🎓 Talabalar',
+      teachers:'👩‍🏫 O‘qituvchilar', quizzes:'📝 Testlar', questions:'❓ Savollar',
+      permissions:'🔐 Ruxsatlar', results:'📈 Natijalar'};
+    return titles[s] || '';
+  }
+
+  // ========== RENDER FUNCTIONS ==========
+  function renderDashboard() {
+    const totalUsers = DATA.users.length;
+    const totalStudents = DATA.students.length;
+    const totalTeachers = DATA.teachers.length;
+    const totalQuizzes = DATA.quizzes.length;
+    return `
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="neo-card p-5 flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xl">👥</div><div><p class="text-gray-400 text-xs">Foydalanuvchilar</p><p class="text-3xl font-extrabold">${totalUsers}</p></div></div>
+        <div class="neo-card p-5 flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white text-xl">🎓</div><div><p class="text-gray-400 text-xs">Talabalar</p><p class="text-3xl font-extrabold">${totalStudents}</p></div></div>
+        <div class="neo-card p-5 flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xl">👩‍🏫</div><div><p class="text-gray-400 text-xs">O‘qituvchilar</p><p class="text-3xl font-extrabold">${totalTeachers}</p></div></div>
+        <div class="neo-card p-5 flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center text-white text-xl">📝</div><div><p class="text-gray-400 text-xs">Testlar</p><p class="text-3xl font-extrabold">${totalQuizzes}</p></div></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="neo-card p-5"><h3 class="font-bold mb-4">So‘nggi natijalar</h3><div class="space-y-2">${DATA.results.slice(0,5).map(r=>`<div class="text-sm">${r.student_name} - ${r.quiz_title}: <strong>${r.total_score} ball</strong></div>`).join('')}</div></div>
+        <div class="neo-card p-5"><h3 class="font-bold mb-4">Testlar faolligi</h3><canvas id="quizChart" height="180"></canvas></div>
+      </div>
+    `;
+  }
+
+  function initCharts() {
+    if(document.getElementById('quizChart')) {
+      new Chart(document.getElementById('quizChart'), {
+        type: 'doughnut',
+        data: {
+          labels: DATA.quizzes.map(q=>q.title),
+          datasets: [{ data: DATA.quizzes.map(q=>q.total_questions), backgroundColor: ['#4F46E5','#7C3AED','#06B6D4','#F59E0B','#10B981'] }]
+        }
+      });
+    }
+  }
+
+  // Jadvallarni yasovchi umumiy funksiya
+  function table(headers, rows) {
+    return `<div class="neo-card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left text-sm">
+      <thead class="bg-slate-800 text-gray-400 uppercase text-xs">${headers.map(h=>`<th class="font-semibold">${h}</th>`).join('')}</thead>
+      <tbody class="divide-y divide-slate-700/50">${rows.join('')}</tbody></table></div></div>`;
+  }
+
+  function renderUsers() {
+    const rows = DATA.users.map(u => `
+      <tr>
+        <td>${u.id}</td><td>${u.first_name} ${u.last_name||''}</td><td>${u.phone_number}</td>
+        <td><span class="badge ${u.role==='admin'?'badge-active':u.role==='teacher'?'badge-pending':'badge-inactive'}">${u.role}</span></td>
+        <td>${u.is_active ? '✅ Faol' : '⛔ Nofaol'}</td>
+        <td class="flex gap-2">
+          <button onclick="editEntity('user', ${u.id})" class="text-primary"><i class="fas fa-edit"></i></button>
+          <button onclick="deleteEntity('user', ${u.id})" class="text-rose"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`);
+    return table(['ID','Ism','Telefon','Rol','Holat','Harakatlar'], rows);
+  }
+
+  function renderStudents() {
+    const rows = DATA.students.map(s => `
+      <tr>
+        <td>${s.user_name}</td><td>${s.phone}</td>
+        <td><span class="badge ${s.status==='active'?'badge-active':'badge-inactive'}">${s.status}</span></td>
+        <td>${s.balance} so‘m</td><td>${s.coins}</td><td>${s.parent_phone||'—'}</td>
+        <td><button onclick="editEntity('student', ${s.id})" class="text-primary"><i class="fas fa-edit"></i></button></td>
+      </tr>`);
+    return table(['Talaba','Telefon','Holat','Balans','Coins','Ota-ona tel','Harakatlar'], rows);
+  }
+
+  function renderTeachers() {
+    const rows = DATA.teachers.map(t => `
+      <tr>
+        <td>${t.user_name}</td><td>${t.specialization}</td><td>${t.experiance} yil</td><td>${t.fixed_salary} so‘m</td>
+        <td><button onclick="editEntity('teacher', ${t.id})" class="text-primary"><i class="fas fa-edit"></i></button></td>
+      </tr>`);
+    return table(['O‘qituvchi','Mutaxassislik','Tajriba','Oylik','Harakatlar'], rows);
+  }
+
+  function renderQuizzes() {
+    const rows = DATA.quizzes.map(q => `
+      <tr>
+        <td>${q.id}</td><td>${q.title}</td><td>${q.total_questions}</td>
+        <td><span class="badge ${q.is_active?'badge-active':'badge-inactive'}">${q.is_active?'Aktiv':'Nofaol'}</span></td>
+        <td class="flex gap-2">
+          <button onclick="editEntity('quiz', ${q.id})" class="text-primary"><i class="fas fa-edit"></i></button>
+          <button onclick="deleteEntity('quiz', ${q.id})" class="text-rose"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`);
+    return `
+      <div class="flex justify-end mb-4"><button onclick="editEntity('quiz', 0)" class="px-5 py-2.5 bg-primary rounded-xl text-white font-medium"><i class="fas fa-plus"></i> Yangi test</button></div>
+      ${table(['ID','Nomi','Savollar soni','Holat','Harakatlar'], rows)}
+    `;
+  }
+
+  function renderQuestions() {
+    const rows = DATA.questions.map(q => `
+      <tr>
+        <td>${q.text}</td><td>${q.quiz_title}</td><td>${q.points}</td>
+        <td><button onclick="editEntity('question', ${q.id})" class="text-primary"><i class="fas fa-edit"></i></button></td>
+      </tr>`);
+    return `
+      <div class="flex justify-end mb-4"><button onclick="editEntity('question', 0)" class="px-5 py-2.5 bg-primary rounded-xl text-white font-medium"><i class="fas fa-plus"></i> Yangi savol</button></div>
+      ${table(['Savol','Test','Ball','Harakatlar'], rows)}
+    `;
+  }
+
+  function renderPermissions() {
+    const rows = DATA.permissions.map(p => `
+      <tr>
+        <td>${p.student_name}</td><td>${p.quiz_title}</td>
+        <td><span class="badge ${p.is_allowed?'badge-active':'badge-inactive'}">${p.is_allowed?'✅ Ruxsat bor':'⛔ Yo‘q'}</span></td>
+        <td><button onclick="togglePermission(${p.id})" class="text-primary">O‘zgartirish</button></td>
+      </tr>`);
+    return table(['Talaba','Test','Ruxsat','Harakatlar'], rows);
+  }
+
+  function renderResults() {
+    const rows = DATA.results.map(r => `
+      <tr>
+        <td>${r.student_name}</td><td>${r.quiz_title}</td><td>${r.correct_answers}</td><td>${r.total_score}</td>
+        <td>${r.taken_at}</td>
+      </tr>`);
+    return table(['Talaba','Test','To‘g‘ri','Ball','Sana'], rows);
+  }
+
+  // ===== MODAL VA API SO‘ROVLAR =====
+  async function editEntity(type, id) {
+    const urlMap = {
+      user: id ? `/admin/api/user/${id}/edit/` : null,
+      quiz: id ? `/admin/api/quiz/${id}/edit/` : `/admin/api/quiz/create/`,
+      question: id ? `/admin/api/question/${id}/edit/` : `/admin/api/question/create/`,
+      student: id ? `/admin/api/student/${id}/edit/` : null,
+      teacher: id ? `/admin/api/teacher/${id}/edit/` : null,
+    };
+    if(!urlMap[type]) return;
+    const url = urlMap[type];
+    const resp = await fetch(url);
+    const html = await resp.text();
+    openModal(html);
+  }
+
+  async function deleteEntity(type, id) {
+    if(!confirm('Haqiqatan ham o‘chirmoqchimisiz?')) return;
+    const urlMap = {
+      user: `/admin/api/user/${id}/delete/`,
+      quiz: `/admin/api/quiz/${id}/delete/`,
+      question: `/admin/api/question/${id}/delete/`,
+    };
+    if(!urlMap[type]) return;
+    await fetch(urlMap[type], {method:'DELETE'});
+    location.reload(); // oddiy yangilash
+  }
+
+  async function togglePermission(id) {
+    await fetch(`/admin/api/permission/${id}/toggle/`, {method:'POST'});
+    location.reload();
+  }
+
+  function openModal(html) {
+    document.getElementById('modalContent').innerHTML = html + `<button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>`;
+    document.getElementById('modalOverlay').classList.remove('hidden');
+  }
+  function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
+  document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target === e.currentTarget) closeModal(); });
+
+  // Boshlang‘ich yuklash
+  showSection('dashboard');
+</script>
+<form onsubmit="submitForm(event, '{{ action_url }}')" class="space-y-4">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="w-full bg-primary py-3 rounded-xl font-bold text-white">Saqlash</button>
+</form>
+<script>
+function submitForm(e, url) {
+  e.preventDefault();
+  const form = e.target;
+  fetch(url, {
+    method: 'POST',
+    body: new FormData(form),
+    headers: {'X-CSRFToken': form.csrf_token.value}
+  }).then(res=>res.json()).then(data=>{
+    if(data.success) { closeModal(); location.reload(); }
+    else alert('Xatolik');
+  });
+}
+</script>
+</body>
+</html>

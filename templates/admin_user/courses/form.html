@@ -1,0 +1,2184 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}
+{% if mode == 'create' %}✨ Yangi kurs · DIGION{% else %}✏️ {{ course.title }} · Tahrirlash{% endif %}
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+    /* ═══════════════════════════════════════════════════════════════
+   ROOT
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+    --cf-primary: #6366f1;
+    --cf-primary-dark: #4f46e5;
+    --cf-violet: #8b5cf6;
+    --cf-pink: #ec4899;
+    --cf-emerald: #10b981;
+    --cf-amber: #f59e0b;
+    --cf-cyan: #06b6d4;
+    --cf-rose: #f43f5e;
+    --cf-header-h: 4rem;
+    --cf-topbar-h: 56px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
+.cf-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    margin: 0;
+    padding: 0.5rem 0 3rem;
+    position: relative;
+    font-size: 14px;
+}
+.cf-page, .cf-page * { box-sizing: border-box; }
+.cf-page img { max-width: 100%; height: auto; }
+.cf-page * { min-width: 0; }
+
+.cf-wrap {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+@media (min-width: 640px) { .cf-wrap { padding-left: 1rem; padding-right: 1rem; } }
+@media (min-width: 1024px) { .cf-wrap { padding-left: 1.25rem; padding-right: 1.25rem; } }
+@media (min-width: 1600px) { .cf-wrap { padding-left: 2rem; padding-right: 2rem; } }
+
+/* Glows */
+.cf-glow { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0; }
+.cf-glow-1 { top: -200px; left: -200px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(99,102,241,0.3), transparent 70%); animation: cfFloat 20s ease-in-out infinite; }
+.cf-glow-2 { top: 40%; right: -250px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(236,72,153,0.2), transparent 70%); animation: cfFloat 25s ease-in-out infinite reverse; }
+.dark .cf-glow { opacity: 0.12; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS — opacity FIX (animatsiya ishlamasa ham ko'rinadi)
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes cfSlideUp { from { transform: translateY(20px); } to { transform: translateY(0); } }
+@keyframes cfSlideDown { from { transform: translateY(-14px); } to { transform: translateY(0); } }
+@keyframes cfSlideLeft { from { transform: translateX(-20px); } to { transform: translateX(0); } }
+@keyframes cfSlideRight { from { transform: translateX(20px); } to { transform: translateX(0); } }
+@keyframes cfFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cfPopIn { 0% { transform: scale(0.85); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes cfShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes cfPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.75; } }
+@keyframes cfRing { 0% { transform: scale(0.85); opacity: 0.6; } 100% { transform: scale(1.9); opacity: 0; } }
+@keyframes cfFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.05); } 66% { transform: translate(-30px, 20px) scale(0.95); } }
+@keyframes cfGradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes cfShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+@keyframes cfToastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ✅ FIX: anim-* endi opacity: 0 dan boshlanmaydi */
+.anim-up { animation: cfSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-pop { animation: cfPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-left { animation: cfSlideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-right { animation: cfSlideRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.d-1 { animation-delay: 0.04s; }
+.d-2 { animation-delay: 0.08s; }
+.d-3 { animation-delay: 0.12s; }
+.d-4 { animation-delay: 0.16s; }
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════════════════ */
+.cf-hero {
+    position: relative;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    background-size: 200% 200%;
+    animation: cfGradientShift 8s ease infinite;
+    box-shadow: 0 20px 44px -14px rgba(99, 102, 241, 0.5);
+    isolation: isolate;
+}
+@media (min-width: 640px) { .cf-hero { padding: 2rem 2.5rem; border-radius: 1.5rem; } }
+@media (min-width: 1024px) { .cf-hero { padding: 2.5rem 3rem; } }
+
+.cf-hero.edit {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+    background-size: 200% 200%;
+    animation: cfGradientShift 8s ease infinite;
+    box-shadow: 0 20px 44px -14px rgba(139, 92, 246, 0.5);
+}
+
+.cf-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.12) 0%, transparent 45%);
+    pointer-events: none;
+    z-index: 1;
+}
+.cf-hero::after {
+    content: '';
+    position: absolute;
+    top: -30%; right: -15%;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 70%);
+    animation: cfFloat 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.cf-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+@media (min-width: 640px) { .cf-hero-content { gap: 1.5rem; flex-wrap: nowrap; } }
+@media (min-width: 1024px) { .cf-hero-content { gap: 2rem; } }
+
+.cf-hero-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    animation: cfPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (min-width: 640px) { .cf-hero-icon { width: 72px; height: 72px; border-radius: 18px; font-size: 28px; } }
+@media (min-width: 1024px) { .cf-hero-icon { width: 84px; height: 84px; border-radius: 20px; font-size: 32px; } }
+.cf-hero-icon:hover { transform: scale(1.1) rotate(-8deg); }
+
+.cf-hero-title {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    line-height: 1.25;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    animation: cfSlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+    word-break: break-word;
+}
+@media (min-width: 640px) { .cf-hero-title { font-size: 1.85rem; } }
+@media (min-width: 1024px) { .cf-hero-title { font-size: 2.25rem; } }
+
+.cf-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    animation: cfSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+    margin-bottom: 0.65rem;
+}
+
+.cf-hero-back {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.35rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+@media (min-width: 640px) { .cf-hero-back { display: inline-flex; } }
+.cf-hero-back:hover {
+    background: rgba(255, 255, 255, 0.32);
+    transform: translateX(-3px);
+    color: #fff !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ✅ LAYOUT — FORMA 1600px GACHA 100% KENG
+   ═══════════════════════════════════════════════════════════════ */
+.cf-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);   /* Default: 1 ustun, TO'LIQ KENG */
+    gap: 1rem;
+    align-items: start;
+    width: 100%;
+}
+
+/* ✅ 1600px+: 2 ustun (forma + preview 280px) */
+@media (min-width: 1600px) {
+    .cf-layout {
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 1.5rem;
+    }
+    .cf-preview-side {
+        display: block;
+        position: sticky;
+        top: calc(var(--cf-header-h) + 1rem);
+    }
+    .cf-fab { display: none; }
+    .cf-mobile-nav { display: none; }
+}
+
+/* ✅ 1900px+: 3 ustun (nav + forma + preview) */
+@media (min-width: 1900px) {
+    .cf-layout {
+        grid-template-columns: 220px minmax(0, 1fr) 300px;
+        gap: 1.75rem;
+    }
+    .cf-nav-side {
+        display: block;
+        position: sticky;
+        top: calc(var(--cf-header-h) + 1rem);
+    }
+    .cf-preview-side {
+        display: block;
+        position: sticky;
+        top: calc(var(--cf-header-h) + 1rem);
+    }
+}
+
+/* Default: hidden */
+.cf-nav-side { display: none; }
+.cf-preview-side { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════
+   NAV CARD
+   ═══════════════════════════════════════════════════════════════ */
+.cf-nav-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 0.875rem;
+    box-shadow: 0 4px 24px -12px rgba(15, 23, 42, 0.08);
+}
+.dark .cf-nav-card {
+    background: #0f172a;
+    border-color: #1e293b;
+    box-shadow: 0 4px 24px -12px rgba(0, 0, 0, 0.5);
+}
+
+.cf-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    border-radius: 0.875rem;
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border: 1px solid #e0e7ff;
+    margin-bottom: 0.875rem;
+    position: relative;
+    overflow: hidden;
+}
+.dark .cf-progress-wrap {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.06));
+    border-color: rgba(99, 102, 241, 0.25);
+}
+.cf-progress-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 200%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: cfShimmer 3s infinite;
+    pointer-events: none;
+}
+
+.cf-progress-svg {
+    width: 48px; height: 48px;
+    transform: rotate(-90deg);
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+}
+.cf-progress-bg { fill: none; stroke: #e0e7ff; stroke-width: 5; }
+.dark .cf-progress-bg { stroke: #1e293b; }
+.cf-progress-circle {
+    fill: none;
+    stroke: url(#cfGradientRing);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.5));
+}
+
+.cf-nav-cat {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 0.5rem 0.4rem 0.4rem;
+}
+.dark .cf-nav-cat { color: #475569; }
+
+.cf-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.7rem;
+    border-radius: 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #475569;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 2px;
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+}
+.cf-nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 3px; height: 60%;
+    background: linear-gradient(180deg, var(--cf-primary), var(--cf-violet));
+    border-radius: 0 3px 3px 0;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cf-nav-item:hover {
+    background: #f1f5f9;
+    transform: translateX(2px);
+}
+.dark .cf-nav-item { color: #94a3b8; }
+.dark .cf-nav-item:hover { background: #1e293b; color: #f1f5f9; }
+
+.cf-nav-item.active {
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    color: #4338ca;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+}
+.cf-nav-item.active::before { transform: translateY(-50%) scaleY(1); }
+.dark .cf-nav-item.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(139, 92, 246, 0.12));
+    color: #a5b4fc;
+}
+.cf-nav-item i { font-size: 12px; width: 14px; text-align: center; transition: transform 0.3s; flex-shrink: 0; }
+.cf-nav-item:hover i { transform: scale(1.15); }
+.cf-nav-item.active i { transform: scale(1.1); }
+.cf-nav-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM SECTIONS — KENG
+   ═══════════════════════════════════════════════════════════════ */
+.cf-section {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1.25rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: cfSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    scroll-margin-top: calc(var(--cf-header-h) + 1rem);
+    width: 100%;
+}
+.dark .cf-section { background: #0f172a; border-color: #1e293b; }
+.cf-section:hover {
+    box-shadow: 0 10px 32px -16px rgba(99, 102, 241, 0.15);
+    border-color: #c7d2fe;
+}
+.dark .cf-section:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 10px 32px -16px rgba(99, 102, 241, 0.25);
+}
+
+.cf-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1.15rem 1.35rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s;
+    position: relative;
+}
+@media (min-width: 640px) { .cf-section-header { gap: 1.15rem; padding: 1.35rem 1.75rem; } }
+@media (min-width: 1024px) { .cf-section-header { padding: 1.5rem 2rem; gap: 1.35rem; } }
+.cf-section-header:hover { background: linear-gradient(90deg, #f8fafc, transparent); }
+.dark .cf-section-header:hover { background: linear-gradient(90deg, #0a0a0f, transparent); }
+
+.cf-section-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px -4px currentColor;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+}
+@media (min-width: 640px) { .cf-section-icon { width: 50px; height: 50px; border-radius: 14px; font-size: 18px; } }
+.cf-section-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 50%);
+    pointer-events: none;
+}
+.cf-section-header:hover .cf-section-icon {
+    transform: scale(1.1) rotate(-6deg);
+    box-shadow: 0 12px 28px -4px currentColor;
+}
+
+.cf-section-toggle {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dark .cf-section-toggle { background: #1e293b; color: #94a3b8; }
+.cf-section-header:hover .cf-section-toggle { background: #e0e7ff; color: #4338ca; }
+.cf-section.open .cf-section-toggle {
+    transform: rotate(180deg);
+    background: #e0e7ff;
+    color: #4338ca;
+}
+.dark .cf-section.open .cf-section-toggle {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+}
+
+.cf-section-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                padding 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.35s;
+    padding: 0 1.35rem;
+    opacity: 0;
+}
+@media (min-width: 640px) { .cf-section-body { padding: 0 1.75rem; } }
+@media (min-width: 1024px) { .cf-section-body { padding: 0 2rem; } }
+.cf-section.open .cf-section-body {
+    max-height: 8000px;
+    padding: 0 1.35rem 1.5rem;
+    opacity: 1;
+}
+@media (min-width: 640px) {
+    .cf-section.open .cf-section-body { padding: 0 1.75rem 1.75rem; }
+}
+@media (min-width: 1024px) {
+    .cf-section.open .cf-section-body { padding: 0 2rem 2rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM FIELDS
+   ═══════════════════════════════════════════════════════════════ */
+.cf-field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.55rem;
+    flex-wrap: wrap;
+}
+.dark .cf-field-label { color: #cbd5e1; }
+.cf-field-label i { font-size: 14px; }
+.cf-field-label .req {
+    color: #ef4444;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: auto;
+    padding: 0.15rem 0.55rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 999px;
+    animation: cfPulse 2s ease-in-out infinite;
+}
+
+.cf-input, .cf-select, .cf-textarea {
+    width: 100%;
+    padding: 0.85rem 1.1rem;
+    border-radius: 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-family: inherit;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+@media (min-width: 640px) { .cf-input, .cf-select, .cf-textarea { padding: 0.95rem 1.2rem; font-size: 0.95rem; } }
+.dark .cf-input, .dark .cf-select, .dark .cf-textarea {
+    background: #0a0a0f;
+    border-color: #1e293b;
+    color: #f1f5f9;
+}
+.cf-input:hover, .cf-select:hover, .cf-textarea:hover {
+    border-color: #cbd5e1;
+    background: #fafbff;
+}
+.dark .cf-input:hover, .dark .cf-select:hover, .dark .cf-textarea:hover {
+    border-color: #334155;
+    background: #0f0f17;
+}
+.cf-input:focus, .cf-select:focus, .cf-textarea:focus {
+    border-color: var(--cf-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 6px 16px -6px rgba(99, 102, 241, 0.2);
+    background: #fff;
+    transform: translateY(-2px);
+}
+.dark .cf-input:focus, .dark .cf-select:focus, .dark .cf-textarea:focus {
+    background: #0a0a0f;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25), 0 6px 16px -6px rgba(99, 102, 241, 0.4);
+}
+.cf-input.is-invalid, .cf-select.is-invalid, .cf-textarea.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+    animation: cfShake 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cf-textarea {
+    resize: vertical;
+    min-height: 140px;
+    line-height: 1.7;
+}
+@media (min-width: 640px) { .cf-textarea { min-height: 160px; } }
+
+.cf-input-wrap { position: relative; }
+.cf-counter {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 1rem;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.15rem 0.55rem;
+    border-radius: 6px;
+    pointer-events: none;
+    transition: all 0.25s;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+.dark .cf-counter { background: rgba(10, 10, 15, 0.95); }
+.cf-counter.warn { color: var(--cf-amber); background: rgba(245, 158, 11, 0.15); }
+.cf-counter.danger { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+
+.cf-hint {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    line-height: 1.5;
+}
+.cf-hint i { margin-top: 2px; flex-shrink: 0; }
+.cf-error {
+    font-size: 0.78rem;
+    color: #ef4444;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    padding: 0.6rem 0.85rem;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 8px;
+    border-left: 3px solid #ef4444;
+    animation: cfShake 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Katta ekranda Grid gap kattaroq */
+.cf-section-body .grid { gap: 1.25rem !important; }
+@media (min-width: 640px) { .cf-section-body .grid { gap: 1.5rem !important; } }
+@media (min-width: 1024px) { .cf-section-body .grid { gap: 1.75rem !important; } }
+
+.cf-section-body .space-y-5 > * + * { margin-top: 1.25rem !important; }
+@media (min-width: 640px) { .cf-section-body .space-y-5 > * + * { margin-top: 1.5rem !important; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   COVER UPLOAD
+   ═══════════════════════════════════════════════════════════════ */
+.cf-cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    max-height: 360px;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    border: 2px dashed #c7d2fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (min-width: 1024px) { .cf-cover { max-height: 480px; } }
+.dark .cf-cover {
+    background: linear-gradient(135deg, #0a0a0f, #13131b);
+    border-color: rgba(99, 102, 241, 0.35);
+}
+.cf-cover:hover {
+    border-color: var(--cf-primary);
+    transform: scale(1.005);
+    box-shadow: 0 14px 40px -10px rgba(99, 102, 241, 0.25);
+}
+.cf-cover.dragover {
+    border-color: var(--cf-primary);
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.12);
+}
+.cf-cover img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    animation: cfPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.cf-cover-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.78) 0%, transparent 55%);
+    opacity: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 1.25rem;
+    transition: opacity 0.3s;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+.cf-cover:hover .cf-cover-overlay { opacity: 1; }
+
+.cf-cover-placeholder {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    color: #94a3b8;
+}
+.cf-cover-icon {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+    color: var(--cf-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 0.875rem;
+    animation: cfFloat 3.5s ease-in-out infinite;
+    box-shadow: 0 10px 26px -4px rgba(99, 102, 241, 0.3);
+}
+@media (min-width: 1024px) {
+    .cf-cover-icon { width: 88px; height: 88px; font-size: 34px; margin-bottom: 1.25rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOGGLE SWITCHES
+   ═══════════════════════════════════════════════════════════════ */
+.cf-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.95rem 1.1rem;
+    border-radius: 0.85rem;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    margin-bottom: 0.65rem;
+    position: relative;
+    overflow: hidden;
+}
+@media (min-width: 640px) { .cf-toggle { gap: 1.1rem; padding: 1.15rem 1.35rem; margin-bottom: 0.75rem; } }
+.dark .cf-toggle { background: #0a0a0f; border-color: #1e293b; }
+.cf-toggle:hover {
+    border-color: #a5b4fc;
+    background: linear-gradient(135deg, #f8faff, #f5f3ff);
+    transform: translateX(4px);
+}
+.dark .cf-toggle:hover { background: rgba(99, 102, 241, 0.06); }
+.cf-toggle.checked {
+    border-color: var(--cf-primary);
+    background: linear-gradient(135deg, #f5f3ff, #eef2ff);
+    box-shadow: 0 6px 20px -6px rgba(99, 102, 241, 0.25);
+}
+.dark .cf-toggle.checked {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+    border-color: rgba(99, 102, 241, 0.55);
+    box-shadow: 0 6px 20px -6px rgba(99, 102, 241, 0.4);
+}
+
+.cf-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cf-toggle-switch {
+    position: relative;
+    width: 48px; height: 26px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    flex-shrink: 0;
+    transition: background 0.3s;
+    pointer-events: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+@media (min-width: 640px) { .cf-toggle-switch { width: 52px; height: 28px; } }
+.dark .cf-toggle-switch { background: #334155; }
+.cf-toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (min-width: 640px) {
+    .cf-toggle-switch::after { width: 22px; height: 22px; }
+}
+.cf-toggle.checked .cf-toggle-switch {
+    background: linear-gradient(135deg, var(--cf-primary), var(--cf-violet));
+    box-shadow: inset 0 2px 4px rgba(99, 102, 241, 0.4), 0 0 14px rgba(99, 102, 241, 0.45);
+}
+.cf-toggle.checked .cf-toggle-switch::after { transform: translateX(22px); }
+@media (min-width: 640px) {
+    .cf-toggle.checked .cf-toggle-switch::after { transform: translateX(24px); }
+}
+
+.cf-toggle-icon {
+    width: 42px; height: 42px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (min-width: 640px) { .cf-toggle-icon { width: 46px; height: 46px; border-radius: 12px; font-size: 18px; } }
+.cf-toggle:hover .cf-toggle-icon { transform: scale(1.08) rotate(-6deg); }
+.cf-toggle.checked .cf-toggle-icon { transform: scale(1.1); animation: cfRing 1.2s ease; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACTION BAR
+   ═══════════════════════════════════════════════════════════════ */
+.cf-action-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid #e2e8f0;
+    padding: 0.875rem 1rem;
+    padding-bottom: calc(0.875rem + env(safe-area-inset-bottom));
+    margin: 1.25rem -0.75rem -0.75rem;
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: wrap;
+    border-radius: 1.25rem 1.25rem 0 0;
+    box-shadow: 0 -8px 32px -8px rgba(0, 0, 0, 0.08);
+}
+@media (min-width: 640px) { .cf-action-bar { padding: 1rem 1.5rem; gap: 0.75rem; margin: 1.5rem -1rem -1rem; } }
+@media (min-width: 1024px) { .cf-action-bar { padding: 1.15rem 2rem; margin: 1.5rem -1.25rem -1.25rem; } }
+.dark .cf-action-bar {
+    background: rgba(15, 23, 42, 0.92);
+    border-color: #1e293b;
+}
+
+.cf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    min-height: 44px;
+}
+@media (min-width: 640px) { .cf-btn { padding: 0.9rem 1.5rem; font-size: 0.92rem; min-height: 46px; } }
+.cf-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+}
+.cf-btn:hover::before { transform: translateX(100%); }
+.cf-btn:active { transform: scale(0.97); }
+
+.cf-btn-primary {
+    background: linear-gradient(135deg, var(--cf-primary), var(--cf-primary-dark));
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 8px 22px -6px rgba(99, 102, 241, 0.5);
+    animation: cfGradientShift 5s ease infinite;
+}
+.cf-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -6px rgba(99, 102, 241, 0.6);
+}
+.cf-btn-success {
+    background: linear-gradient(135deg, #059669, var(--cf-emerald));
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 8px 22px -6px rgba(16, 185, 129, 0.5);
+    animation: cfGradientShift 5s ease infinite;
+}
+.cf-btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -6px rgba(16, 185, 129, 0.6);
+}
+.cf-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+.cf-btn-secondary:hover { background: #e2e8f0; transform: translateY(-2px); }
+.dark .cf-btn-secondary { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+.dark .cf-btn-secondary:hover { background: #334155; }
+
+@media (max-width: 640px) {
+    .cf-action-bar {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+    .cf-action-bar .cf-btn {
+        flex: 1;
+        padding: 0.8rem 0.9rem;
+        font-size: 0.85rem;
+        min-height: 46px;
+    }
+    .cf-action-bar .cf-btn-icon {
+        flex: 0;
+        padding: 0.8rem;
+        width: 46px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE FAB + NAV
+   ═══════════════════════════════════════════════════════════════ */
+.cf-fab {
+    position: fixed;
+    bottom: calc(5rem + env(safe-area-inset-bottom));
+    right: 1rem;
+    z-index: 25;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cf-primary), var(--cf-violet), var(--cf-pink));
+    background-size: 200% 200%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 14px 32px -10px rgba(99, 102, 241, 0.75);
+    border: none;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: cfGradientShift 5s ease infinite;
+}
+.cf-fab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.5;
+    animation: cfRing 2.2s ease-out infinite;
+    z-index: -1;
+}
+.cf-fab:hover { transform: scale(1.12) rotate(90deg); }
+.cf-fab:active { transform: scale(0.9); }
+.cf-fab.open { transform: rotate(45deg); animation: none; }
+@media (min-width: 1600px) { .cf-fab { display: none; } }
+
+.cf-mobile-nav {
+    position: fixed;
+    inset: auto 1rem calc(9rem + env(safe-area-inset-bottom)) 1rem;
+    z-index: 24;
+    background: #fff;
+    border-radius: 1.25rem;
+    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.3);
+    padding: 0.75rem;
+    opacity: 0;
+    transform: translateY(20px) scale(0.92);
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.dark .cf-mobile-nav { background: #0f172a; border: 1px solid #1e293b; }
+.cf-mobile-nav.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+@media (min-width: 1600px) { .cf-mobile-nav { display: none; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   PREVIEW
+   ═══════════════════════════════════════════════════════════════ */
+.cf-preview {
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.08);
+}
+.dark .cf-preview { background: #0f172a; border-color: #1e293b; }
+.cf-preview:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 44px -8px rgba(99, 102, 241, 0.28);
+    border-color: #c7d2fe;
+}
+.dark .cf-preview:hover { border-color: rgba(99, 102, 241, 0.5); }
+
+.cf-preview-cover {
+    aspect-ratio: 16/10;
+    background: linear-gradient(135deg, var(--cf-primary), var(--cf-violet));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+.cf-preview-cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    background-size: 200% 100%;
+    animation: cfShimmer 4s infinite;
+}
+.cf-preview-cover img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    position: absolute; inset: 0;
+    transition: transform 0.5s;
+}
+.cf-preview:hover .cf-preview-cover img { transform: scale(1.05); }
+
+.cf-preview-badge {
+    position: absolute;
+    top: 0.65rem; left: 0.65rem;
+    padding: 0.3rem 0.65rem;
+    background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #4338ca;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.cf-preview-price {
+    position: absolute;
+    bottom: 0.65rem; right: 0.65rem;
+    padding: 0.3rem 0.7rem;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+    z-index: 2;
+}
+.cf-preview-body { padding: 0.9rem; }
+.cf-preview-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #0f172a;
+    line-height: 1.35;
+    margin-bottom: 0.4rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4rem;
+    word-break: break-word;
+}
+.dark .cf-preview-title { color: #f1f5f9; }
+.cf-preview-desc {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.2rem;
+}
+.dark .cf-preview-desc { color: #94a3b8; }
+.cf-preview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid #f1f5f9;
+}
+.dark .cf-preview-meta { border-color: #1e293b; }
+.cf-preview-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    color: #64748b;
+    padding: 0.25rem 0.5rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-weight: 500;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dark .cf-preview-meta-item { background: #0a0a0f; color: #94a3b8; }
+.cf-preview:hover .cf-preview-meta-item { background: #eef2ff; color: #4338ca; }
+.dark .cf-preview:hover .cf-preview-meta-item { background: rgba(99, 102, 241, 0.12); color: #a5b4fc; }
+
+.cf-tips {
+    margin-top: 0.875rem;
+    padding: 0.875rem;
+    border-radius: 0.875rem;
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 1px solid #fde68a;
+    animation: cfSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+.dark .cf-tips {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.06));
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════════ */
+.cf-toasts {
+    position: fixed;
+    top: 5rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+    max-width: 22rem;
+}
+@media (max-width: 640px) {
+    .cf-toasts { left: 0.625rem; right: 0.625rem; max-width: none; }
+}
+.cf-toast {
+    padding: 0.85rem 1rem;
+    border-radius: 0.875rem;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.35);
+    pointer-events: auto;
+    animation: cfToastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cf-toast i { font-size: 15px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ERRORS
+   ═══════════════════════════════════════════════════════════════ */
+.cf-errors {
+    margin-bottom: 1rem;
+    padding: 0.95rem 1.1rem;
+    border-radius: 0.95rem;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+    animation: cfShake 0.5s ease;
+}
+.dark .cf-errors {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.06));
+    color: #fca5a5;
+}
+
+/* Utility */
+.cf-mw0 { min-width: 0; }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="cf-page">
+
+<!-- Ambient glows -->
+<div class="cf-glow cf-glow-1"></div>
+<div class="cf-glow cf-glow-2"></div>
+
+<div class="cf-wrap">
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="cf-hero {% if mode == 'edit' %}edit{% endif %}">
+    <div class="cf-hero-content">
+        <div class="cf-hero-icon">
+            <i class="fas {% if mode == 'create' %}fa-plus-circle{% else %}fa-pen-to-square{% endif %}"></i>
+        </div>
+        <div class="flex-1 cf-mw0">
+            <div class="cf-hero-badge">
+                <i class="fas {% if mode == 'create' %}fa-sparkles{% else %}fa-wrench{% endif %}"></i>
+                {% if mode == 'create' %}Yangi kurs yaratish{% else %}Kursni tahrirlash{% endif %}
+            </div>
+            <h1 class="cf-hero-title">
+                {% if mode == 'create' %}Yangi kurs yarating{% else %}{{ course.title|truncatechars:60 }}{% endif %}
+            </h1>
+            <p class="text-white/85 text-sm sm:text-base mt-2 max-w-2xl">
+                {% if mode == 'create' %}
+                Kurs nomi, tavsifi va boshqa ma'lumotlarni to'ldiring. Barcha maydonlar to'ldirilgach saqlang.
+                {% else %}
+                Kurs ma'lumotlarini tahrirlang. O'zgarishlar darhol kuchga kiradi.
+                {% endif %}
+            </p>
+        </div>
+        <a href="{% if course %}{% url 'courses_admin:detail' pk=course.pk %}{% else %}{% url 'courses_admin:list' %}{% endif %}"
+           class="cf-hero-back hidden sm:inline-flex">
+            <i class="fas fa-arrow-left"></i>
+            <span>Orqaga</span>
+        </a>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FORM ERRORS
+     ═══════════════════════════════════════════════════════════ -->
+{% if form.non_field_errors %}
+<div class="cf-errors">
+    <div class="flex items-start gap-3">
+        <i class="fas fa-circle-exclamation mt-0.5 text-lg"></i>
+        <div class="flex-1">
+            <div class="font-bold mb-1">Xatolik yuz berdi</div>
+            <ul class="text-sm space-y-1 list-disc list-inside">
+                {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN FORM
+     ═══════════════════════════════════════════════════════════ -->
+<form method="post" enctype="multipart/form-data" id="courseForm" novalidate>
+    {% csrf_token %}
+
+    <div class="cf-layout">
+
+        <!-- ═══════════ CHAP USTUN — NAVIGATOR ═══════════ -->
+        <aside class="cf-nav-side">
+            <div class="cf-nav-card anim-left d-2">
+                <!-- Progress ring -->
+                <div class="cf-progress-wrap">
+                    <svg class="cf-progress-svg" viewBox="0 0 52 52">
+                        <defs>
+                            <linearGradient id="cfGradientRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#6366f1"/>
+                                <stop offset="100%" stop-color="#8b5cf6"/>
+                            </linearGradient>
+                        </defs>
+                        <circle class="cf-progress-bg" cx="26" cy="26" r="22"></circle>
+                        <circle class="cf-progress-circle" cx="26" cy="26" r="22"
+                                stroke-dasharray="138.2"
+                                stroke-dashoffset="138.2"
+                                id="cfProgressRing"></circle>
+                    </svg>
+                    <div class="flex-1 cf-mw0">
+                        <div class="text-lg font-bold text-slate-900 dark:text-white" id="cfProgressText">0%</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">To'ldirildi</div>
+                    </div>
+                </div>
+
+                <div class="cf-nav-cat">Bo'limlar</div>
+
+                <button type="button" class="cf-nav-item active" data-target="section-basic">
+                    <i class="fas fa-info-circle" style="color: #6366f1;"></i>
+                    <span>Asosiy ma'lumotlar</span>
+                </button>
+                <button type="button" class="cf-nav-item" data-target="section-media">
+                    <i class="fas fa-image" style="color: #f43f5e;"></i>
+                    <span>Muqova va media</span>
+                </button>
+                <button type="button" class="cf-nav-item" data-target="section-teacher">
+                    <i class="fas fa-user-tie" style="color: #8b5cf6;"></i>
+                    <span>O'qituvchi</span>
+                </button>
+                <button type="button" class="cf-nav-item" data-target="section-dates">
+                    <i class="fas fa-calendar-alt" style="color: #f59e0b;"></i>
+                    <span>Sanalar</span>
+                </button>
+                <button type="button" class="cf-nav-item" data-target="section-price">
+                    <i class="fas fa-cash-coin" style="color: #10b981;"></i>
+                    <span>Narx va to'lov</span>
+                </button>
+                <button type="button" class="cf-nav-item" data-target="section-seo">
+                    <i class="fas fa-search" style="color: #06b6d4;"></i>
+                    <span>SEO</span>
+                </button>
+                <button type="button" class="cf-nav-item" data-target="section-settings">
+                    <i class="fas fa-sliders-h" style="color: #64748b;"></i>
+                    <span>Sozlamalar</span>
+                </button>
+            </div>
+        </aside>
+
+
+        <!-- ═══════════ O'RTA USTUN — FORMA ═══════════ -->
+        <div class="cf-mw0">
+
+            <!-- ═════ SECTION 1: BASIC ═════ -->
+            <div class="cf-section open" id="section-basic">
+                <div class="cf-section-header" onclick="cfToggleSection(this)">
+                    <span class="cf-section-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #6366f1;">
+                        <i class="fas fa-info-circle"></i>
+                    </span>
+                    <div class="flex-1 cf-mw0">
+                        <h2 class="font-display font-bold text-slate-900 dark:text-white text-base sm:text-lg">Asosiy ma'lumotlar</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kurs nomi, tavsifi va slug</p>
+                    </div>
+                    <span class="cf-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="cf-section-body">
+                    <div class="space-y-5">
+                        <div>
+                            <label for="{{ form.title.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-heading" style="color: #6366f1;"></i>
+                                <span>{{ form.title.label }}</span>
+                                <span class="req">Majburiy</span>
+                            </label>
+                            <div class="cf-input-wrap">
+                                {{ form.title }}
+                                <span class="cf-counter" data-for="title" data-max="255">0/255</span>
+                            </div>
+                            <p class="cf-hint"><i class="fas fa-lightbulb"></i>Qisqa, tushunarli va o'ziga jalb qiluvchi nom</p>
+                            {% if form.title.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.title.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.slug.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-link" style="color: #64748b;"></i>
+                                <span>{{ form.slug.label }}</span>
+                            </label>
+                            {{ form.slug }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Bo'sh qoldirsangiz avtomatik yaratiladi</p>
+                            {% if form.slug.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.slug.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.short_description.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-align-left" style="color: #06b6d4;"></i>
+                                <span>{{ form.short_description.label }}</span>
+                            </label>
+                            <div class="cf-input-wrap">
+                                {{ form.short_description }}
+                                <span class="cf-counter" data-for="short_description" data-max="300">0/300</span>
+                            </div>
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Karta ko'rinishida ko'rsatiladi</p>
+                            {% if form.short_description.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.short_description.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.description.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-book-open" style="color: #10b981;"></i>
+                                <span>{{ form.description.label }}</span>
+                            </label>
+                            {{ form.description }}
+                            <p class="cf-hint"><i class="fas fa-code"></i>Markdown yoki HTML qo'llab-quvvatlanadi</p>
+                            {% if form.description.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.description.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═════ SECTION 2: MEDIA ═════ -->
+            <div class="cf-section open" id="section-media">
+                <div class="cf-section-header" onclick="cfToggleSection(this)">
+                    <span class="cf-section-icon" style="background: linear-gradient(135deg, #f43f5e, #e11d48); color: #f43f5e;">
+                        <i class="fas fa-image"></i>
+                    </span>
+                    <div class="flex-1 cf-mw0">
+                        <h2 class="font-display font-bold text-slate-900 dark:text-white text-base sm:text-lg">Muqova va media</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Rasm va video materiallar</p>
+                    </div>
+                    <span class="cf-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="cf-section-body">
+                    <div class="space-y-5">
+                        <div>
+                            <label class="cf-field-label">
+                                <i class="fas fa-image" style="color: #f43f5e;"></i>
+                                <span>{{ form.cover_image.label }}</span>
+                            </label>
+                            <div class="cf-cover" id="cfCoverUpload">
+                                {% if course and course.cover_image %}
+                                <img src="{{ course.cover_image.url }}" alt="Cover" id="cfCoverImg">
+                                <div class="cf-cover-overlay">
+                                    <span><i class="fas fa-camera mr-2"></i>Rasmni almashtirish</span>
+                                </div>
+                                {% else %}
+                                <div class="cf-cover-placeholder" id="cfCoverPlaceholder">
+                                    <div class="cf-cover-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <p class="text-base font-bold text-slate-600 dark:text-slate-300 mb-1">
+                                        Rasm yuklash
+                                    </p>
+                                    <p class="text-sm opacity-70 mb-2">yoki sudrab tashlang</p>
+                                    <div class="flex items-center justify-center gap-2 text-[10px] font-semibold opacity-60">
+                                        <span class="px-2 py-1 bg-white/60 dark:bg-slate-700/60 rounded">JPG</span>
+                                        <span class="px-2 py-1 bg-white/60 dark:bg-slate-700/60 rounded">PNG</span>
+                                        <span class="px-2 py-1 bg-white/60 dark:bg-slate-700/60 rounded">WEBP</span>
+                                        <span class="px-2 py-1 bg-white/60 dark:bg-slate-700/60 rounded">Max 5 MB</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <input type="file" name="cover_image" id="cfCoverInput" accept="image/*" hidden>
+                            {% if form.cover_image.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.cover_image.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.promo_video.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-video" style="color: #f43f5e;"></i>
+                                <span>{{ form.promo_video.label }}</span>
+                            </label>
+                            {{ form.promo_video }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>YouTube, Vimeo yoki boshqa havola</p>
+                            {% if form.promo_video.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.promo_video.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═════ SECTION 3: TEACHER ═════ -->
+            <div class="cf-section open" id="section-teacher">
+                <div class="cf-section-header" onclick="cfToggleSection(this)">
+                    <span class="cf-section-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #8b5cf6;">
+                        <i class="fas fa-user-tie"></i>
+                    </span>
+                    <div class="flex-1 cf-mw0">
+                        <h2 class="font-display font-bold text-slate-900 dark:text-white text-base sm:text-lg">O'qituvchi va kategoriya</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kurs egasi va turkum</p>
+                    </div>
+                    <span class="cf-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="cf-section-body">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label for="{{ form.teacher.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-chalkboard-user" style="color: #8b5cf6;"></i>
+                                <span>{{ form.teacher.label }}</span>
+                            </label>
+                            {{ form.teacher }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Kursni olib boradigan o'qituvchi</p>
+                            {% if form.teacher.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.teacher.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.category.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-folder" style="color: #8b5cf6;"></i>
+                                <span>{{ form.category.label }}</span>
+                            </label>
+                            {{ form.category }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Kurs qaysi turkumga tegishli</p>
+                            {% if form.category.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.category.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═════ SECTION 4: DATES ═════ -->
+            <div class="cf-section open" id="section-dates">
+                <div class="cf-section-header" onclick="cfToggleSection(this)">
+                    <span class="cf-section-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #f59e0b;">
+                        <i class="fas fa-calendar-alt"></i>
+                    </span>
+                    <div class="flex-1 cf-mw0">
+                        <h2 class="font-display font-bold text-slate-900 dark:text-white text-base sm:text-lg">Sanalar va davomiylik</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Boshlanish va tugash</p>
+                    </div>
+                    <span class="cf-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="cf-section-body">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div>
+                            <label for="{{ form.start_date.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-play-circle" style="color: #10b981;"></i>
+                                <span>{{ form.start_date.label }}</span>
+                            </label>
+                            {{ form.start_date }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Boshlanish sanasi</p>
+                            {% if form.start_date.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.start_date.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.end_date.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-stop-circle" style="color: #f43f5e;"></i>
+                                <span>{{ form.end_date.label }}</span>
+                            </label>
+                            {{ form.end_date }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Tugash sanasi</p>
+                            {% if form.end_date.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.end_date.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.duration_months.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-hourglass-half" style="color: #f59e0b;"></i>
+                                <span>{{ form.duration_months.label }}</span>
+                            </label>
+                            {{ form.duration_months }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>1-36 oy</p>
+                            {% if form.duration_months.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.duration_months.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═════ SECTION 5: PRICE ═════ -->
+            <div class="cf-section open" id="section-price">
+                <div class="cf-section-header" onclick="cfToggleSection(this)">
+                    <span class="cf-section-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: #10b981;">
+                        <i class="fas fa-cash-coin"></i>
+                    </span>
+                    <div class="flex-1 cf-mw0">
+                        <h2 class="font-display font-bold text-slate-900 dark:text-white text-base sm:text-lg">Narx va to'lov</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Kurs narxi va chegirma</p>
+                    </div>
+                    <span class="cf-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="cf-section-body">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label for="{{ form.price.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-money-bill-wave" style="color: #10b981;"></i>
+                                <span>{{ form.price.label }}</span>
+                            </label>
+                            {{ form.price }}
+                            <p class="cf-hint"><i class="fas fa-gift"></i>0 kiritsangiz — kurs bepul</p>
+                            {% if form.price.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.price.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.discounted_price.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-tag" style="color: #10b981;"></i>
+                                <span>{{ form.discounted_price.label }}</span>
+                            </label>
+                            {{ form.discounted_price }}
+                            <p class="cf-hint"><i class="fas fa-percent"></i>Bo'sh qoldirsangiz chegirma yo'q</p>
+                            {% if form.discounted_price.errors %}
+                            <p class="cf-error"><i class="fas fa-circle-exclamation"></i>{{ form.discounted_price.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═════ SECTION 6: SEO ═════ -->
+            <div class="cf-section" id="section-seo">
+                <div class="cf-section-header" onclick="cfToggleSection(this)">
+                    <span class="cf-section-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2); color: #06b6d4;">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <div class="flex-1 cf-mw0">
+                        <h2 class="font-display font-bold text-slate-900 dark:text-white text-base sm:text-lg">SEO sozlamalari</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Qidiruv tizimlari uchun</p>
+                    </div>
+                    <span class="cf-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="cf-section-body">
+                    <div class="space-y-5">
+                        <div>
+                            <label for="{{ form.meta_title.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-heading" style="color: #06b6d4;"></i>
+                                <span>{{ form.meta_title.label }}</span>
+                            </label>
+                            <div class="cf-input-wrap">
+                                {{ form.meta_title }}
+                                <span class="cf-counter" data-for="meta_title" data-max="60">0/60</span>
+                            </div>
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Qidiruvda ko'rinadigan sarlavha</p>
+                        </div>
+                        <div>
+                            <label for="{{ form.meta_description.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-align-left" style="color: #06b6d4;"></i>
+                                <span>{{ form.meta_description.label }}</span>
+                            </label>
+                            <div class="cf-input-wrap">
+                                {{ form.meta_description }}
+                                <span class="cf-counter" data-for="meta_description" data-max="160">0/160</span>
+                            </div>
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Qidiruvda ko'rinadigan tavsif</p>
+                        </div>
+                        <div>
+                            <label for="{{ form.meta_keywords.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-tags" style="color: #06b6d4;"></i>
+                                <span>{{ form.meta_keywords.label }}</span>
+                            </label>
+                            {{ form.meta_keywords }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>Vergul bilan: python, dasturlash, backend</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═════ SECTION 7: SETTINGS ═════ -->
+            <div class="cf-section" id="section-settings">
+                <div class="cf-section-header" onclick="cfToggleSection(this)">
+                    <span class="cf-section-icon" style="background: linear-gradient(135deg, #64748b, #475569); color: #64748b;">
+                        <i class="fas fa-sliders-h"></i>
+                    </span>
+                    <div class="flex-1 cf-mw0">
+                        <h2 class="font-display font-bold text-slate-900 dark:text-white text-base sm:text-lg">Sozlamalar</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Til, daraja, holat va boshqa</p>
+                    </div>
+                    <span class="cf-section-toggle"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="cf-section-body">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
+                        <div>
+                            <label for="{{ form.language.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-language" style="color: #64748b;"></i>
+                                <span>{{ form.language.label }}</span>
+                            </label>
+                            {{ form.language }}
+                        </div>
+                        <div>
+                            <label for="{{ form.level.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-signal" style="color: #64748b;"></i>
+                                <span>{{ form.level.label }}</span>
+                            </label>
+                            {{ form.level }}
+                        </div>
+                        <div>
+                            <label for="{{ form.status.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-flag" style="color: #64748b;"></i>
+                                <span>{{ form.status.label }}</span>
+                            </label>
+                            {{ form.status }}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
+                        <div>
+                            <label for="{{ form.max_students.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-users" style="color: #d946ef;"></i>
+                                <span>{{ form.max_students.label }}</span>
+                            </label>
+                            {{ form.max_students }}
+                            <p class="cf-hint"><i class="fas fa-info-circle"></i>0 = cheksiz</p>
+                        </div>
+                        <div>
+                            <label for="{{ form.passing_score.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-percent" style="color: #d946ef;"></i>
+                                <span>{{ form.passing_score.label }}</span>
+                            </label>
+                            {{ form.passing_score }}
+                        </div>
+                        <div>
+                            <label for="{{ form.attendance_required.id_for_label }}" class="cf-field-label">
+                                <i class="fas fa-user-check" style="color: #d946ef;"></i>
+                                <span>{{ form.attendance_required.label }}</span>
+                            </label>
+                            {{ form.attendance_required }}
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="cf-toggle" data-toggle>
+                            {{ form.is_active }}
+                            <span class="cf-toggle-icon" style="background: rgba(16, 185, 129, 0.14); color: #10b981;">
+                                <i class="fas fa-power-off"></i>
+                            </span>
+                            <div class="flex-1 cf-mw0">
+                                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-0.5">
+                                    {{ form.is_active.label }}
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    Faol bo'lmagan kurs saytda va qidiruvda ko'rinmaydi
+                                </p>
+                            </div>
+                            <span class="cf-toggle-switch"></span>
+                        </label>
+
+                        <label class="cf-toggle" data-toggle>
+                            {{ form.is_featured }}
+                            <span class="cf-toggle-icon" style="background: rgba(245, 158, 11, 0.14); color: #f59e0b;">
+                                <i class="fas fa-star"></i>
+                            </span>
+                            <div class="flex-1 cf-mw0">
+                                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-0.5">
+                                    {{ form.is_featured.label }}
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    Tanlangan kurslar bosh sahifada birinchi ko'rinadi
+                                </p>
+                            </div>
+                            <span class="cf-toggle-switch"></span>
+                        </label>
+
+                        <label class="cf-toggle" data-toggle>
+                            {{ form.is_certificate_enabled }}
+                            <span class="cf-toggle-icon" style="background: rgba(139, 92, 246, 0.14); color: #8b5cf6;">
+                                <i class="fas fa-award"></i>
+                            </span>
+                            <div class="flex-1 cf-mw0">
+                                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-0.5">
+                                    {{ form.is_certificate_enabled.label }}
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    Muvaffaqiyatli tugatganlarga sertifikat beriladi
+                                </p>
+                            </div>
+                            <span class="cf-toggle-switch"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═════ ACTION BAR ═════ -->
+            <div class="cf-action-bar">
+                <button type="submit" class="cf-btn cf-btn-primary">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{% if mode == 'create' %}Kursni yaratish{% else %}Saqlash{% endif %}</span>
+                </button>
+
+                {% if mode == 'create' %}
+                <button type="submit" name="save_and_new" value="1" class="cf-btn cf-btn-success">
+                    <i class="fas fa-plus"></i>
+                    <span class="hidden sm:inline">Saqlash va yangi</span>
+                    <span class="sm:hidden">+Yangi</span>
+                </button>
+                {% endif %}
+
+                <div class="flex-1 hidden sm:block"></div>
+
+                <a href="{% if course %}{% url 'courses_admin:detail' pk=course.pk %}{% else %}{% url 'courses_admin:list' %}{% endif %}"
+                   class="cf-btn cf-btn-secondary cf-btn-icon sm:w-auto sm:px-4" title="Bekor qilish">
+                    <i class="fas fa-times"></i>
+                    <span class="hidden sm:inline">Bekor qilish</span>
+                </a>
+            </div>
+
+        </div>
+
+
+        <!-- ═══════════ O'NG USTUN — LIVE PREVIEW ═══════════ -->
+        <aside class="cf-preview-side">
+            <div class="anim-right d-3">
+                <div class="cf-nav-cat" style="padding-left: 0.25rem;">Jonli ko'rinish</div>
+                <div class="cf-preview">
+                    <div class="cf-preview-cover" id="cfPreviewCover">
+                        {% if course and course.cover_image %}
+                        <img src="{{ course.cover_image.url }}" alt="Cover">
+                        {% else %}
+                        <i class="fas fa-image"></i>
+                        {% endif %}
+                        <span class="cf-preview-badge">
+                            {% if mode == 'create' %}YANGI{% else %}TAHRIR{% endif %}
+                        </span>
+                        <span class="cf-preview-price" id="cfPreviewPrice">
+                            {% if course and course.current_price %}Narx{% else %}BEPUL{% endif %}
+                        </span>
+                    </div>
+                    <div class="cf-preview-body">
+                        <div class="cf-preview-title" id="cfPreviewTitle">
+                            {% if course %}{{ course.title }}{% else %}Kurs nomi kiritilmagan{% endif %}
+                        </div>
+                        <div class="cf-preview-desc" id="cfPreviewDesc">
+                            {% if course and course.short_description %}{{ course.short_description }}{% else %}Tavsif kiritilmagan...{% endif %}
+                        </div>
+                        <div class="cf-preview-meta">
+                            <span class="cf-preview-meta-item">
+                                <i class="fas fa-user-tie" style="color: #8b5cf6;"></i>
+                                <span id="cfPreviewTeacher">Belgilanmagan</span>
+                            </span>
+                            <span class="cf-preview-meta-item">
+                                <i class="fas fa-hourglass-half" style="color: #f59e0b;"></i>
+                                <span id="cfPreviewDuration">{% if course %}{{ course.duration_months }} oy{% else %}—{% endif %}</span>
+                            </span>
+                            <span class="cf-preview-meta-item">
+                                <i class="fas fa-signal" style="color: #6366f1;"></i>
+                                <span id="cfPreviewLevel">{% if course %}{{ course.get_level_display }}{% else %}—{% endif %}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="cf-tips">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/30">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="flex-1 cf-mw0">
+                            <div class="text-sm font-bold text-amber-900 dark:text-amber-300 mb-1">
+                                Maslahat
+                            </div>
+                            <p class="text-xs text-amber-800 dark:text-amber-400 leading-relaxed">
+                                {% if mode == 'create' %}
+                                Yaxshi kurs nomi 30-60 belgidan iborat bo'ladi va aniq foyda va'da qiladi.
+                                {% else %}
+                                O'zgarishlardan keyin "Saqlash" tugmasini bosishni unutmang. Ctrl+S ham ishlaydi.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</form>
+
+</div><!-- /.cf-wrap -->
+
+<!-- ═══════════ MOBILE FAB + NAV ═══════════ -->
+<button type="button" class="cf-fab" id="cfMobileFab" aria-label="Bo'limlar">
+    <i class="fas fa-list-ul"></i>
+</button>
+
+<div class="cf-mobile-nav" id="cfMobileNav">
+    <div class="cf-nav-cat">Bo'limlar</div>
+    <button type="button" class="cf-nav-item" data-target="section-basic">
+        <i class="fas fa-info-circle" style="color: #6366f1;"></i>
+        <span>Asosiy ma'lumotlar</span>
+    </button>
+    <button type="button" class="cf-nav-item" data-target="section-media">
+        <i class="fas fa-image" style="color: #f43f5e;"></i>
+        <span>Muqova va media</span>
+    </button>
+    <button type="button" class="cf-nav-item" data-target="section-teacher">
+        <i class="fas fa-user-tie" style="color: #8b5cf6;"></i>
+        <span>O'qituvchi</span>
+    </button>
+    <button type="button" class="cf-nav-item" data-target="section-dates">
+        <i class="fas fa-calendar-alt" style="color: #f59e0b;"></i>
+        <span>Sanalar</span>
+    </button>
+    <button type="button" class="cf-nav-item" data-target="section-price">
+        <i class="fas fa-cash-coin" style="color: #10b981;"></i>
+        <span>Narx</span>
+    </button>
+    <button type="button" class="cf-nav-item" data-target="section-seo">
+        <i class="fas fa-search" style="color: #06b6d4;"></i>
+        <span>SEO</span>
+    </button>
+    <button type="button" class="cf-nav-item" data-target="section-settings">
+        <i class="fas fa-sliders-h" style="color: #64748b;"></i>
+        <span>Sozlamalar</span>
+    </button>
+</div>
+
+<!-- Toasts -->
+<div id="cfToastWrap" class="cf-toasts"></div>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION TOGGLE
+// ═══════════════════════════════════════════════════════════════
+function cfToggleSection(headerEl) {
+    const section = headerEl.closest('.cf-section');
+    section.classList.toggle('open');
+}
+window.cfToggleSection = cfToggleSection;
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATOR (desktop + mobile)
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.cf-nav-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const targetId = this.dataset.target;
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        if (!target.classList.contains('open')) {
+            target.classList.add('open');
+        }
+
+        const y = target.getBoundingClientRect().top + window.pageYOffset - 100;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+
+        document.querySelectorAll('.cf-nav-item').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll(`.cf-nav-item[data-target="${targetId}"]`).forEach(b => b.classList.add('active'));
+
+        cfCloseMobileNav();
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// SCROLL SPY
+// ═══════════════════════════════════════════════════════════════
+const cfSections = document.querySelectorAll('.cf-section');
+const cfObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.id;
+            document.querySelectorAll('.cf-nav-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll(`.cf-nav-item[data-target="${id}"]`).forEach(b => b.classList.add('active'));
+        }
+    });
+}, { root: null, rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+cfSections.forEach(s => cfObserver.observe(s));
+
+// ═══════════════════════════════════════════════════════════════
+// MOBILE NAV
+// ═══════════════════════════════════════════════════════════════
+const cfFab = document.getElementById('cfMobileFab');
+const cfMobileNav = document.getElementById('cfMobileNav');
+
+function cfOpenMobileNav() {
+    cfMobileNav.classList.add('open');
+    cfFab.classList.add('open');
+}
+function cfCloseMobileNav() {
+    cfMobileNav.classList.remove('open');
+    cfFab.classList.remove('open');
+}
+
+cfFab?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    cfMobileNav.classList.contains('open') ? cfCloseMobileNav() : cfOpenMobileNav();
+});
+
+document.addEventListener('click', (e) => {
+    if (!cfMobileNav.contains(e.target) && !cfFab.contains(e.target)) {
+        cfCloseMobileNav();
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// COVER UPLOAD
+// ═══════════════════════════════════════════════════════════════
+const cfCoverInput = document.getElementById('cfCoverInput');
+const cfCoverUpload = document.getElementById('cfCoverUpload');
+const cfPreviewCover = document.getElementById('cfPreviewCover');
+
+cfCoverUpload?.addEventListener('click', () => cfCoverInput.click());
+
+['dragover', 'dragenter'].forEach(evt => {
+    cfCoverUpload?.addEventListener(evt, (e) => {
+        e.preventDefault();
+        cfCoverUpload.classList.add('dragover');
+    });
+});
+['dragleave', 'drop'].forEach(evt => {
+    cfCoverUpload?.addEventListener(evt, (e) => {
+        e.preventDefault();
+        cfCoverUpload.classList.remove('dragover');
+    });
+});
+
+cfCoverUpload?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) cfHandleCoverFile(file);
+});
+
+cfCoverInput?.addEventListener('change', function() {
+    if (this.files[0]) cfHandleCoverFile(this.files[0]);
+});
+
+function cfHandleCoverFile(file) {
+    if (file.size > 5 * 1024 * 1024) {
+        cfShowToast("Rasm 5 MB dan oshmasligi kerak", 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+        document.getElementById('cfCoverPlaceholder')?.remove();
+
+        let img = document.getElementById('cfCoverImg');
+        if (!img) {
+            img = document.createElement('img');
+            img.id = 'cfCoverImg';
+            img.alt = 'Cover';
+            cfCoverUpload.appendChild(img);
+
+            const overlay = document.createElement('div');
+            overlay.className = 'cf-cover-overlay';
+            overlay.innerHTML = '<span><i class="fas fa-camera mr-2"></i>Rasmni almashtirish</span>';
+            cfCoverUpload.appendChild(overlay);
+        }
+        img.src = ev.target.result;
+
+        if (cfPreviewCover) {
+            let pImg = cfPreviewCover.querySelector('img');
+            if (!pImg) {
+                pImg = document.createElement('img');
+                pImg.alt = 'Cover';
+                cfPreviewCover.insertBefore(pImg, cfPreviewCover.firstChild);
+                cfPreviewCover.querySelector('.fa-image')?.remove();
+            }
+            pImg.src = ev.target.result;
+        }
+
+        cfShowToast("✅ Rasm yuklandi", 'success');
+    };
+    reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHARACTER COUNTERS
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.cf-counter').forEach(counter => {
+    const input = document.querySelector(`[name="${counter.dataset.for}"]`);
+    if (!input) return;
+    const max = parseInt(counter.dataset.max, 10);
+
+    function update() {
+        const len = input.value.length;
+        counter.textContent = `${len}/${max}`;
+        counter.classList.remove('warn', 'danger');
+        if (len > max) counter.classList.add('danger');
+        else if (len > max * 0.8) counter.classList.add('warn');
+    }
+
+    input.addEventListener('input', update);
+    update();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TOGGLE SWITCHES
+// ═══════════════════════════════════════════════════════════════
+document.querySelectorAll('.cf-toggle[data-toggle]').forEach(row => {
+    const cb = row.querySelector('input[type="checkbox"]');
+    if (!cb) return;
+    if (cb.checked) row.classList.add('checked');
+
+    cb.addEventListener('change', function() {
+        row.classList.toggle('checked', this.checked);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// LIVE PREVIEW
+// ═══════════════════════════════════════════════════════════════
+const cfForm = document.getElementById('courseForm');
+const cfPreviewTitle = document.getElementById('cfPreviewTitle');
+const cfPreviewDesc = document.getElementById('cfPreviewDesc');
+const cfPreviewPrice = document.getElementById('cfPreviewPrice');
+const cfPreviewDuration = document.getElementById('cfPreviewDuration');
+const cfPreviewLevel = document.getElementById('cfPreviewLevel');
+const cfPreviewTeacher = document.getElementById('cfPreviewTeacher');
+
+function cfUpdatePreview() {
+    const title = cfForm.querySelector('[name="title"]')?.value;
+    const desc = cfForm.querySelector('[name="short_description"]')?.value;
+    const price = cfForm.querySelector('[name="price"]')?.value;
+    const discount = cfForm.querySelector('[name="discounted_price"]')?.value;
+    const months = cfForm.querySelector('[name="duration_months"]')?.value;
+    const level = cfForm.querySelector('[name="level"]');
+    const teacher = cfForm.querySelector('[name="teacher"]');
+
+    if (cfPreviewTitle) cfPreviewTitle.textContent = title || 'Kurs nomi kiritilmagan';
+    if (cfPreviewDesc) cfPreviewDesc.textContent = desc || 'Tavsif kiritilmagan...';
+
+    if (cfPreviewPrice) {
+        const p = parseFloat(discount) || parseFloat(price) || 0;
+        if (p > 0) {
+            cfPreviewPrice.textContent = new Intl.NumberFormat('uz-UZ').format(p) + " so'm";
+            cfPreviewPrice.style.background = 'linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(79, 70, 229, 0.95))';
+        } else {
+            cfPreviewPrice.textContent = 'BEPUL';
+            cfPreviewPrice.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95))';
+        }
+    }
+
+    if (cfPreviewDuration) cfPreviewDuration.textContent = months ? months + ' oy' : '—';
+    if (cfPreviewLevel && level) cfPreviewLevel.textContent = level.options[level.selectedIndex]?.text || '—';
+    if (cfPreviewTeacher && teacher) cfPreviewTeacher.textContent = teacher.options[teacher.selectedIndex]?.text || 'Belgilanmagan';
+}
+
+cfForm?.addEventListener('input', cfUpdatePreview);
+cfForm?.addEventListener('change', cfUpdatePreview);
+cfUpdatePreview();
+
+// ═══════════════════════════════════════════════════════════════
+// PROGRESS RING
+// ═══════════════════════════════════════════════════════════════
+const cfFields = ['title', 'short_description', 'description', 'teacher', 'category', 'start_date', 'end_date', 'duration_months', 'price', 'language', 'level', 'status'];
+
+function cfUpdateProgress() {
+    const ring = document.getElementById('cfProgressRing');
+    const text = document.getElementById('cfProgressText');
+    if (!ring || !text) return;
+
+    let filled = 0;
+    cfFields.forEach(name => {
+        const el = cfForm.querySelector(`[name="${name}"]`);
+        if (el && el.value && el.value.trim() !== '') filled++;
+    });
+
+    const percent = Math.round((filled / cfFields.length) * 100);
+    const circumference = 138.2;
+    const offset = circumference - (percent / 100) * circumference;
+
+    ring.style.strokeDashoffset = offset;
+    text.textContent = percent + '%';
+}
+
+cfForm?.addEventListener('input', cfUpdateProgress);
+cfForm?.addEventListener('change', cfUpdateProgress);
+cfUpdateProgress();
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function cfShowToast(message, type = 'info') {
+    const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+    const bgs = {
+        success: 'linear-gradient(135deg,#059669,#10b981)',
+        error: 'linear-gradient(135deg,#e11d48,#f43f5e)',
+        info: 'linear-gradient(135deg,#4f46e5,#6366f1)'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = 'cf-toast';
+    toast.style.background = bgs[type] || bgs.info;
+    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span class="flex-1">${message}</span>`;
+
+    document.getElementById('cfToastWrap').appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(30px)';
+        setTimeout(() => toast.remove(), 400);
+    }, 3000);
+}
+window.cfShowToast = cfShowToast;
+
+// ═══════════════════════════════════════════════════════════════
+// FORM INPUT STYLING (Django auto-classes)
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#courseForm input:not([type="checkbox"]):not([type="file"]):not([hidden]), #courseForm select, #courseForm textarea').forEach(el => {
+        if (!el.classList.contains('cf-input') && !el.classList.contains('cf-select') && !el.classList.contains('cf-textarea')) {
+            if (el.tagName === 'SELECT') el.classList.add('cf-select');
+            else if (el.tagName === 'TEXTAREA') el.classList.add('cf-textarea');
+            else el.classList.add('cf-input');
+        }
+    });
+
+    document.querySelectorAll('.cf-error').forEach(err => {
+        const parent = err.parentElement;
+        const input = parent.querySelector('input, select, textarea');
+        if (input) input.classList.add('is-invalid');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// CTRL+S
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        cfForm.submit();
+    }
+    if (e.key === 'Escape') {
+        cfCloseMobileNav();
+    }
+});
+</script>
+{% endblock %}

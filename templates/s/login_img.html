@@ -1,0 +1,136 @@
+{% extends 's/settings.html' %}
+{% load static %}
+{% block login %}
+
+ <header class="im-content-header">
+    <h1 class="im-page-title">📦 Mahsulotlar</h1>
+    <a href="{% url 'create_img' %}" class="im-btn im-btn-primary">➕ Yangi qo'shish</a>
+</header>
+<style>
+        .im-modal {
+    position: fixed;          /* page scroll bilan birga turadi */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7); /* sahifa ustini qorong'ilashtirish */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;            /* barcha elementlar ustida chiqadi */
+}
+
+.im-modal-content {
+    background: #222;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+<!-- Filter va qidiruv -->
+<div class="im-filter-section">
+    <form action="{% url 'login_img_view' %}" method="get" class="im-filter-form">
+        <div class="im-form-group">
+                <select onchange="this.form.submit()"  name="status" class="im-form-input">
+                    <option style="color:white;background-color:black;" value="" >
+                        Barcha kategoriyalar
+                    </option>
+                    <option style="color:white;background-color:black;"
+                            value="active"
+                            {% if request.GET.status == 'active' %}selected{% endif%}>
+                        Active
+                    </option>
+                    <option style="color:white;background-color:black;"
+                            value="no_active"
+                            {% if request.GET.status == 'no_active' %}selected{% endif %}>
+                        No active
+                    </option>
+                </select>
+
+        </div>
+        <div class="im-form-group im-search-box">
+            <input type="text"
+                   name="search"
+                   placeholder="Tavsif bo'yicha qidirish..."
+                   class="im-form-input"
+                    value="{{ request.GET.search}}">
+            <button type="submit" class="im-search-btn">🔍</button>
+        </div>
+    </form>
+</div>
+
+<!-- Elementlar ro'yxati -->
+<div class="im-items-grid">
+    <!-- 1-element -->
+    {% for i in login_img_obj%}
+     <div class="im-item-card">
+                        <div style="width:160px;height:100px" class="im-item-icon"><img  style="width:140px;height:80px; border-radius:20px" src="{{i.cover_img.url}}" alt="{{i.cover.img.name |slice:'15'}}"></div>
+                        <div class="im-item-details">
+                            <h3 class="im-item-name">{{ i.cover_img.name | slice:'15' }}</h3>
+                            <p class="im-item-category">IMG</p>
+                            <p class="im-item-desc">
+                                {{i.description | truncatewords:'15'}}
+                                {% if i.is_active %}
+                                    <img style="width:20px;height:20px;" src="{% static 'png/Logo-certifie-Instagram.png' %}" alt="fadfa">
+                                {% else %}
+                                    <img style="width:20px;height:20px;" src="{% static 'png/images.png' %}" alt="fadfa">
+                                {% endif %}</p>
+                        </div>
+                        <div class="im-item-actions">
+                            <a href="view.html?id=1" class="im-action-btn view" title="Ko'rish">👁️</a>
+                            <a href="edit.html?id=1" class="im-action-btn edit" title="Tahrirlash">✏️</a>
+                            <a href=""
+                               class="im-action-btn delete"
+                               title="O'chirish"
+                               onclick="openDeleteModal({{i.id}}, '{{i.description}}');return false;">
+                               🗑️
+                            </a>
+                        </div>
+                    </div>
+
+                   <!-- Body oxirida qo'yamiz -->
+                    <div id="deleteModal_{{i.id}}" class="im-modal" style="display:none;">
+                        <div class="im-modal-content">
+                            <div class="im-warning-icon" style="font-size: 40px;">⚠️</div>
+                            <h2 style="color: white; margin: 20px 0;">O'chirishni tasdiqlaysizmi?</h2>
+                            <p id="deleteItemName_{{i.id}}" style="color: rgba(255,255,255,0.7); margin-bottom: 30px;"></p>
+
+                            <form id="deleteForm_{{i.id}}" method="post">
+                                {% csrf_token %}
+                                <div class="im-delete-actions">
+                                    <a href="{% url 'delete_login_img_view' i.id %}" class="im-btn im-btn-danger">🗑 Ha, o'chirish</a>
+                                    <button type="button" class="im-btn im-btn-secondary" onclick="closeModal({{i.id}})">Bekor qilish</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                  <script>
+function openDeleteModal(id, name) {
+
+    const modal = document.getElementById("deleteModal_" + id); // OZGARDI: - -> _
+    const form = document.getElementById("deleteForm_" + id);   // OZGARDI: - -> _
+    const itemName = document.getElementById("deleteItemName_" + id); // OZGARDI: - -> _
+
+    modal.style.display = "flex";
+
+    form.action = "delete.html?id=" + id;
+    itemName.textContent = name + " ni o‘chirmoqchimisiz?";
+}
+
+function closeModal(id) {
+    document.getElementById("deleteModal_" + id).style.display = "none"; // OZGARDI: - -> _
+}
+</script>
+    {% endfor %}
+
+</div>
+{% endblock login %}

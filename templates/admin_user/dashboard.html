@@ -1,0 +1,361 @@
+﻿{% extends 'admin_user/base.html' %}
+
+{% block title %}Boshqaruv paneli | LearnCraft Admin{% endblock %}
+
+{% block content %}
+
+<style>
+     :root {
+    --lc-indigo: #6366f1;
+    --lc-rose:   #f43f5e;
+    --lc-amber:  #f59e0b;
+    --lc-cyan:   #06b6d4;
+    --lc-emerald:#10b981;
+    --lc-purple: #a855f7;
+  }
+
+  .lc-eyebrow {
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-size: .68rem;
+    font-weight: 700;
+    color: #94a3b8;
+  }
+
+  /* --- Statistika kartalari: kirish animatsiyasi --- */
+  .lc-kpi {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    padding: .9rem 1rem;
+    background: white;
+    border: 1px solid rgba(148,163,184,.18);
+    border-top: 3px solid var(--accent, #94a3b8);
+    transition: transform .18s ease, box-shadow .18s ease;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: lc-rise .5s ease forwards;
+  }
+  .dark .lc-kpi { background: rgb(30 41 59 / .5); }
+  .lc-kpi:hover { transform: translateY(-3px); box-shadow: 0 12px 26px -14px rgb(0 0 0 / .22); }
+  .lc-kpi .lc-ico { position: absolute; right: -.35rem; bottom: -.55rem; font-size: 2.3rem; opacity: .07; color: var(--accent); }
+  .lc-kpi .lc-num { font-size: 1.4rem; font-weight: 800; letter-spacing: -.02em; }
+
+  @keyframes lc-rise { to { opacity: 1; transform: translateY(0); } }
+  .lc-kpi:nth-child(1){ animation-delay: .02s; }
+  .lc-kpi:nth-child(2){ animation-delay: .08s; }
+  .lc-kpi:nth-child(3){ animation-delay: .14s; }
+  .lc-kpi:nth-child(4){ animation-delay: .20s; }
+  .lc-kpi:nth-child(5){ animation-delay: .26s; }
+  .lc-kpi:nth-child(6){ animation-delay: .32s; }
+
+  /* --- Pastki bo'limlar: skrollda paydo bo'lish --- */
+  .lc-reveal { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s ease; }
+  .lc-reveal.in-view { opacity: 1; transform: none; }
+
+  /* --- So'nggi so'rov qatorlari uchun yengil hover --- */
+  .lc-row:hover { background: rgba(148,163,184,.06); }
+
+  /* --- Live nuqta: kutilayotgan so'rovlar bo'lsa --- */
+  .lc-live { position: relative; display:inline-block; width:7px; height:7px; border-radius:50%; background: var(--lc-rose); }
+  .lc-live::after {
+    content:""; position:absolute; inset:-4px; border-radius:50%;
+    border:1.5px solid var(--lc-rose); animation: lc-ping 1.6s cubic-bezier(0,0,.2,1) infinite;
+  }
+  @keyframes lc-ping { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(1.8); opacity: 0; } }
+
+  /* --- Tezkor havola strelkasi --- */
+  .lc-quick .lc-arrow { transition: transform .18s ease; opacity: .4; }
+  .lc-quick:hover .lc-arrow { transform: translateX(4px); opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lc-kpi, .lc-reveal { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+    .lc-live::after { animation: none !important; }
+  }
+</style>
+<!-- Xush kelibsiz -->
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">Xush kelibsiz, Admin!</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Bugungi sana: {% now "j-F Y" %}</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'admin_courses' %}" class="px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-all">
+            <i class="fas fa-plus mr-1"></i> Yangi kurs
+        </a>
+        <button class="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-medium hover:bg-gray-300 dark:hover:bg-slate-600 transition-all">
+            <i class="fas fa-download mr-1"></i> Hisobot
+        </button>
+    </div>
+</div>
+
+<!-- Statistika kartalari (mobil: 2 ustun, desktop: 6 ustun) -->
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 mb-6">
+    <div class="stat-card neo-card p-3 md:p-4">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="stat-icon w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-base md:text-xl shrink-0">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">O‘quvchilar</p>
+                <p class="text-lg md:text-xl font-bold">{{ total_students|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card neo-card p-3 md:p-4">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="stat-icon w-8 h-8 md:w-10 md:h-10 rounded-xl bg-rose/20 text-rose flex items-center justify-center text-base md:text-xl shrink-0">
+                <i class="fas fa-user-friends"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Ota-onalar</p>
+                <p class="text-lg md:text-xl font-bold">{{ total_parents|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card neo-card p-3 md:p-4">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="stat-icon w-8 h-8 md:w-10 md:h-10 rounded-xl bg-warm/20 text-warm flex items-center justify-center text-base md:text-xl shrink-0">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">O‘qituvchilar</p>
+                <p class="text-lg md:text-xl font-bold">{{ total_teachers|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card neo-card p-3 md:p-4">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="stat-icon w-8 h-8 md:w-10 md:h-10 rounded-xl bg-accent/20 text-accent flex items-center justify-center text-base md:text-xl shrink-0">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Yangi so‘rovlar</p>
+                <p class="text-lg md:text-xl font-bold">{{ pending_requests|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card neo-card p-3 md:p-4">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="stat-icon w-8 h-8 md:w-10 md:h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-base md:text-xl shrink-0">
+                <i class="fas fa-book"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Darslar</p>
+                <p class="text-lg md:text-xl font-bold">{{ total_lessons|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card neo-card p-3 md:p-4">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="stat-icon w-8 h-8 md:w-10 md:h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-base md:text-xl shrink-0">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div>
+                <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Testlar</p>
+                <p class="text-lg md:text-xl font-bold">{{ total_quizzes|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grafiklar (mobil: 1 ustun, desktop: 2/3 nisbatda) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    <div class="neo-card p-4 md:p-5 lg:col-span-2">
+        <h3 class="font-bold text-base md:text-lg mb-3 flex items-center gap-2">
+            <i class="fas fa-chart-line text-primary"></i> Haftalik faollik
+        </h3>
+        <div class="h-56 md:h-72">
+            <canvas id="weeklyActivityChart"></canvas>
+        </div>
+    </div>
+
+    <div class="neo-card p-4 md:p-5">
+        <h3 class="font-bold text-base md:text-lg mb-3 flex items-center gap-2">
+            <i class="fas fa-chart-pie text-accent"></i> Foydalanuvchilar
+        </h3>
+        <div class="h-48 md:h-64">
+            <canvas id="userDistributionChart"></canvas>
+        </div>
+        <div class="mt-3 space-y-1.5">
+            <div class="flex items-center justify-between text-xs md:text-sm">
+                <span class="flex items-center gap-2"><i class="fas fa-circle text-primary text-[8px]"></i> O‘quvchilar</span>
+                <span class="font-semibold">{{ total_students|default:"0" }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs md:text-sm">
+                <span class="flex items-center gap-2"><i class="fas fa-circle text-rose text-[8px]"></i> Ota-onalar</span>
+                <span class="font-semibold">{{ total_parents|default:"0" }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs md:text-sm">
+                <span class="flex items-center gap-2"><i class="fas fa-circle text-warm text-[8px]"></i> O‘qituvchilar</span>
+                <span class="font-semibold">{{ total_teachers|default:"0" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- So'nggi so'rovlar -->
+<div class="neo-card p-4 md:p-5 mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="font-bold text-base md:text-lg flex items-center gap-2">
+            <i class="fas fa-inbox text-primary"></i> So‘nggi ota-ona so‘rovlari
+        </h3>
+        <a href="{% url 'admin_parent_requests' %}" class="text-xs md:text-sm text-primary hover:underline">Barchasi</a>
+    </div>
+    <div class="overflow-x-auto -mx-2 px-2">
+        <table class="w-full text-xs md:text-sm">
+            <thead>
+                <tr class="text-left text-[10px] md:text-xs text-gray-500 uppercase border-b dark:border-slate-700">
+                    <th class="py-2 pr-2 md:pr-4">Ota-ona</th>
+                    <th class="py-2 pr-2 md:pr-4">Talaba</th>
+                    <th class="py-2 pr-2 md:pr-4">Dars</th>
+                    <th class="py-2 pr-2 md:pr-4">Holat</th>
+                    <th class="py-2 pr-2 md:pr-4">Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in latest_requests %}
+                <tr class="border-b dark:border-slate-700/50">
+                    <td class="py-2 pr-2 md:py-3 md:pr-4 font-medium">{{ req.parent.phone_number }}</td>
+                    <td class="py-2 pr-2 md:py-3 md:pr-4">{{ req.student.user.get_full_name }}</td>
+                    <td class="py-2 pr-2 md:py-3 md:pr-4">{{ req.lesson.title }}</td>
+                    <td class="py-2 pr-2 md:py-3 md:pr-4">
+                        {% if req.status == 'pending' %}
+                            <span class="badge bg-yellow-100 text-yellow-700">Kutilmoqda</span>
+                        {% elif req.status == 'approved' %}
+                            <span class="badge bg-green-100 text-green-700">Tasdiqlangan</span>
+                        {% else %}
+                            <span class="badge bg-red-100 text-red-600">Rad etilgan</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-2 pr-2 md:py-3 md:pr-4 text-[10px] md:text-xs">{{ req.created_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="py-4 text-center text-gray-500">So‘rovlar yo‘q</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tezkor havolalar -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4 mb-6">
+    <a href="{% url 'admin_courses' %}" class="neo-card p-4 md:p-5 flex items-center gap-3 hover:shadow-lg transition-all hover:-translate-y-1">
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-xl md:text-2xl shrink-0">
+            <i class="fas fa-book"></i>
+        </div>
+        <div>
+            <p class="font-semibold text-sm md:text-base">Kurslarni boshqarish</p>
+            <p class="text-[10px] md:text-xs text-gray-500">Yangi kurslar qo‘shish</p>
+        </div>
+    </a>
+    <a href="{% url 'admin_tasks' %}" class="neo-card p-4 md:p-5 flex items-center gap-3 hover:shadow-lg transition-all hover:-translate-y-1">
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-accent/20 text-accent flex items-center justify-center text-xl md:text-2xl shrink-0">
+            <i class="fas fa-tasks"></i>
+        </div>
+        <div>
+            <p class="font-semibold text-sm md:text-base">Topshiriqlar</p>
+            <p class="text-[10px] md:text-xs text-gray-500">Vazifalar boshqaruvi</p>
+        </div>
+    </a>
+    <a href="{% url 'admin_quizzes' %}" class="neo-card p-4 md:p-5 flex items-center gap-3 hover:shadow-lg transition-all hover:-translate-y-1">
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-warm/20 text-warm flex items-center justify-center text-xl md:text-2xl shrink-0">
+            <i class="fas fa-question-circle"></i>
+        </div>
+        <div>
+            <p class="font-semibold text-sm md:text-base">Testlar</p>
+            <p class="text-[10px] md:text-xs text-gray-500">Quiz va savollar</p>
+        </div>
+    </a>
+</div>
+
+<!-- Yaqinlashayotgan darslar -->
+<div class="neo-card p-4 md:p-5 mb-6">
+    <h3 class="font-bold text-base md:text-lg mb-3 flex items-center gap-2">
+        <i class="fas fa-calendar-alt text-primary"></i> Yaqinlashayotgan darslar
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        {% for lesson in upcoming_lessons %}
+        <div class="p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-sm font-semibold">{{ lesson.title }}</span>
+                <span class="badge bg-primary/20 text-primary text-[10px]">{{ lesson.date|date:"d.m.Y" }}</span>
+            </div>
+            <p class="text-xs text-gray-500">{{ lesson.course.title }}</p>
+        </div>
+        {% empty %}
+        <p class="col-span-full text-center text-gray-500 py-4">Yaqinlashayotgan darslar yo‘q</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Oxirgi faolliklar -->
+<div class="neo-card p-4 md:p-5">
+    <h3 class="font-bold text-base md:text-lg mb-3 flex items-center gap-2">
+        <i class="fas fa-history text-primary"></i> Oxirgi faolliklar
+    </h3>
+    <div class="space-y-2">
+        {% for activity in recent_activities %}
+        <div class="flex items-center gap-2 md:gap-3 p-2 md:p-3 rounded-xl bg-gray-50 dark:bg-slate-800/50">
+            <i class="fas fa-sign-in-alt text-primary text-sm"></i>
+            <div class="flex-1">
+                <p class="text-xs md:text-sm font-medium">{{ activity.user.phone_number }}</p>
+                <p class="text-[10px] md:text-xs text-gray-500">{{ activity.login_time|date:"d.m.Y H:i" }}</p>
+            </div>
+            <span class="badge bg-primary/20 text-primary text-[10px]">Kirish</span>
+        </div>
+        {% empty %}
+        <p class="text-center text-gray-500 py-4">Faollik yo‘q</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Haftalik faollik
+    if (document.getElementById('weeklyActivityChart')) {
+        new Chart(document.getElementById('weeklyActivityChart'), {
+            type: 'line',
+            data: {
+                labels: ['Dush', 'Sesh', 'Chor', 'Pay', 'Juma', 'Shan', 'Yak'],
+                datasets: [{
+                    label: 'Faol foydalanuvchilar',
+                    data: [120, 150, 180, 170, 200, 220, 210],
+                    borderColor: '#4F46E5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#4F46E5'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // Foydalanuvchilar taqsimoti
+    if (document.getElementById('userDistributionChart')) {
+        new Chart(document.getElementById('userDistributionChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['O‘quvchilar', 'Ota-onalar', 'O‘qituvchilar'],
+                datasets: [{
+                    data: [
+                        {{ total_students|default:"0" }},
+                        {{ total_parents|default:"0" }},
+                        {{ total_teachers|default:"0" }}
+                    ],
+                    backgroundColor: ['#4F46E5', '#F43F5E', '#F59E0B'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+</script>
+{% endblock %}

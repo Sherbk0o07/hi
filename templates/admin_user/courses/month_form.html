@@ -1,0 +1,902 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}
+{% if mode == 'create' %}📅 Yangi oy · {{ course.title }}{% else %}✏️ {{ month.title }} · Tahrirlash{% endif %}
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ROOT
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+    --mf-primary: #6366f1;
+    --mf-primary-dark: #4f46e5;
+    --mf-violet: #8b5cf6;
+    --mf-pink: #ec4899;
+    --mf-emerald: #10b981;
+    --mf-amber: #f59e0b;
+    --mf-cyan: #06b6d4;
+    --mf-header-h: 4rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
+.mf-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    margin: 0;
+    padding: 0.5rem 0 3rem;
+    position: relative;
+    font-size: 14px;
+}
+.mf-page * { box-sizing: border-box; min-width: 0; }
+
+.mf-wrap {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+@media (min-width: 640px) { .mf-wrap { padding-left: 1rem; padding-right: 1rem; } }
+@media (min-width: 1024px) { .mf-wrap { padding-left: 1.25rem; padding-right: 1.25rem; max-width: 1100px; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes mfSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes mfSlideDown { from { transform: translateY(-14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes mfPopIn { 0% { transform: scale(0.85); opacity: 0; } 60% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes mfGradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes mfFloat { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -30px) scale(1.05); } 66% { transform: translate(-30px, 20px) scale(0.95); } }
+@keyframes mfShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+@keyframes mfToastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.anim-up { animation: mfSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-pop { animation: mfPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.d-1 { animation-delay: 0.05s; }
+.d-2 { animation-delay: 0.1s; }
+.d-3 { animation-delay: 0.15s; }
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO — KICHIK
+   ═══════════════════════════════════════════════════════════════ */
+.mf-hero {
+    position: relative;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    background-size: 200% 200%;
+    animation: mfGradientShift 8s ease infinite, mfSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow: 0 20px 44px -14px rgba(99, 102, 241, 0.5);
+    isolation: isolate;
+}
+@media (min-width: 640px) { .mf-hero { padding: 1.75rem 2.25rem; border-radius: 1.5rem; } }
+
+.mf-hero.edit {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+}
+
+.mf-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.12) 0%, transparent 45%);
+    pointer-events: none;
+    z-index: 1;
+}
+.mf-hero::after {
+    content: '';
+    position: absolute;
+    top: -30%; right: -15%;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 70%);
+    animation: mfFloat 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.mf-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+@media (min-width: 640px) { .mf-hero-content { gap: 1.25rem; flex-wrap: nowrap; } }
+
+.mf-hero-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    animation: mfPopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (min-width: 640px) { .mf-hero-icon { width: 64px; height: 64px; border-radius: 16px; font-size: 26px; } }
+.mf-hero-icon:hover { transform: scale(1.1) rotate(-8deg); }
+
+.mf-hero-title {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 1.35rem;
+    line-height: 1.25;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    word-break: break-word;
+    margin-bottom: 0.4rem;
+}
+@media (min-width: 640px) { .mf-hero-title { font-size: 1.75rem; } }
+
+.mf-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.8rem;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+}
+
+.mf-hero-back {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.15rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+@media (min-width: 640px) { .mf-hero-back { display: inline-flex; } }
+.mf-hero-back:hover {
+    background: rgba(255, 255, 255, 0.32);
+    transform: translateX(-3px);
+    color: #fff !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM CARD
+   ═══════════════════════════════════════════════════════════════ */
+.mf-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 4px 24px -12px rgba(15, 23, 42, 0.08);
+    animation: mfSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+.dark .mf-card { background: #0f172a; border-color: #1e293b; }
+
+.mf-card-body {
+    padding: 1.25rem;
+}
+@media (min-width: 640px) { .mf-card-body { padding: 1.75rem 2rem; } }
+@media (min-width: 1024px) { .mf-card-body { padding: 2rem 2.5rem; } }
+
+/* ═══════════════════════════════════════════════════════════════
+   FIELD
+   ═══════════════════════════════════════════════════════════════ */
+.mf-field {
+    margin-bottom: 1.25rem;
+}
+.mf-field:last-of-type { margin-bottom: 0; }
+
+.mf-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+.dark .mf-label { color: #cbd5e1; }
+.mf-label i { font-size: 14px; }
+.mf-label .req {
+    color: #ef4444;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: auto;
+    padding: 0.15rem 0.55rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 999px;
+}
+
+.mf-input, .mf-textarea {
+    width: 100%;
+    padding: 0.85rem 1.1rem;
+    border-radius: 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-family: inherit;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+@media (min-width: 640px) { .mf-input, .mf-textarea { padding: 0.95rem 1.15rem; font-size: 0.95rem; } }
+.dark .mf-input, .dark .mf-textarea {
+    background: #0a0a0f;
+    border-color: #1e293b;
+    color: #f1f5f9;
+}
+.mf-input:hover, .mf-textarea:hover {
+    border-color: #cbd5e1;
+    background: #fafbff;
+}
+.dark .mf-input:hover, .dark .mf-textarea:hover {
+    border-color: #334155;
+    background: #0f0f17;
+}
+.mf-input:focus, .mf-textarea:focus {
+    border-color: var(--mf-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 6px 16px -6px rgba(99, 102, 241, 0.2);
+    background: #fff;
+    transform: translateY(-2px);
+}
+.dark .mf-input:focus, .dark .mf-textarea:focus {
+    background: #0a0a0f;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25);
+}
+.mf-input.is-invalid, .mf-textarea.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+    animation: mfShake 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mf-textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.65;
+}
+@media (min-width: 640px) { .mf-textarea { min-height: 110px; } }
+
+.mf-hint {
+    font-size: 0.73rem;
+    color: #94a3b8;
+    margin-top: 0.45rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    line-height: 1.45;
+}
+.mf-hint i { margin-top: 2px; flex-shrink: 0; }
+
+.mf-error {
+    font-size: 0.76rem;
+    color: #ef4444;
+    margin-top: 0.45rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    padding: 0.55rem 0.8rem;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 8px;
+    border-left: 3px solid #ef4444;
+    animation: mfShake 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Row 2 col */
+.mf-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+@media (min-width: 640px) {
+    .mf-row { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INFO BOX
+   ═══════════════════════════════════════════════════════════════ */
+.mf-info {
+    padding: 0.9rem 1rem;
+    border-radius: 0.875rem;
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border: 1px solid #e0e7ff;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.dark .mf-info {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.06));
+    border-color: rgba(99, 102, 241, 0.25);
+}
+.mf-info-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px -3px rgba(99, 102, 241, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACTION BAR
+   ═══════════════════════════════════════════════════════════════ */
+.mf-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+.dark .mf-actions { background: #0a0a0f; border-color: #1e293b; }
+@media (min-width: 640px) { .mf-actions { padding: 1.15rem 2rem; } }
+@media (min-width: 1024px) { .mf-actions { padding: 1.25rem 2.5rem; } }
+
+.mf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    min-height: 44px;
+}
+@media (min-width: 640px) { .mf-btn { padding: 0.85rem 1.4rem; font-size: 0.9rem; min-height: 46px; } }
+.mf-btn:active { transform: scale(0.97); }
+
+.mf-btn-primary {
+    background: linear-gradient(135deg, var(--mf-primary), var(--mf-primary-dark));
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 8px 22px -6px rgba(99, 102, 241, 0.5);
+    animation: mfGradientShift 5s ease infinite;
+}
+.mf-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -6px rgba(99, 102, 241, 0.6);
+}
+.mf-btn-secondary {
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+.mf-btn-secondary:hover { background: #f1f5f9; transform: translateY(-2px); }
+.dark .mf-btn-secondary { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+.dark .mf-btn-secondary:hover { background: #334155; }
+
+.mf-btn-danger {
+    background: linear-gradient(135deg, #e11d48, #f43f5e);
+    color: #fff;
+    box-shadow: 0 8px 22px -6px rgba(225, 29, 72, 0.5);
+}
+.mf-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -6px rgba(225, 29, 72, 0.6);
+}
+
+.mf-spacer { flex: 1; }
+
+@media (max-width: 640px) {
+    .mf-actions {
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+    .mf-actions .mf-btn { flex: 1; padding: 0.75rem 0.9rem; font-size: 0.85rem; }
+    .mf-spacer { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DELETE EXISTING MONTHS — info
+   ═══════════════════════════════════════════════════════════════ */
+.mf-existing {
+    margin-top: 1.25rem;
+    padding: 1rem 1.15rem;
+    border-radius: 1rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    animation: mfSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+.dark .mf-existing { background: #0f172a; border-color: #1e293b; }
+
+.mf-existing-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.dark .mf-existing-title { color: #f1f5f9; }
+
+.mf-existing-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.mf-existing-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    background: #f1f5f9;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #475569;
+    transition: all 0.25s;
+}
+.dark .mf-existing-item { background: #1e293b; color: #cbd5e1; }
+.mf-existing-item:hover { background: #e0e7ff; color: #4338ca; transform: translateY(-1px); }
+
+.mf-existing-num {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════════ */
+.mf-toasts {
+    position: fixed;
+    top: 5rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+    max-width: 22rem;
+}
+@media (max-width: 640px) {
+    .mf-toasts { left: 0.625rem; right: 0.625rem; max-width: none; }
+}
+.mf-toast {
+    padding: 0.85rem 1rem;
+    border-radius: 0.875rem;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-shadow: 0 14px 34px -8px rgba(0, 0, 0, 0.35);
+    pointer-events: auto;
+    animation: mfToastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.mf-toast i { font-size: 15px; }
+/* ═══════════════════════════════════════════════════════════════
+   FORMA XATOLAR BOX
+   ═══════════════════════════════════════════════════════════════ */
+.mf-errors-box {
+    margin-bottom: 1rem;
+    padding: 1rem 1.15rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    border: 1px solid #fecaca;
+    border-left: 4px solid #ef4444;
+    animation: mfSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dark .mf-errors-box {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(220, 38, 38, 0.06));
+    border-color: rgba(239, 68, 68, 0.3);
+}
+.mf-errors-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 0.6rem;
+}
+.dark .mf-errors-header { color: #fca5a5; }
+.mf-errors-header i { font-size: 18px; }
+.mf-errors-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.mf-errors-list li {
+    font-size: 0.82rem;
+    color: #7f1d1d;
+    padding: 0.4rem 0.75rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    border-left: 3px solid #ef4444;
+}
+.dark .mf-errors-list li {
+    color: #fca5a5;
+    background: rgba(0, 0, 0, 0.2);
+}
+.mf-errors-list li strong {
+    font-weight: 700;
+    margin-right: 0.35rem;
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="mf-page">
+<div class="mf-wrap">
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════════ -->
+<div class="mf-hero {% if mode == 'edit' %}edit{% endif %}">
+    <div class="mf-hero-content">
+        <div class="mf-hero-icon">
+            <i class="fas {% if mode == 'create' %}fa-calendar-plus{% else %}fa-calendar-check{% endif %}"></i>
+        </div>
+        <div class="flex-1 mf-mw0">
+            <div class="mf-hero-badge">
+                <i class="fas {% if mode == 'create' %}fa-plus-circle{% else %}fa-pen-to-square{% endif %}"></i>
+                {% if mode == 'create' %}Yangi oy{% else %}Oyni tahrirlash{% endif %}
+            </div>
+            <h1 class="mf-hero-title">
+                {% if mode == 'create' %}
+                    {% if next_number %}{{ next_number }}-oy qo'shish{% else %}Yangi oy qo'shish{% endif %}
+                {% else %}
+                    {{ month.title }}
+                {% endif %}
+            </h1>
+            <p class="text-white/85 text-sm">
+                <i class="fas fa-book text-xs mr-1"></i>
+                {{ course.title|truncatechars:60 }}
+            </p>
+        </div>
+        <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="mf-hero-back">
+            <i class="fas fa-arrow-left"></i>
+            <span>Orqaga</span>
+        </a>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FORM CARD
+     ═══════════════════════════════════════════════════════════ -->
+<form method="post" id="monthForm" novalidate>
+    {% csrf_token %}
+      {% if form.errors %}
+    <div class="mf-errors-box">
+        <div class="mf-errors-header">
+            <i class="fas fa-circle-exclamation"></i>
+            <span>Formada xatoliklar bor:</span>
+        </div>
+        <ul class="mf-errors-list">
+            {% for field in form %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                    <li>
+                        <strong>{{ field.label }}:</strong> {{ error }}
+                    </li>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="mf-card">
+        <div class="mf-card-body">
+
+            <!-- Info -->
+            {% if mode == 'create' %}
+            <div class="mf-info">
+                <div class="mf-info-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="flex-1 mf-mw0">
+                    <div class="text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-0.5">
+                        Bu {{ next_number }}-oy bo'ladi
+                    </div>
+                    <p class="text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed">
+                        Har oyda 4 hafta va har haftada 3 kun dars o'tiladi. Oyga nom va maqsadlar kiriting.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Title -->
+            <div class="mf-field">
+                <label for="id_title" class="mf-label">
+                    <i class="fas fa-heading" style="color: #6366f1;"></i>
+                    <span>Oy nomi</span>
+                    <span class="req">Majburiy</span>
+                </label>
+                <input type="text"
+                       name="title"
+                       id="id_title"
+                       class="mf-input"
+                       placeholder="Masalan: Python asoslari"
+                       value="{% if month %}{{ month.title }}{% else %}{{ next_number }}-oy{% endif %}"
+                       maxlength="200"
+                       required>
+                <p class="mf-hint">
+                    <i class="fas fa-lightbulb"></i>
+                    Bu oyda nimalar o'rganilishini qisqa nomda ifodalang
+                </p>
+            </div>
+
+            <!-- Description -->
+            <div class="mf-field">
+                <label for="id_description" class="mf-label">
+                    <i class="fas fa-align-left" style="color: #06b6d4;"></i>
+                    <span>Tavsif</span>
+                </label>
+                <textarea name="description"
+                          id="id_description"
+                          class="mf-textarea"
+                          placeholder="Bu oy haqida batafsil ma'lumot...">{% if month %}{{ month.description }}{% endif %}</textarea>
+                <p class="mf-hint">
+                    <i class="fas fa-info-circle"></i>
+                    O'quvchilarga oy haqida qisqacha ma'lumot
+                </p>
+            </div>
+
+            <!-- Goals -->
+            <div class="mf-field">
+                <label for="id_goals" class="mf-label">
+                    <i class="fas fa-bullseye" style="color: #f59e0b;"></i>
+                    <span>Maqsadlar</span>
+                </label>
+                <textarea name="goals"
+                          id="id_goals"
+                          class="mf-textarea"
+                          placeholder="Bu oy oxirida o'quvchi nimalarni biladi...">{% if month %}{{ month.goals }}{% endif %}</textarea>
+                <p class="mf-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Har bir maqsadni yangi qatordan yozing
+                </p>
+            </div>
+
+            <!-- Dates -->
+            <div class="mf-row">
+                <div class="mf-field">
+                    <label for="id_start_date" class="mf-label">
+                        <i class="fas fa-play-circle" style="color: #10b981;"></i>
+                        <span>Boshlanish sanasi</span>
+                    </label>
+                    <input type="date"
+                           name="start_date"
+                           id="id_start_date"
+                           class="mf-input"
+                           value="{% if month and month.start_date %}{{ month.start_date|date:'Y-m-d' }}{% endif %}">
+                    <p class="mf-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Oy qachon boshlanadi
+                    </p>
+                </div>
+
+                <div class="mf-field">
+                    <label for="id_end_date" class="mf-label">
+                        <i class="fas fa-stop-circle" style="color: #f43f5e;"></i>
+                        <span>Tugash sanasi</span>
+                    </label>
+                    <input type="date"
+                           name="end_date"
+                           id="id_end_date"
+                           class="mf-input"
+                           value="{% if month and month.end_date %}{{ month.end_date|date:'Y-m-d' }}{% endif %}">
+                    <p class="mf-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Oy qachon tugaydi
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="mf-actions">
+            <button type="submit" class="mf-btn mf-btn-primary">
+                <i class="fas fa-check-circle"></i>
+                <span>{% if mode == 'create' %}Oy qo'shish{% else %}Saqlash{% endif %}</span>
+            </button>
+
+            <div class="mf-spacer"></div>
+
+            <a href="{% url 'courses_admin:detail' pk=course.pk %}" class="mf-btn mf-btn-secondary">
+                <i class="fas fa-times"></i>
+                <span>Bekor qilish</span>
+            </a>
+        </div>
+    </div>
+</form>
+
+<!-- ═══════════════════════════════════════════════════════════
+     EXISTING MONTHS — reference
+     ═══════════════════════════════════════════════════════════ -->
+{% if existing_months %}
+<div class="mf-existing">
+    <div class="mf-existing-title">
+        <i class="fas fa-list-ul" style="color: #6366f1;"></i>
+        <span>Mavjud oylar ({{ existing_months|length }})</span>
+    </div>
+    <div class="mf-existing-list">
+        {% for m in existing_months %}
+        <span class="mf-existing-item">
+            <span class="mf-existing-num">{{ m.month_number }}</span>
+            <span>{{ m.title|truncatechars:24 }}</span>
+        </span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Toasts -->
+<div id="mfToastWrap" class="mf-toasts"></div>
+
+</div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function mfToast(message, type = 'success') {
+    const icons = {
+        success: 'fa-circle-check',
+        error: 'fa-circle-xmark',
+        info: 'fa-circle-info'
+    };
+    const bgs = {
+        success: 'linear-gradient(135deg,#059669,#10b981)',
+        error: 'linear-gradient(135deg,#e11d48,#f43f5e)',
+        info: 'linear-gradient(135deg,#4f46e5,#6366f1)'
+    };
+    const el = document.createElement('div');
+    el.className = 'mf-toast';
+    el.style.background = bgs[type] || bgs.info;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span class="flex-1">${message}</span>`;
+    document.getElementById('mfToastWrap').appendChild(el);
+
+    setTimeout(() => {
+        el.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(30px)';
+        setTimeout(() => el.remove(), 400);
+    }, 3000);
+}
+window.mfToast = mfToast;
+
+// ═══════════════════════════════════════════════════════════════
+// FORM VALIDATION
+// ═══════════════════════════════════════════════════════════════
+const form = document.getElementById('monthForm');
+const startInput = document.getElementById('id_start_date');
+const endInput = document.getElementById('id_end_date');
+const titleInput = document.getElementById('id_title');
+
+form?.addEventListener('submit', function(e) {
+    let hasError = false;
+
+    // Title tekshirish
+    if (!titleInput.value.trim()) {
+        titleInput.classList.add('is-invalid');
+        mfToast("Oy nomini kiriting!", 'error');
+        hasError = true;
+    }
+
+    // Sana tekshirish
+    if (startInput.value && endInput.value) {
+        if (startInput.value > endInput.value) {
+            endInput.classList.add('is-invalid');
+            mfToast("Tugash sanasi boshlanishdan keyin bo'lishi kerak!", 'error');
+            hasError = true;
+        }
+    }
+
+    if (hasError) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+// Errorlarni olib tashlash
+[titleInput, startInput, endInput].forEach(el => {
+    el?.addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// AUTO-FILL DATES
+// ═══════════════════════════════════════════════════════════════
+{% if mode == 'create' and next_number %}
+// Yangi oy uchun avtomatik sanalar
+(function() {
+    if (startInput.value) return; // allaqachon to'ldirilgan
+
+    // Bugundan boshlab hisoblash
+    const now = new Date();
+    // Keyingi oy uchun boshlanish
+    const start = new Date(now.getFullYear(), now.getMonth() + ({{ next_number }} - 1), 1);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+
+    const fmt = d => d.toISOString().split('T')[0];
+    startInput.value = fmt(start);
+    endInput.value = fmt(end);
+})();
+{% endif %}
+
+// ═══════════════════════════════════════════════════════════════
+// CTRL+S — saqlash
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        form.submit();
+    }
+});
+</script>
+{% endblock %}

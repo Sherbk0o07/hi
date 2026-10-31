@@ -1,0 +1,2659 @@
+{% extends "admin_user/base.html" %}
+{% load static %}
+
+{% block title %}Uyga vazifalar · DIGION{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DIGION LMS — HOMEWORK LIST
+   Professional homework management interface
+   Light + Dark mode + Bulk actions
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --hl-primary: #f59e0b;
+    --hl-primary-dark: #d97706;
+    --hl-orange: #f97316;
+    --hl-green: #10b981;
+    --hl-blue: #3b82f6;
+    --hl-indigo: #6366f1;
+    --hl-violet: #8b5cf6;
+    --hl-pink: #ec4899;
+    --hl-rose: #f43f5e;
+    --hl-red: #ef4444;
+
+    --hl-bg: #f8fafc;
+    --hl-card-bg: #ffffff;
+    --hl-card-border: #e2e8f0;
+    --hl-text: #0f172a;
+    --hl-text-muted: #64748b;
+    --hl-text-dim: #94a3b8;
+    --hl-hover: #f1f5f9;
+    --hl-input-bg: #f8fafc;
+
+    --hl-radius: 14px;
+    --hl-radius-sm: 10px;
+    --hl-radius-lg: 20px;
+
+    --hl-shadow-sm: 0 1px 2px rgba(15,23,42,.05);
+    --hl-shadow: 0 4px 12px -2px rgba(15,23,42,.08);
+    --hl-shadow-md: 0 12px 28px -12px rgba(15,23,42,.15);
+    --hl-shadow-lg: 0 16px 48px -16px rgba(245,158,11,.5);
+    --hl-shadow-xl: 0 24px 64px -20px rgba(245,158,11,.6);
+
+    --hl-transition: all .3s cubic-bezier(.16,1,.3,1);
+    --hl-transition-bounce: all .3s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════════ */
+.dark {
+    --hl-bg: #0f172a;
+    --hl-card-bg: #1e293b;
+    --hl-card-border: #334155;
+    --hl-text: #f1f5f9;
+    --hl-text-muted: #94a3b8;
+    --hl-text-dim: #64748b;
+    --hl-hover: #334155;
+    --hl-input-bg: #1e293b;
+}
+
+.dark .hl-page {
+    background: linear-gradient(180deg, #0f172a 0%, #0b1120 400px);
+}
+
+.dark .hl-toolbar,
+.dark .hl-card,
+.dark .hl-list-item,
+.dark .hl-table-wrap,
+.dark .hl-stat,
+.dark .hl-filters-panel {
+    background: var(--hl-card-bg);
+    border-color: var(--hl-card-border);
+    color: var(--hl-text);
+}
+
+.dark .hl-card-title,
+.dark .hl-list-title,
+.dark .hl-table-title a {
+    color: var(--hl-text);
+}
+
+.dark .hl-card-desc,
+.dark .hl-list-meta,
+.dark .hl-table-sub {
+    color: var(--hl-text-muted);
+}
+
+.dark .hl-search input,
+.dark .hl-select {
+    background: var(--hl-input-bg);
+    color: var(--hl-text);
+    border-color: var(--hl-card-border);
+}
+
+.dark .hl-search input::placeholder {
+    color: var(--hl-text-dim);
+}
+
+.dark .hl-view-switch {
+    background: rgba(51,65,85,.5);
+    border-color: var(--hl-card-border);
+}
+
+.dark .hl-view-btn.active {
+    background: var(--hl-card-bg);
+}
+
+.dark .hl-table thead {
+    background: rgba(15,23,42,.5);
+}
+
+.dark .hl-table tbody tr:hover {
+    background: rgba(245,158,11,.05);
+}
+
+.dark .hl-table td {
+    color: var(--hl-text);
+    border-color: var(--hl-card-border);
+}
+
+.dark .hl-empty {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border-color: var(--hl-card-border);
+}
+
+.dark .hl-empty h3 {
+    color: var(--hl-text);
+}
+
+.dark .hl-page-btn {
+    background: var(--hl-card-bg);
+    border-color: var(--hl-card-border);
+    color: var(--hl-text-muted);
+}
+
+.dark .hl-toast {
+    background: var(--hl-card-bg);
+    border-color: var(--hl-card-border);
+}
+
+.dark .hl-toast-title {
+    color: var(--hl-text);
+}
+
+.dark .hl-filters-head,
+.dark .hl-filters-foot {
+    background: rgba(15,23,42,.4);
+    border-color: var(--hl-card-border);
+}
+
+.dark .hl-filters-head h4 {
+    color: var(--hl-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
+.hl-page {
+    min-height: 100vh;
+    padding-bottom: 80px;
+    background: var(--hl-bg);
+    color: var(--hl-text);
+    transition: background-color .3s, color .3s;
+}
+
+.hl-wrap {
+    max-width: 1560px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+@media (max-width: 768px) {
+    .hl-wrap { padding: 0 16px; }
+}
+
+@media (max-width: 480px) {
+    .hl-wrap { padding: 0 12px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════════ */
+.hl-header {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%);
+    background-size: 200% 200%;
+    animation: hlGradient 12s ease infinite;
+    border-radius: var(--hl-radius-lg);
+    padding: 40px 44px;
+    color: #fff;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--hl-shadow-lg);
+}
+
+@keyframes hlGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.hl-header::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -100px;
+    width: 380px;
+    height: 380px;
+    background: rgba(255,255,255,.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hl-header::after {
+    content: '';
+    position: absolute;
+    bottom: -160px;
+    left: -60px;
+    width: 280px;
+    height: 280px;
+    background: rgba(255,255,255,.08);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hl-header-deco {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    font-size: 180px;
+    color: rgba(255,255,255,.06);
+    transform: rotate(-15deg);
+    pointer-events: none;
+    line-height: 1;
+}
+
+.hl-header > * { position: relative; z-index: 1; }
+
+.hl-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.hl-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.hl-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.hl-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: var(--hl-radius-sm);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--hl-transition-bounce);
+    font-family: inherit;
+    backdrop-filter: blur(12px);
+}
+
+.hl-header-btn:hover {
+    background: rgba(255,255,255,.25);
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+.hl-header-btn.solid {
+    background: #fff;
+    color: var(--hl-primary-dark);
+    border-color: #fff;
+}
+
+.hl-header-btn.solid:hover {
+    background: var(--hl-bg);
+    color: var(--hl-primary-dark);
+}
+
+.hl-header h1 {
+    font-size: 34px;
+    font-weight: 800;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    letter-spacing: -.02em;
+    line-height: 1.15;
+}
+
+.hl-header h1 i { font-size: 30px; opacity: .95; }
+
+.hl-header p {
+    font-size: 15px;
+    opacity: .95;
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.hl-header p strong {
+    font-weight: 800;
+    background: rgba(255,255,255,.2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin: 0 2px;
+}
+
+.hl-header-mini-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,.2);
+}
+
+.hl-header-mini-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hl-header-mini-stat-ico {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.hl-header-mini-stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 3px;
+}
+
+.hl-header-mini-stat-lbl {
+    font-size: 11px;
+    opacity: .8;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: .05em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STATS CARDS
+   ═══════════════════════════════════════════════════════════════ */
+.hl-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.hl-stat {
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    border-radius: var(--hl-radius);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-left: 4px solid var(--c);
+    transition: var(--hl-transition);
+    text-decoration: none;
+    color: inherit;
+    animation: hlUp .5s ease backwards;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.hl-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--hl-shadow-md);
+    border-color: var(--c);
+}
+
+.hl-stat.active {
+    background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000));
+    border-color: transparent;
+    color: #fff;
+}
+
+.hl-stat.active .hl-stat-val,
+.hl-stat.active .hl-stat-lbl,
+.hl-stat.active .hl-stat-arrow {
+    color: #fff;
+}
+
+@keyframes hlUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hl-stat-ico {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    color: #fff;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+
+.hl-stat:hover .hl-stat-ico {
+    transform: scale(1.1) rotate(-8deg);
+}
+
+.hl-stat-body { flex: 1; min-width: 0; }
+
+.hl-stat-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--hl-text);
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.hl-stat-lbl {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--hl-text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hl-stat-arrow {
+    color: var(--hl-text-dim);
+    font-size: 12px;
+    opacity: 0;
+    transition: all .3s;
+    transform: translateX(-6px);
+}
+
+.hl-stat:hover .hl-stat-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOOLBAR
+   ═══════════════════════════════════════════════════════════════ */
+.hl-toolbar {
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    border-radius: var(--hl-radius);
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--hl-shadow-sm);
+}
+
+.hl-toolbar-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.hl-toolbar-row + .hl-toolbar-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--hl-card-border);
+}
+
+.hl-search {
+    position: relative;
+    flex: 1 1 280px;
+    min-width: 220px;
+}
+
+.hl-search i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--hl-text-dim);
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.hl-search input {
+    width: 100%;
+    padding: 11px 40px 11px 42px;
+    border-radius: var(--hl-radius-sm);
+    background: var(--hl-input-bg);
+    border: 1.5px solid var(--hl-card-border);
+    font-size: 13.5px;
+    color: var(--hl-text);
+    outline: none;
+    font-family: inherit;
+    transition: all .2s;
+    font-weight: 500;
+}
+
+.hl-search input:focus {
+    border-color: var(--hl-primary);
+    box-shadow: 0 0 0 4px rgba(245,158,11,.12);
+    background: var(--hl-card-bg);
+}
+
+.hl-select {
+    padding: 11px 36px 11px 14px;
+    border-radius: var(--hl-radius-sm);
+    background: var(--hl-input-bg);
+    border: 1.5px solid var(--hl-card-border);
+    font-size: 13px;
+    color: var(--hl-text);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    min-width: 150px;
+    transition: all .2s;
+    max-width: 220px;
+}
+
+.hl-select:hover {
+    border-color: var(--hl-text-dim);
+}
+
+.hl-select:focus {
+    border-color: var(--hl-primary);
+    box-shadow: 0 0 0 4px rgba(245,158,11,.12);
+}
+
+.hl-select.active {
+    border-color: var(--hl-primary);
+    background-color: rgba(245,158,11,.06);
+    color: var(--hl-primary-dark);
+}
+
+.hl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: var(--hl-radius-sm);
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: var(--hl-transition-bounce);
+    font-family: inherit;
+    min-height: 42px;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.hl-btn-primary {
+    background: linear-gradient(135deg, var(--hl-primary), var(--hl-orange));
+    color: #fff;
+    box-shadow: 0 6px 16px -4px rgba(245,158,11,.5);
+}
+
+.hl-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px -6px rgba(245,158,11,.7);
+    color: #fff;
+}
+
+.hl-btn-secondary {
+    background: var(--hl-hover);
+    color: var(--hl-text-muted);
+    border-color: var(--hl-card-border);
+}
+
+.hl-btn-secondary:hover {
+    background: var(--hl-card-bg);
+    color: var(--hl-text);
+    transform: translateY(-2px);
+}
+
+.hl-btn-ghost {
+    background: transparent;
+    color: var(--hl-text-muted);
+    border-color: transparent;
+}
+
+.hl-btn-ghost:hover {
+    background: var(--hl-hover);
+    color: var(--hl-text);
+}
+
+.hl-btn-danger {
+    background: rgba(239,68,68,.1);
+    color: var(--hl-red);
+    border-color: rgba(239,68,68,.2);
+}
+
+.hl-btn-danger:hover {
+    background: var(--hl-red);
+    color: #fff;
+    border-color: var(--hl-red);
+}
+
+.hl-btn-icon {
+    padding: 11px;
+    min-width: 42px;
+    justify-content: center;
+}
+
+.hl-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIEW SWITCHER
+   ═══════════════════════════════════════════════════════════════ */
+.hl-view-switch {
+    display: inline-flex;
+    background: var(--hl-hover);
+    border-radius: var(--hl-radius-sm);
+    padding: 3px;
+    gap: 2px;
+    border: 1px solid var(--hl-card-border);
+}
+
+.hl-view-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--hl-text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: all .2s;
+    font-family: inherit;
+}
+
+.hl-view-btn:hover {
+    color: var(--hl-text);
+    background: rgba(255,255,255,.3);
+}
+
+.hl-view-btn.active {
+    background: var(--hl-card-bg);
+    color: var(--hl-primary);
+    box-shadow: 0 2px 6px rgba(15,23,42,.08);
+    font-weight: 800;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BULK BAR
+   ═══════════════════════════════════════════════════════════════ */
+.hl-bulk-bar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: var(--hl-radius);
+    margin-bottom: 16px;
+    color: #fff;
+    box-shadow: 0 20px 40px -12px rgba(15,23,42,.4);
+    animation: hlBulkIn .3s cubic-bezier(.16,1,.3,1);
+    flex-wrap: wrap;
+}
+
+.hl-bulk-bar.show { display: flex; }
+
+@keyframes hlBulkIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hl-bulk-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.hl-bulk-info-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: rgba(245,158,11,.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--hl-primary);
+}
+
+.hl-bulk-info strong {
+    color: var(--hl-primary);
+    font-size: 15px;
+    margin: 0 2px;
+}
+
+.hl-bulk-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.hl-bulk-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    transition: all .2s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.hl-bulk-btn:hover {
+    background: rgba(255,255,255,.15);
+    transform: translateY(-2px);
+}
+
+.hl-bulk-btn.publish {
+    background: rgba(16,185,129,.2);
+    border-color: rgba(16,185,129,.4);
+    color: #6ee7b7;
+}
+
+.hl-bulk-btn.publish:hover {
+    background: var(--hl-green);
+    color: #fff;
+}
+
+.hl-bulk-btn.unpublish {
+    background: rgba(100,116,139,.2);
+    border-color: rgba(100,116,139,.4);
+}
+
+.hl-bulk-btn.archive {
+    background: rgba(139,92,246,.2);
+    border-color: rgba(139,92,246,.4);
+    color: #c4b5fd;
+}
+
+.hl-bulk-btn.archive:hover {
+    background: var(--hl-violet);
+    color: #fff;
+}
+
+.hl-bulk-btn.delete {
+    background: rgba(239,68,68,.2);
+    border-color: rgba(239,68,68,.4);
+    color: #fca5a5;
+}
+
+.hl-bulk-btn.delete:hover {
+    background: var(--hl-red);
+    color: #fff;
+}
+
+.hl-bulk-btn.cancel {
+    background: transparent;
+    border-color: rgba(255,255,255,.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARD (GRID VIEW)
+   ═══════════════════════════════════════════════════════════════ */
+.hl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 640px) {
+    .hl-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+.hl-card {
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    border-radius: var(--hl-radius);
+    padding: 18px;
+    transition: var(--hl-transition);
+    position: relative;
+    overflow: hidden;
+    animation: hlUp .5s ease backwards;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hl-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--hl-primary), var(--hl-orange));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform .3s;
+}
+
+.hl-card:hover::before { transform: scaleY(1); }
+
+.hl-card:hover {
+    border-color: rgba(245,158,11,.5);
+    transform: translateY(-3px);
+    box-shadow: var(--hl-shadow-md);
+}
+
+.hl-card.selected {
+    border-color: var(--hl-primary);
+    box-shadow: 0 0 0 3px rgba(245,158,11,.15), var(--hl-shadow-md);
+}
+
+.hl-card-checkbox {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--hl-card-border);
+    background: var(--hl-card-bg);
+    cursor: pointer;
+    accent-color: var(--hl-primary);
+    z-index: 5;
+}
+
+.hl-card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-left: 26px;
+}
+
+.hl-card-ico {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--hl-primary), var(--hl-orange));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 6px 16px -4px rgba(245,158,11,.5);
+    transition: transform .3s;
+}
+
+.hl-card:hover .hl-card-ico {
+    transform: scale(1.08) rotate(-6deg);
+}
+
+.hl-card-ico.type-code { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+.hl-card-ico.type-quiz { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+.hl-card-ico.type-project { background: linear-gradient(135deg, #10b981, #14b8a6); }
+.hl-card-ico.type-essay { background: linear-gradient(135deg, #f59e0b, #f97316); }
+
+.hl-card-body { flex: 1; min-width: 0; }
+
+.hl-card-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--hl-text);
+    line-height: 1.35;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hl-card-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.hl-card-title a:hover { color: var(--hl-primary-dark); }
+
+.hl-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 11.5px;
+    color: var(--hl-text-muted);
+    font-weight: 600;
+}
+
+.hl-card-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hl-card-meta i { color: var(--hl-primary); font-size: 10px; }
+
+.hl-card-desc {
+    font-size: 12.5px;
+    color: var(--hl-text-muted);
+    line-height: 1.55;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hl-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.hl-badge {
+    padding: 4px 10px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.hl-badge i { font-size: 9px; }
+
+.hl-badge.approved { background: rgba(16,185,129,.12); color: #059669; }
+.hl-badge.pending { background: rgba(245,158,11,.12); color: #d97706; }
+.hl-badge.sent { background: rgba(99,102,241,.12); color: #6366f1; }
+.hl-badge.notsent { background: rgba(148,163,184,.15); color: #475569; }
+.hl-badge.points { background: rgba(245,158,11,.12); color: #d97706; }
+.hl-badge.deadline { background: rgba(236,72,153,.12); color: #ec4899; }
+.hl-badge.coins { background: rgba(251,191,36,.18); color: #b45309; }
+.hl-badge.xp { background: rgba(139,92,246,.12); color: #7c3aed; }
+.hl-badge.group-work { background: rgba(20,184,166,.12); color: #0d9488; }
+
+.dark .hl-badge.approved { background: rgba(16,185,129,.2); color: #6ee7b7; }
+.dark .hl-badge.pending { background: rgba(245,158,11,.2); color: #fcd34d; }
+.dark .hl-badge.sent { background: rgba(99,102,241,.2); color: #a5b4fc; }
+.dark .hl-badge.notsent { background: rgba(148,163,184,.2); color: #cbd5e1; }
+.dark .hl-badge.points { background: rgba(245,158,11,.2); color: #fcd34d; }
+.dark .hl-badge.deadline { background: rgba(236,72,153,.2); color: #f9a8d4; }
+.dark .hl-badge.coins { background: rgba(251,191,36,.25); color: #fcd34d; }
+.dark .hl-badge.xp { background: rgba(139,92,246,.2); color: #c4b5fd; }
+
+/* Card Actions */
+.hl-card-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--hl-card-border);
+    margin-top: auto;
+}
+
+.hl-card-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--hl-transition-bounce);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    border: 1.5px solid transparent;
+    line-height: 1;
+    min-height: 36px;
+    white-space: nowrap;
+}
+
+.hl-card-btn i { font-size: 11px; }
+
+.hl-card-btn.primary {
+    background: linear-gradient(135deg, var(--hl-primary), var(--hl-orange));
+    color: #fff;
+    box-shadow: 0 4px 12px -3px rgba(245,158,11,.4);
+}
+
+.hl-card-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -5px rgba(245,158,11,.6);
+    color: #fff;
+}
+
+.hl-card-btn.secondary {
+    background: var(--hl-hover);
+    color: var(--hl-text-muted);
+    border-color: var(--hl-card-border);
+}
+
+.hl-card-btn.secondary:hover {
+    background: var(--hl-card-bg);
+    color: var(--hl-text);
+    transform: translateY(-2px);
+}
+
+.hl-card-btn.danger {
+    background: rgba(239,68,68,.1);
+    color: var(--hl-red);
+    border-color: rgba(239,68,68,.2);
+    flex: 0 0 36px;
+    padding: 9px;
+}
+
+.hl-card-btn.danger:hover {
+    background: var(--hl-red);
+    color: #fff;
+    border-color: var(--hl-red);
+    transform: translateY(-2px);
+}
+
+.hl-card-btn.icon-only {
+    flex: 0 0 36px;
+    padding: 9px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIST VIEW
+   ═══════════════════════════════════════════════════════════════ */
+.hl-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.hl-list-item {
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    border-radius: var(--hl-radius);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--hl-transition);
+    animation: hlUp .5s ease backwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.hl-list-item.selected {
+    border-color: var(--hl-primary);
+    box-shadow: 0 0 0 3px rgba(245,158,11,.15);
+}
+
+.hl-list-item:hover {
+    border-color: rgba(245,158,11,.5);
+    box-shadow: var(--hl-shadow);
+    transform: translateX(3px);
+}
+
+.hl-list-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--hl-card-border);
+    background: var(--hl-card-bg);
+    cursor: pointer;
+    accent-color: var(--hl-primary);
+    flex-shrink: 0;
+}
+
+.hl-list-ico {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--hl-primary), var(--hl-orange));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.hl-list-body { flex: 1; min-width: 0; }
+
+.hl-list-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--hl-text);
+    line-height: 1.3;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hl-list-title a { color: inherit; text-decoration: none; }
+.hl-list-title a:hover { color: var(--hl-primary-dark); }
+
+.hl-list-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 11.5px;
+    color: var(--hl-text-muted);
+    font-weight: 600;
+}
+
+.hl-list-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hl-list-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TABLE VIEW
+   ═══════════════════════════════════════════════════════════════ */
+.hl-table-wrap {
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    border-radius: var(--hl-radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.hl-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.hl-table thead {
+    background: var(--hl-hover);
+    border-bottom: 1.5px solid var(--hl-card-border);
+}
+
+.hl-table th {
+    text-align: left;
+    padding: 14px 16px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--hl-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    white-space: nowrap;
+}
+
+.hl-table tbody tr {
+    border-bottom: 1px solid var(--hl-card-border);
+    transition: background .2s;
+}
+
+.hl-table tbody tr.selected {
+    background: rgba(245,158,11,.06);
+}
+
+.hl-table tbody tr:hover {
+    background: rgba(245,158,11,.03);
+}
+
+.hl-table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--hl-text);
+    vertical-align: middle;
+}
+
+.hl-table-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--hl-card-border);
+    cursor: pointer;
+    accent-color: var(--hl-primary);
+}
+
+.hl-table-title {
+    font-weight: 800;
+    color: var(--hl-text);
+    font-size: 13.5px;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hl-table-title a { color: inherit; text-decoration: none; }
+.hl-table-title a:hover { color: var(--hl-primary-dark); }
+
+.hl-table-ico {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--hl-primary), var(--hl-orange));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.hl-table-actions {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════════════════════════════ */
+.hl-empty {
+    text-align: center;
+    padding: 90px 24px;
+    background: linear-gradient(135deg, var(--hl-bg), var(--hl-card-bg));
+    border: 2px dashed var(--hl-card-border);
+    border-radius: var(--hl-radius-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.hl-empty-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, var(--hl-primary), var(--hl-orange));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    box-shadow: var(--hl-shadow-xl);
+    animation: hlFloat 3s ease-in-out infinite;
+}
+
+@keyframes hlFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.hl-empty h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--hl-text);
+    margin: 0 0 10px;
+}
+
+.hl-empty p {
+    font-size: 14px;
+    color: var(--hl-text-muted);
+    margin: 0 0 24px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.hl-empty-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGINATION
+   ═══════════════════════════════════════════════════════════════ */
+.hl-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+.hl-page-btn {
+    min-width: 42px;
+    height: 42px;
+    padding: 0 14px;
+    border-radius: var(--hl-radius-sm);
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    color: var(--hl-text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    transition: var(--hl-transition-bounce);
+}
+
+.hl-page-btn:hover {
+    background: var(--hl-primary);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-2px);
+}
+
+.hl-page-btn.disabled {
+    opacity: .4;
+    pointer-events: none;
+}
+
+.hl-page-info {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--hl-text-muted);
+    padding: 0 12px;
+}
+
+.hl-page-info strong { color: var(--hl-text); font-weight: 800; }
+
+/* ═══════════════════════════════════════════════════════════════
+   FILTERS PANEL
+   ═══════════════════════════════════════════════════════════════ */
+.hl-filters-panel {
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    border-radius: var(--hl-radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    display: none;
+}
+
+.hl-filters-panel.open {
+    display: block;
+    animation: hlUp .3s ease;
+}
+
+.hl-filters-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--hl-card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--hl-hover);
+}
+
+.hl-filters-head h4 {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--hl-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+}
+
+.hl-filters-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.hl-filter-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--hl-text-muted);
+    margin-bottom: 8px;
+}
+
+.hl-filter-group .hl-select {
+    width: 100%;
+    max-width: none;
+}
+
+.hl-filters-foot {
+    padding: 16px 20px;
+    border-top: 1px solid var(--hl-card-border);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    background: var(--hl-hover);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════════ */
+.hl-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.hl-toast {
+    background: var(--hl-card-bg);
+    border: 1.5px solid var(--hl-card-border);
+    border-radius: var(--hl-radius-sm);
+    padding: 14px 18px;
+    box-shadow: 0 20px 40px -12px rgba(15,23,42,.25);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+    max-width: 400px;
+    animation: hlToastIn .4s cubic-bezier(.16,1,.3,1);
+    pointer-events: auto;
+    border-left: 4px solid var(--hl-primary);
+}
+
+.hl-toast.success { border-left-color: var(--hl-green); }
+.hl-toast.error { border-left-color: var(--hl-red); }
+.hl-toast.info { border-left-color: var(--hl-blue); }
+
+.hl-toast-ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.hl-toast.success .hl-toast-ico { background: rgba(16,185,129,.12); color: var(--hl-green); }
+.hl-toast.error .hl-toast-ico { background: rgba(239,68,68,.12); color: var(--hl-red); }
+.hl-toast.info .hl-toast-ico { background: rgba(59,130,246,.12); color: var(--hl-blue); }
+
+.hl-toast-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--hl-text);
+    margin-bottom: 2px;
+}
+
+.hl-toast-msg {
+    font-size: 12px;
+    color: var(--hl-text-muted);
+    line-height: 1.4;
+}
+
+@keyframes hlToastIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL
+   ═══════════════════════════════════════════════════════════════ */
+.hl-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,.6);
+    backdrop-filter: blur(4px);
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.hl-modal-overlay.show {
+    display: flex;
+    animation: hlFadeIn .2s ease;
+}
+
+@keyframes hlFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.hl-modal {
+    background: var(--hl-card-bg);
+    border-radius: var(--hl-radius-lg);
+    padding: 28px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,.4);
+    animation: hlModalIn .3s cubic-bezier(.16,1,.3,1);
+}
+
+@keyframes hlModalIn {
+    from { opacity: 0; transform: scale(.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.hl-modal-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: rgba(239,68,68,.12);
+    color: var(--hl-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 20px;
+}
+
+.hl-modal h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--hl-text);
+    text-align: center;
+    margin: 0 0 10px;
+}
+
+.hl-modal p {
+    font-size: 14px;
+    color: var(--hl-text-muted);
+    text-align: center;
+    margin: 0 0 24px;
+    line-height: 1.5;
+}
+
+.hl-modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.hl-modal-actions .hl-btn {
+    flex: 1;
+    justify-content: center;
+}
+
+.hl-btn-danger-solid {
+    background: var(--hl-red);
+    color: #fff;
+    box-shadow: 0 4px 12px -3px rgba(239,68,68,.4);
+}
+
+.hl-btn-danger-solid:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .hl-header { padding: 32px 28px; }
+    .hl-header h1 { font-size: 28px; }
+    .hl-header-deco { font-size: 130px; }
+}
+
+@media (max-width: 768px) {
+    .hl-header { padding: 24px 20px; border-radius: 16px; }
+    .hl-header h1 { font-size: 22px; gap: 10px; }
+    .hl-header h1 i { font-size: 22px; }
+    .hl-header p { font-size: 13px; }
+    .hl-header-deco { display: none; }
+    .hl-header-mini-stats { gap: 14px; }
+    .hl-header-mini-stat-ico { width: 34px; height: 34px; font-size: 13px; }
+    .hl-header-mini-stat-val { font-size: 16px; }
+
+    .hl-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .hl-stat { padding: 14px; gap: 10px; }
+    .hl-stat-ico { width: 38px; height: 38px; font-size: 15px; }
+    .hl-stat-val { font-size: 20px; }
+
+    .hl-toolbar { padding: 12px; }
+    .hl-select { min-width: 130px; max-width: 180px; font-size: 12px; }
+
+    .hl-grid { grid-template-columns: 1fr; gap: 12px; }
+
+    .hl-table-wrap { overflow-x: auto; }
+    .hl-table { min-width: 720px; }
+
+    .hl-list-item { padding: 12px; gap: 12px; flex-wrap: wrap; }
+    .hl-list-actions { width: 100%; justify-content: flex-end; }
+
+    .hl-bulk-bar { flex-direction: column; align-items: stretch; }
+    .hl-bulk-info { justify-content: center; }
+    .hl-bulk-actions { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+    .hl-stats { grid-template-columns: 1fr; }
+    .hl-header-top { flex-direction: column; align-items: flex-start; }
+    .hl-header-actions { width: 100%; }
+    .hl-header-btn { flex: 1; justify-content: center; }
+    .hl-empty { padding: 60px 18px; }
+    .hl-empty-icon { width: 80px; height: 80px; font-size: 32px; }
+    .hl-empty h3 { font-size: 18px; }
+    .hl-pagination { gap: 5px; }
+    .hl-page-btn { min-width: 36px; height: 36px; padding: 0 10px; font-size: 12px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════════════════ */
+.hl-hidden { display: none !important; }
+
+.hl-page ::-webkit-scrollbar { width: 8px; height: 8px; }
+.hl-page ::-webkit-scrollbar-track { background: var(--hl-hover); border-radius: 4px; }
+.hl-page ::-webkit-scrollbar-thumb { background: var(--hl-text-dim); border-radius: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hl-page">
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hl-wrap">
+    <div class="hl-header">
+        <div class="hl-header-deco">
+            <i class="fas fa-clipboard-check"></i>
+        </div>
+
+        <div class="hl-header-top">
+            <div class="hl-header-badge">
+                <i class="fas fa-bolt"></i>
+                Uyga vazifalar boshqaruvi
+            </div>
+            <div class="hl-header-actions">
+                <a href="{% url 'courses_admin:lesson_list' %}" class="hl-header-btn">
+                    <i class="fas fa-book-open"></i>
+                    Darslar
+                </a>
+                <button type="button" class="hl-header-btn" onclick="toggleTheme()">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                    Rejim
+                </button>
+                <a href="{% url 'courses_admin:list' %}" class="hl-header-btn solid">
+                    <i class="fas fa-graduation-cap"></i>
+                    Kurslar
+                </a>
+            </div>
+        </div>
+
+        <h1>
+            <i class="fas fa-list-check"></i>
+            Uyga vazifalar
+        </h1>
+
+        <p>
+            Jami <strong>{{ stats.total }}</strong> ta vazifa ·
+            <strong>{{ stats.approved }}</strong> tasdiqlangan ·
+            <strong>{{ stats.pending }}</strong> kutilmoqda
+        </p>
+
+        <div class="hl-header-mini-stats">
+            <div class="hl-header-mini-stat">
+                <div class="hl-header-mini-stat-ico"><i class="fas fa-list"></i></div>
+                <div>
+                    <div class="hl-header-mini-stat-val">{{ stats.total }}</div>
+                    <div class="hl-header-mini-stat-lbl">Jami</div>
+                </div>
+            </div>
+            <div class="hl-header-mini-stat">
+                <div class="hl-header-mini-stat-ico"><i class="fas fa-check"></i></div>
+                <div>
+                    <div class="hl-header-mini-stat-val">{{ stats.approved }}</div>
+                    <div class="hl-header-mini-stat-lbl">Tasdiqlangan</div>
+                </div>
+            </div>
+            <div class="hl-header-mini-stat">
+                <div class="hl-header-mini-stat-ico"><i class="fas fa-paper-plane"></i></div>
+                <div>
+                    <div class="hl-header-mini-stat-val">{{ stats.sent }}</div>
+                    <div class="hl-header-mini-stat-lbl">Yuborilgan</div>
+                </div>
+            </div>
+            <div class="hl-header-mini-stat">
+                <div class="hl-header-mini-stat-ico"><i class="fas fa-hourglass-half"></i></div>
+                <div>
+                    <div class="hl-header-mini-stat-val">{{ stats.pending }}</div>
+                    <div class="hl-header-mini-stat-lbl">Kutilmoqda</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hl-wrap">
+
+<!-- ═══════════════════════════════════════════════════════════
+     STATS CARDS
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hl-stats">
+    <a href="?" class="hl-stat {% if not status_filter %}active{% endif %}" style="--c: #6366f1;">
+        <div class="hl-stat-ico" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+            <i class="fas fa-list"></i>
+        </div>
+        <div class="hl-stat-body">
+            <div class="hl-stat-val">{{ stats.total }}</div>
+            <div class="hl-stat-lbl">Jami</div>
+        </div>
+        <i class="fas fa-arrow-right hl-stat-arrow"></i>
+    </a>
+
+    <a href="?status=approved" class="hl-stat {% if status_filter == 'approved' %}active{% endif %}" style="--c: #10b981;">
+        <div class="hl-stat-ico" style="background: linear-gradient(135deg, #10b981, #14b8a6);">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="hl-stat-body">
+            <div class="hl-stat-val">{{ stats.approved }}</div>
+            <div class="hl-stat-lbl">Tasdiqlangan</div>
+        </div>
+        <i class="fas fa-arrow-right hl-stat-arrow"></i>
+    </a>
+
+    <a href="?status=pending" class="hl-stat {% if status_filter == 'pending' %}active{% endif %}" style="--c: #f59e0b;">
+        <div class="hl-stat-ico" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="hl-stat-body">
+            <div class="hl-stat-val">{{ stats.pending }}</div>
+            <div class="hl-stat-lbl">Kutilmoqda</div>
+        </div>
+        <i class="fas fa-arrow-right hl-stat-arrow"></i>
+    </a>
+
+    <a href="?status=sent" class="hl-stat {% if status_filter == 'sent' %}active{% endif %}" style="--c: #ec4899;">
+        <div class="hl-stat-ico" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">
+            <i class="fas fa-paper-plane"></i>
+        </div>
+        <div class="hl-stat-body">
+            <div class="hl-stat-val">{{ stats.sent }}</div>
+            <div class="hl-stat-lbl">Yuborilgan</div>
+        </div>
+        <i class="fas fa-arrow-right hl-stat-arrow"></i>
+    </a>
+
+    <a href="?status=not_sent" class="hl-stat {% if status_filter == 'not_sent' %}active{% endif %}" style="--c: #64748b;">
+        <div class="hl-stat-ico" style="background: linear-gradient(135deg, #64748b, #475569);">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="hl-stat-body">
+            <div class="hl-stat-val">{{ stats.not_sent }}</div>
+            <div class="hl-stat-lbl">Yuborilmagan</div>
+        </div>
+        <i class="fas fa-arrow-right hl-stat-arrow"></i>
+    </a>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOOLBAR
+     ═══════════════════════════════════════════════════════════ -->
+<form method="get" id="hlFilterForm">
+<div class="hl-toolbar">
+    <div class="hl-toolbar-row">
+        <div class="hl-search">
+            <i class="fas fa-search"></i>
+            <input type="text" name="q" value="{{ search }}"
+                   placeholder="Vazifa, dars yoki kurs nomi bo'yicha qidirish..."
+                   autocomplete="off" id="hlSearchInput">
+            {% if search %}
+            <a href="{% url 'courses_admin:homework_list' %}" class="hl-search-clear">
+                <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="hl-btn hl-btn-primary">
+            <i class="fas fa-search"></i>
+            Qidirish
+        </button>
+
+        <button type="button" class="hl-btn hl-btn-secondary" onclick="toggleFilters()">
+            <i class="fas fa-sliders-h"></i>
+            Filtrlar
+        </button>
+
+        <div class="hl-view-switch">
+            <button type="button" class="hl-view-btn active" data-view="grid" onclick="setView('grid')" title="Karta">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button type="button" class="hl-view-btn" data-view="list" onclick="setView('list')" title="Ro'yxat">
+                <i class="fas fa-list"></i>
+            </button>
+            <button type="button" class="hl-view-btn" data-view="table" onclick="setView('table')" title="Jadval">
+                <i class="fas fa-table"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="hl-toolbar-row">
+        <select name="course" class="hl-select {% if course_filter %}active{% endif %}" onchange="this.form.submit()">
+            <option value="">📚 Barcha kurslar</option>
+            {% for c in courses %}
+            <option value="{{ c.pk }}" {% if course_filter == c.pk|stringformat:"s" %}selected{% endif %}>
+                {{ c.title|truncatechars:35 }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="status" class="hl-select {% if status_filter %}active{% endif %}" onchange="this.form.submit()">
+            <option value="">🔵 Barcha holatlar</option>
+            <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>✅ Tasdiqlangan</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>⏳ Kutilmoqda</option>
+            <option value="sent" {% if status_filter == 'sent' %}selected{% endif %}>📤 Yuborilgan</option>
+            <option value="not_sent" {% if status_filter == 'not_sent' %}selected{% endif %}>🕐 Yuborilmagan</option>
+        </select>
+
+        <select name="type" class="hl-select {% if type_filter %}active{% endif %}" onchange="this.form.submit()">
+            <option value="">🏷️ Barcha turlar</option>
+            {% for value, label in type_choices %}
+            <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="sort" class="hl-select {% if sort != '-created_at' %}active{% endif %}" onchange="this.form.submit()">
+            <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>🕐 Eng yangi</option>
+            <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>🕐 Eng eski</option>
+            <option value="title" {% if sort == 'title' %}selected{% endif %}>🔤 A-Z</option>
+            <option value="-title" {% if sort == '-title' %}selected{% endif %}>🔤 Z-A</option>
+            <option value="deadline_days" {% if sort == 'deadline_days' %}selected{% endif %}>⏱ Muddat ↑</option>
+            <option value="-deadline_days" {% if sort == '-deadline_days' %}selected{% endif %}>⏱ Muddat ↓</option>
+        </select>
+
+        {% if search or course_filter or status_filter or type_filter or sort != '-created_at' %}
+        <a href="{% url 'courses_admin:homework_list' %}" class="hl-btn hl-btn-secondary">
+            <i class="fas fa-times"></i>
+            Tozalash
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ADVANCED FILTERS -->
+<div class="hl-filters-panel" id="hlFiltersPanel">
+    <div class="hl-filters-head">
+        <h4><i class="fas fa-sliders-h"></i> Kengaytirilgan filtrlar</h4>
+        <button type="button" class="hl-bulk-btn cancel" onclick="toggleFilters()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="hl-filters-body">
+        <div class="hl-filter-group">
+            <label>Kurs</label>
+            <select name="course" class="hl-select">
+                <option value="">Barcha kurslar</option>
+                {% for c in courses %}
+                <option value="{{ c.pk }}" {% if course_filter == c.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ c.title|truncatechars:40 }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="hl-filter-group">
+            <label>Holat</label>
+            <select name="status" class="hl-select">
+                <option value="">Barcha holatlar</option>
+                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Tasdiqlangan</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Kutilmoqda</option>
+                <option value="sent" {% if status_filter == 'sent' %}selected{% endif %}>Yuborilgan</option>
+                <option value="not_sent" {% if status_filter == 'not_sent' %}selected{% endif %}>Yuborilmagan</option>
+            </select>
+        </div>
+        <div class="hl-filter-group">
+            <label>Turi</label>
+            <select name="type" class="hl-select">
+                <option value="">Barcha turlar</option>
+                {% for value, label in type_choices %}
+                <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="hl-filter-group">
+            <label>Tartiblash</label>
+            <select name="sort" class="hl-select">
+                <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Eng yangi</option>
+                <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Eng eski</option>
+                <option value="title" {% if sort == 'title' %}selected{% endif %}>A-Z</option>
+                <option value="-title" {% if sort == '-title' %}selected{% endif %}>Z-A</option>
+            </select>
+        </div>
+        <div class="hl-filter-group">
+            <label>Sahifada</label>
+            <select name="per_page" class="hl-select">
+                <option value="20" {% if per_page == 20 %}selected{% endif %}>20 ta</option>
+                <option value="40" {% if per_page == 40 %}selected{% endif %}>40 ta</option>
+                <option value="80" {% if per_page == 80 %}selected{% endif %}>80 ta</option>
+                <option value="100" {% if per_page == 100 %}selected{% endif %}>100 ta</option>
+            </select>
+        </div>
+    </div>
+    <div class="hl-filters-foot">
+        <a href="{% url 'courses_admin:homework_list' %}" class="hl-btn hl-btn-secondary">
+            <i class="fas fa-undo"></i>
+            Tozalash
+        </a>
+        <button type="submit" class="hl-btn hl-btn-primary">
+            <i class="fas fa-check"></i>
+            Qo'llash
+        </button>
+    </div>
+</div>
+</form>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BULK ACTIONS BAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hl-bulk-bar" id="hlBulkBar">
+    <div class="hl-bulk-info">
+        <div class="hl-bulk-info-icon">
+            <i class="fas fa-check-double"></i>
+        </div>
+        <span>Tanlandi: <strong id="hlBulkCount">0</strong> ta vazifa</span>
+    </div>
+    <div class="hl-bulk-actions">
+        <button type="button" class="hl-bulk-btn publish" onclick="bulkAction('approve')">
+            <i class="fas fa-check"></i> Tasdiqlash
+        </button>
+        <button type="button" class="hl-bulk-btn unpublish" onclick="bulkAction('unapprove')">
+            <i class="fas fa-times"></i> Bekor qilish
+        </button>
+        <button type="button" class="hl-bulk-btn archive" onclick="bulkAction('archive')">
+            <i class="fas fa-box-archive"></i> Arxivlash
+        </button>
+        <button type="button" class="hl-bulk-btn delete" onclick="bulkAction('delete')">
+            <i class="fas fa-trash"></i> O'chirish
+        </button>
+        <button type="button" class="hl-bulk-btn cancel" onclick="clearSelection()">
+            <i class="fas fa-xmark"></i> Bekor
+        </button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     RESULTS BAR
+     ═══════════════════════════════════════════════════════════ -->
+{% if homeworks %}
+<div class="hl-toolbar" style="padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--hl-text-muted);">
+        <i class="fas fa-clipboard-list" style="color: var(--hl-primary);"></i>
+        <span>Topildi: <strong style="color: var(--hl-text);">{{ page_obj.paginator.count }}</strong> ta vazifa</span>
+        {% if is_paginated %}
+        <span style="color: var(--hl-text-dim);">· {{ page_obj.number }}-sahifa / {{ page_obj.paginator.num_pages }}</span>
+        {% endif %}
+    </div>
+    <div style="display: flex; gap: 6px;">
+        <button type="button" class="hl-btn hl-btn-ghost hl-btn-icon" title="Hammasini tanlash" onclick="selectAll()">
+            <i class="fas fa-check-double"></i>
+        </button>
+        <button type="button" class="hl-btn hl-btn-ghost hl-btn-icon" title="Yangilash" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     GRID VIEW
+     ═══════════════════════════════════════════════════════════ -->
+{% if homeworks %}
+<div class="hl-grid" id="hlGridView">
+    {% for hw in homeworks %}
+    <div class="hl-card" data-hw-id="{{ hw.pk }}" style="animation-delay: .0{{ forloop.counter }}s;">
+        <input type="checkbox" class="hl-card-checkbox hw-checkbox" value="{{ hw.pk }}" onchange="onCheckboxChange(this)">
+
+        <div class="hl-card-head">
+            <div class="hl-card-ico type-{{ hw.homework_type|default:'practice' }}">
+                {% if hw.homework_type == 'code' %}<i class="fas fa-code"></i>
+                {% elif hw.homework_type == 'quiz' %}<i class="fas fa-question-circle"></i>
+                {% elif hw.homework_type == 'project' %}<i class="fas fa-project-diagram"></i>
+                {% elif hw.homework_type == 'essay' %}<i class="fas fa-file-alt"></i>
+                {% else %}<i class="fas fa-clipboard-check"></i>{% endif %}
+            </div>
+            <div class="hl-card-body">
+                <div class="hl-card-title">
+                    <a href="{% url 'courses_admin:homework_form' lesson_pk=hw.lesson.pk %}">
+                        {{ hw.title|truncatechars:80 }}
+                    </a>
+                </div>
+                <div class="hl-card-meta">
+                    <span><i class="fas fa-graduation-cap"></i> {{ hw.lesson.course.title|truncatechars:22 }}</span>
+                    <span><i class="fas fa-book"></i> {{ hw.lesson.lesson_number }}-dars</span>
+                </div>
+            </div>
+        </div>
+
+        {% if hw.short_description %}
+        <p class="hl-card-desc">{{ hw.short_description|truncatechars:140 }}</p>
+        {% endif %}
+
+        <div class="hl-card-badges">
+            {% if hw.is_approved %}
+            <span class="hl-badge approved"><i class="fas fa-check"></i> Tasdiqlangan</span>
+            {% else %}
+            <span class="hl-badge pending"><i class="fas fa-hourglass"></i> Kutilmoqda</span>
+            {% endif %}
+
+            {% if hw.is_sent %}
+            <span class="hl-badge sent"><i class="fas fa-paper-plane"></i> Yuborilgan</span>
+            {% else %}
+            <span class="hl-badge notsent"><i class="fas fa-clock"></i> Yuborilmagan</span>
+            {% endif %}
+
+            <span class="hl-badge points"><i class="fas fa-star"></i> {{ hw.max_score|default:100 }}</span>
+
+            {% if hw.deadline_days %}
+            <span class="hl-badge deadline"><i class="fas fa-clock"></i> {{ hw.deadline_days }} kun</span>
+            {% endif %}
+
+            {% if hw.coins_reward %}
+            <span class="hl-badge coins"><i class="fas fa-coins"></i> {{ hw.coins_reward }}</span>
+            {% endif %}
+
+            {% if hw.xp_reward %}
+            <span class="hl-badge xp"><i class="fas fa-bolt"></i> {{ hw.xp_reward }} XP</span>
+            {% endif %}
+        </div>
+
+        <div class="hl-card-actions">
+            <a href="{% url 'courses_admin:homework_form' lesson_pk=hw.lesson.pk %}" class="hl-card-btn primary">
+                <i class="fas fa-pen"></i>
+                Tahrirlash
+            </a>
+            <a href="{% url 'courses_admin:lesson_detail' pk=hw.lesson.pk %}" class="hl-card-btn secondary icon-only" title="Darsga">
+                <i class="fas fa-book"></i>
+            </a>
+            <button type="button" class="hl-card-btn danger" title="O'chirish" onclick="deleteHomework({{ hw.pk }}, '{{ hw.title|escapejs }}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     LIST VIEW
+     ═══════════════════════════════════════════════════════════ -->
+{% if homeworks %}
+<div class="hl-list hl-hidden" id="hlListView">
+    {% for hw in homeworks %}
+    <div class="hl-list-item" data-hw-id="{{ hw.pk }}">
+        <input type="checkbox" class="hl-list-checkbox hw-checkbox" value="{{ hw.pk }}" onchange="onCheckboxChange(this)">
+
+        <div class="hl-list-ico type-{{ hw.homework_type|default:'practice' }}">
+            {% if hw.homework_type == 'code' %}<i class="fas fa-code"></i>
+            {% elif hw.homework_type == 'quiz' %}<i class="fas fa-question-circle"></i>
+            {% elif hw.homework_type == 'project' %}<i class="fas fa-project-diagram"></i>
+            {% else %}<i class="fas fa-clipboard-check"></i>{% endif %}
+        </div>
+
+        <div class="hl-list-body">
+            <div class="hl-list-title">
+                <a href="{% url 'courses_admin:homework_form' lesson_pk=hw.lesson.pk %}">
+                    {{ hw.title|truncatechars:90 }}
+                </a>
+            </div>
+            <div class="hl-list-meta">
+                <span><i class="fas fa-graduation-cap"></i> {{ hw.lesson.course.title|truncatechars:30 }}</span>
+                <span><i class="fas fa-book"></i> {{ hw.lesson.lesson_number }}-dars</span>
+                <span><i class="fas fa-star"></i> {{ hw.max_score|default:100 }} ball</span>
+                <span><i class="fas fa-clock"></i> {{ hw.deadline_days|default:"—" }} kun</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 6px;">
+            {% if hw.is_approved %}
+            <span class="hl-badge approved"><i class="fas fa-check"></i></span>
+            {% else %}
+            <span class="hl-badge pending"><i class="fas fa-hourglass"></i></span>
+            {% endif %}
+
+            {% if hw.is_sent %}
+            <span class="hl-badge sent"><i class="fas fa-paper-plane"></i></span>
+            {% else %}
+            <span class="hl-badge notsent"><i class="fas fa-clock"></i></span>
+            {% endif %}
+        </div>
+
+        <div class="hl-list-actions">
+            <a href="{% url 'courses_admin:homework_form' lesson_pk=hw.lesson.pk %}" class="hl-card-btn primary icon-only" title="Tahrirlash">
+                <i class="fas fa-pen"></i>
+            </a>
+            <a href="{% url 'courses_admin:lesson_detail' pk=hw.lesson.pk %}" class="hl-card-btn secondary icon-only" title="Darsga">
+                <i class="fas fa-book"></i>
+            </a>
+            <button type="button" class="hl-card-btn danger" title="O'chirish" onclick="deleteHomework({{ hw.pk }}, '{{ hw.title|escapejs }}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     TABLE VIEW
+     ═══════════════════════════════════════════════════════════ -->
+{% if homeworks %}
+<div class="hl-table-wrap hl-hidden" id="hlTableView">
+    <table class="hl-table">
+        <thead>
+            <tr>
+                <th style="width: 40px;">
+                    <input type="checkbox" class="hl-table-checkbox" id="hlSelectAllTable" onchange="selectAllTable(this)">
+                </th>
+                <th>Vazifa</th>
+                <th>Kurs / Dars</th>
+                <th style="text-align: center;">Holat</th>
+                <th style="text-align: center;">Yuborish</th>
+                <th style="text-align: center;">Ball</th>
+                <th style="text-align: center;">Muddat</th>
+                <th style="text-align: right;">Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for hw in homeworks %}
+            <tr data-hw-id="{{ hw.pk }}">
+                <td>
+                    <input type="checkbox" class="hl-table-checkbox hw-checkbox" value="{{ hw.pk }}" onchange="onCheckboxChange(this)">
+                </td>
+                <td>
+                    <div class="hl-table-title">
+                        <div class="hl-table-ico type-{{ hw.homework_type|default:'practice' }}">
+                            {% if hw.homework_type == 'code' %}<i class="fas fa-code"></i>
+                            {% elif hw.homework_type == 'quiz' %}<i class="fas fa-question-circle"></i>
+                            {% elif hw.homework_type == 'project' %}<i class="fas fa-project-diagram"></i>
+                            {% else %}<i class="fas fa-clipboard-check"></i>{% endif %}
+                        </div>
+                        <div>
+                            <a href="{% url 'courses_admin:homework_form' lesson_pk=hw.lesson.pk %}">
+                                {{ hw.title|truncatechars:50 }}
+                            </a>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div style="font-weight: 700; color: var(--hl-text); font-size: 12.5px;">
+                        {{ hw.lesson.course.title|truncatechars:28 }}
+                    </div>
+                    <div style="font-size: 11px; color: var(--hl-text-dim); margin-top: 2px;">
+                        {{ hw.lesson.lesson_number }}-dars
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    {% if hw.is_approved %}
+                    <span class="hl-badge approved"><i class="fas fa-check"></i> OK</span>
+                    {% else %}
+                    <span class="hl-badge pending"><i class="fas fa-hourglass"></i> Kut</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    {% if hw.is_sent %}
+                    <span class="hl-badge sent"><i class="fas fa-paper-plane"></i> Ha</span>
+                    {% else %}
+                    <span class="hl-badge notsent"><i class="fas fa-clock"></i> Yo'q</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <span class="hl-badge points"><i class="fas fa-star"></i> {{ hw.max_score|default:100 }}</span>
+                </td>
+                <td style="text-align: center;">
+                    <span class="hl-badge deadline"><i class="fas fa-clock"></i> {{ hw.deadline_days|default:"—" }}</span>
+                </td>
+                <td>
+                    <div class="hl-table-actions">
+                        <a href="{% url 'courses_admin:homework_form' lesson_pk=hw.lesson.pk %}" class="hl-card-btn primary icon-only" title="Tahrirlash">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <button type="button" class="hl-card-btn danger" title="O'chirish" onclick="deleteHomework({{ hw.pk }}, '{{ hw.title|escapejs }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     EMPTY STATE
+     ═══════════════════════════════════════════════════════════ -->
+{% if not homeworks %}
+<div class="hl-empty">
+    <div class="hl-empty-icon">
+        <i class="fas fa-clipboard-check"></i>
+    </div>
+    <h3>
+        {% if search or course_filter or status_filter or type_filter %}
+        Vazifa topilmadi
+        {% else %}
+        Hali vazifalar yo'q
+        {% endif %}
+    </h3>
+    <p>
+        {% if search or course_filter or status_filter or type_filter %}
+        Filtr shartlariga mos vazifa topilmadi.
+        {% else %}
+        Uyga vazifalar dars sahifasida qo'shiladi.
+        {% endif %}
+    </p>
+    <div class="hl-empty-actions">
+        {% if search or course_filter or status_filter or type_filter %}
+        <a href="{% url 'courses_admin:homework_list' %}" class="hl-btn hl-btn-primary">
+            <i class="fas fa-times"></i> Tozalash
+        </a>
+        {% else %}
+        <a href="{% url 'courses_admin:lesson_list' %}" class="hl-btn hl-btn-primary">
+            <i class="fas fa-book-open"></i> Darslarga
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGINATION
+     ═══════════════════════════════════════════════════════════ -->
+{% if is_paginated %}
+<div class="hl-pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page=1{% if search %}&q={{ search }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="hl-page-btn">
+        <i class="fas fa-angle-double-left"></i>
+    </a>
+    <a href="?page={{ page_obj.previous_page_number }}{% if search %}&q={{ search }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="hl-page-btn">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {% else %}
+    <span class="hl-page-btn disabled"><i class="fas fa-angle-double-left"></i></span>
+    <span class="hl-page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+    {% endif %}
+
+    <span class="hl-page-info">
+        <strong>{{ page_obj.number }}</strong> / {{ page_obj.paginator.num_pages }}
+        <span style="color: var(--hl-text-dim); font-weight: 500;">
+            ({{ page_obj.paginator.count }} ta)
+        </span>
+    </span>
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if search %}&q={{ search }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="hl-page-btn">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+    <a href="?page={{ page_obj.paginator.num_pages }}{% if search %}&q={{ search }}{% endif %}{% if course_filter %}&course={{ course_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" class="hl-page-btn">
+        <i class="fas fa-angle-double-right"></i>
+    </a>
+    {% else %}
+    <span class="hl-page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+    <span class="hl-page-btn disabled"><i class="fas fa-angle-double-right"></i></span>
+    {% endif %}
+</div>
+{% endif %}
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CONFIRM MODAL
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hl-modal-overlay" id="hlConfirmModal">
+    <div class="hl-modal">
+        <div class="hl-modal-icon">
+            <i class="fas fa-triangle-exclamation"></i>
+        </div>
+        <h3 id="hlConfirmTitle">Tasdiqlash</h3>
+        <p id="hlConfirmMessage">Bu amalni qaytarib bo'lmaydi!</p>
+        <div class="hl-modal-actions">
+            <button type="button" class="hl-btn hl-btn-secondary" onclick="closeConfirm()">
+                Bekor qilish
+            </button>
+            <button type="button" class="hl-btn hl-btn-danger-solid" id="hlConfirmOk">
+                O'chirish
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOAST
+     ═══════════════════════════════════════════════════════════ -->
+<div class="hl-toast-container" id="hlToastContainer"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DIGION LMS — HOMEWORK LIST SCRIPT
+   ═══════════════════════════════════════════════════════════════ */
+
+(function() {
+    'use strict';
+
+    /* ─── THEME ─── */
+    window.toggleTheme = function() {
+        const html = document.documentElement;
+        const isDark = html.classList.toggle('dark');
+        try {
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        } catch (e) {}
+        updateThemeIcon();
+    };
+
+    function updateThemeIcon() {
+        const icon = document.getElementById('themeIcon');
+        if (!icon) return;
+        const isDark = document.documentElement.classList.contains('dark');
+        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    (function initTheme() {
+        let theme = null;
+        try {
+            theme = localStorage.getItem('theme');
+        } catch (e) {}
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcon();
+    })();
+
+    /* ─── VIEW SWITCHER ─── */
+    const STORAGE_KEY = 'digion_homework_view';
+
+    window.setView = function(view) {
+        document.querySelectorAll('.hl-view-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === view);
+        });
+
+        const grid = document.getElementById('hlGridView');
+        const list = document.getElementById('hlListView');
+        const table = document.getElementById('hlTableView');
+
+        [grid, list, table].forEach(el => {
+            if (el) el.classList.add('hl-hidden');
+        });
+
+        if (view === 'grid' && grid) grid.classList.remove('hl-hidden');
+        else if (view === 'list' && list) list.classList.remove('hl-hidden');
+        else if (view === 'table' && table) table.classList.remove('hl-hidden');
+
+        try {
+            localStorage.setItem(STORAGE_KEY, view);
+        } catch (e) {}
+    };
+
+    (function initView() {
+        let savedView = 'grid';
+        try {
+            savedView = localStorage.getItem(STORAGE_KEY) || 'grid';
+        } catch (e) {}
+        if (['grid', 'list', 'table'].includes(savedView)) {
+            setView(savedView);
+        }
+    })();
+
+    /* ─── FILTERS TOGGLE ─── */
+    window.toggleFilters = function() {
+        const panel = document.getElementById('hlFiltersPanel');
+        if (!panel) return;
+        panel.classList.toggle('open');
+        try {
+            localStorage.setItem('digion_homework_filters_open',
+                panel.classList.contains('open') ? '1' : '0');
+        } catch (e) {}
+    };
+
+    (function restoreFilters() {
+        try {
+            if (localStorage.getItem('digion_homework_filters_open') === '1') {
+                document.getElementById('hlFiltersPanel')?.classList.add('open');
+            }
+        } catch (e) {}
+    })();
+
+    /* ─── TOAST ─── */
+    window.showToast = function(type, title, message, duration = 4000) {
+        const container = document.getElementById('hlToastContainer');
+        if (!container) return;
+
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            info: 'fa-info-circle',
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `hl-toast ${type}`;
+        toast.innerHTML = `
+            <div class="hl-toast-ico"><i class="fas ${icons[type] || icons.info}"></i></div>
+            <div class="hl-toast-body">
+                <div class="hl-toast-title">${title}</div>
+                ${message ? `<div class="hl-toast-msg">${message}</div>` : ''}
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(40px)';
+            toast.style.transition = 'all .3s';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    };
+
+    /* ─── BULK SELECTION ─── */
+    let selectedIds = new Set();
+
+    window.onCheckboxChange = function(checkbox) {
+        const id = checkbox.value;
+        if (checkbox.checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+        updateBulkBar();
+        updateCardSelection();
+    };
+
+    function updateCardSelection() {
+        document.querySelectorAll('[data-hw-id]').forEach(el => {
+            const id = el.dataset.hwId;
+            el.classList.toggle('selected', selectedIds.has(id));
+        });
+    }
+
+    function updateBulkBar() {
+        const bar = document.getElementById('hlBulkBar');
+        const count = document.getElementById('hlBulkCount');
+        if (!bar || !count) return;
+
+        count.textContent = selectedIds.size;
+        bar.classList.toggle('show', selectedIds.size > 0);
+    }
+
+    window.selectAll = function() {
+        const all = document.querySelectorAll('.hw-checkbox');
+        const allChecked = Array.from(all).every(cb => cb.checked);
+
+        all.forEach(cb => {
+            cb.checked = !allChecked;
+            if (!allChecked) selectedIds.add(cb.value);
+            else selectedIds.delete(cb.value);
+        });
+
+        updateBulkBar();
+        updateCardSelection();
+    };
+
+    window.selectAllTable = function(checkbox) {
+        document.querySelectorAll('#hlTableView .hw-checkbox').forEach(cb => {
+            cb.checked = checkbox.checked;
+            if (checkbox.checked) selectedIds.add(cb.value);
+            else selectedIds.delete(cb.value);
+        });
+        updateBulkBar();
+        updateCardSelection();
+    };
+
+    window.clearSelection = function() {
+        document.querySelectorAll('.hw-checkbox').forEach(cb => cb.checked = false);
+        selectedIds.clear();
+        updateBulkBar();
+        updateCardSelection();
+    };
+
+    /* ─── BULK ACTIONS ─── */
+    window.bulkAction = async function(action) {
+        const ids = Array.from(selectedIds);
+        if (!ids.length) {
+            showToast('info', 'Diqqat', 'Hech narsa tanlanmagan');
+            return;
+        }
+
+        const messages = {
+            approve: `Tanlangan ${ids.length} ta vazifani tasdiqlash?`,
+            unapprove: `Tanlangan ${ids.length} ta vazifani bekor qilish?`,
+            archive: `Tanlangan ${ids.length} ta vazifani arxivlash?`,
+            delete: `Tanlangan ${ids.length} ta vazifani o'chirish?`,
+        };
+
+        const confirmed = await confirmAction(messages[action] || 'Davom etish?');
+        if (!confirmed) return;
+
+        // TODO: Backend bulk endpoint
+        showToast('success', 'Muvaffaqiyatli',
+            `${ids.length} ta vazifa uchun ${action} bajarildi`);
+        clearSelection();
+
+        // Simulate reload
+        setTimeout(() => location.reload(), 1000);
+    };
+
+    /* ─── DELETE SINGLE ─── */
+    window.deleteHomework = async function(pk, title) {
+        const confirmed = await confirmAction(
+            `"${title}" vazifasini o'chirishni xohlaysizmi?`
+        );
+        if (!confirmed) return;
+
+        showToast('success', 'O\'chirildi', `"${title}" muvaffaqiyatli o'chirildi`);
+        setTimeout(() => location.reload(), 800);
+    };
+
+    /* ─── CONFIRM MODAL ─── */
+    let confirmResolver = null;
+
+    window.confirmAction = function(message) {
+        return new Promise(resolve => {
+            const modal = document.getElementById('hlConfirmModal');
+            const title = document.getElementById('hlConfirmTitle');
+            const msg = document.getElementById('hlConfirmMessage');
+            const okBtn = document.getElementById('hlConfirmOk');
+
+            title.textContent = 'Tasdiqlash';
+            msg.textContent = message;
+            modal.classList.add('show');
+
+            confirmResolver = resolve;
+
+            const handleOk = () => {
+                modal.classList.remove('show');
+                okBtn.removeEventListener('click', handleOk);
+                confirmResolver = null;
+                resolve(true);
+            };
+
+            okBtn.addEventListener('click', handleOk, { once: true });
+        });
+    };
+
+    window.closeConfirm = function() {
+        const modal = document.getElementById('hlConfirmModal');
+        modal.classList.remove('show');
+        if (confirmResolver) {
+            confirmResolver(false);
+            confirmResolver = null;
+        }
+    };
+
+    document.getElementById('hlConfirmModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeConfirm();
+    });
+
+    /* ─── KEYBOARD SHORTCUTS ─── */
+    document.addEventListener('keydown', function(e) {
+        const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
+
+        // "/" — focus search
+        if (e.key === '/' && !isInput) {
+            e.preventDefault();
+            document.getElementById('hlSearchInput')?.focus();
+        }
+
+        // "Escape" — clear
+        if (e.key === 'Escape') {
+            document.getElementById('hlFiltersPanel')?.classList.remove('open');
+            closeConfirm();
+            clearSelection();
+        }
+
+        // "a" — select all
+        if (e.key === 'a' && (e.ctrlKey || e.metaKey) && !isInput) {
+            e.preventDefault();
+            selectAll();
+        }
+
+        // "1", "2", "3" — switch views
+        if (['1', '2', '3'].includes(e.key) && !isInput) {
+            setView({ '1': 'grid', '2': 'list', '3': 'table' }[e.key]);
+        }
+    });
+
+    /* ─── SEARCH DEBOUNCE ─── */
+    (function searchDebounce() {
+        const input = document.getElementById('hlSearchInput');
+        if (!input) return;
+
+        let timer = null;
+        input.addEventListener('input', function() {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                if (input.value.length >= 2) {
+                    document.getElementById('hlFilterForm').submit();
+                }
+            }, 800);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(timer);
+                document.getElementById('hlFilterForm').submit();
+            }
+        });
+    })();
+
+    /* ─── CONSOLE INFO ─── */
+    console.log(
+        '%c DIGION LMS %c Homework List ',
+        'background: #f59e0b; color: #fff; padding: 4px 8px; border-radius: 4px 0 0 4px; font-weight: 700;',
+        'background: #0f172a; color: #fff; padding: 4px 8px; border-radius: 0 4px 4px 0; font-weight: 600;'
+    );
+    console.log('⌨️  / = qidiruv · Ctrl+A = hammasini tanlash · 1/2/3 = ko\'rinish · Esc = bekor');
+})();
+</script>
+{% endblock %}

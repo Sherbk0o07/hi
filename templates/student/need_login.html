@@ -1,0 +1,734 @@
+{% extends "student/telegram_base.html" %}
+
+{% block title %}Kirish kerak | DIGION{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO KARTA
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card text-center animate-scale-in" style="padding: 40px 24px;">
+
+  <!-- Ikona -->
+  <div class="relative inline-block mb-5">
+    <div class="w-28 h-28 mx-auto rounded-full flex items-center justify-center"
+         style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(124, 58, 237, 0.15));">
+      <span class="text-6xl pulse-icon">🔐</span>
+    </div>
+    <!-- Telegram badge -->
+    <div class="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-[#229ED9] flex items-center justify-center shadow-lg">
+      <i class="fab fa-telegram text-white text-lg"></i>
+    </div>
+  </div>
+
+  <!-- Sarlavha -->
+  <h1 class="text-2xl font-extrabold mb-2">Kirish talab qilinadi</h1>
+
+  <!-- Tavsif -->
+  <p class="text-sm leading-relaxed mb-4" style="color: var(--tg-hint);">
+    Bu sahifani ochish uchun <b>Telegram akkauntingizni</b> DIGION tizimiga bog'lashingiz kerak.
+  </p>
+
+  <!-- Status -->
+  <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+       style="background: rgba(239, 68, 68, 0.1);">
+    <span class="w-2 h-2 rounded-full bg-rose animate-pulse"></span>
+    <span class="text-xs font-semibold" style="color: #DC2626;">
+      Sessiya topilmadi
+    </span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     QADAM-BAQADAM QO'LLANMA
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(79, 70, 229, 0.15);">
+      <i class="fas fa-route text-primary"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Qanday bog'lash mumkin
+    </h3>
+  </div>
+
+  <div class="space-y-3">
+    <!-- Qadam 1 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl animate-slide-in-left"
+         style="background: var(--tg-bg); animation-delay: 0.1s;">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0"
+           style="background: linear-gradient(135deg, #4F46E5, #7C3AED);">
+        1
+      </div>
+      <div class="flex-1 min-w-0 pt-1">
+        <p class="font-bold text-sm mb-1">
+          <i class="fab fa-telegram text-[#229ED9] mr-1"></i>
+          Telegram botga o'ting
+        </p>
+        <p class="text-xs leading-relaxed" style="color: var(--tg-hint);">
+          Quyidagi <b>tugma</b> orqali @digion_bot ni oching
+        </p>
+      </div>
+    </div>
+
+    <!-- Qadam 2 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl animate-slide-in-left"
+         style="background: var(--tg-bg); animation-delay: 0.2s;">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0"
+           style="background: linear-gradient(135deg, #4F46E5, #7C3AED);">
+        2
+      </div>
+      <div class="flex-1 min-w-0 pt-1">
+        <p class="font-bold text-sm mb-1">
+          <i class="fas fa-share text-primary mr-1"></i>
+          Telefon raqamingizni yuboring
+        </p>
+        <p class="text-xs leading-relaxed" style="color: var(--tg-hint);">
+          Botdan <b>«📱 Telefon raqamni ulashish»</b> tugmasini bosing va raqamingizni yuboring
+        </p>
+      </div>
+    </div>
+
+    <!-- Qadam 3 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl animate-slide-in-left"
+         style="background: var(--tg-bg); animation-delay: 0.3s;">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0"
+           style="background: linear-gradient(135deg, #4F46E5, #7C3AED);">
+        3
+      </div>
+      <div class="flex-1 min-w-0 pt-1">
+        <p class="font-bold text-sm mb-1">
+          <i class="fas fa-check-circle text-success mr-1"></i>
+          Botga /start bosing
+        </p>
+        <p class="text-xs leading-relaxed" style="color: var(--tg-hint);">
+          Botga qaytib, <code class="px-1.5 py-0.5 rounded bg-black/10 text-[10px]">/start</code> buyrug'ini yuboring
+        </p>
+      </div>
+    </div>
+
+    <!-- Qadam 4 -->
+    <div class="flex items-start gap-3 p-3 rounded-xl animate-slide-in-left"
+         style="background: var(--tg-bg); animation-delay: 0.4s;">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0"
+           style="background: linear-gradient(135deg, #4F5EE5, #06B6D4);">
+        <i class="fas fa-redo text-sm"></i>
+      </div>
+      <div class="flex-1 min-w-0 pt-1">
+        <p class="font-bold text-sm mb-1">
+          <i class="fas fa-link text-accent mr-1"></i>
+          Havolani qaytadan oching
+        </p>
+        <p class="text-xs leading-relaxed" style="color: var(--tg-hint);">
+          Ushbu sahifani yangilang — avtomatik kirasiz
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ASOSIY TUGMALAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="space-y-3 mb-4 animate-slide-up">
+
+  <!-- Botga o'tish -->
+  <button onclick="openBot()" class="btn btn-primary">
+    <i class="fab fa-telegram text-xl"></i>
+    <span>Telegram botni ochish</span>
+    <i class="fas fa-arrow-right ml-auto opacity-70"></i>
+  </button>
+
+  <!-- Qayta urinish -->
+  <button onclick="reloadPage()"
+          class="btn"
+          style="background: var(--tg-line); color: var(--tg-text);">
+    <i class="fas fa-sync-alt"></i>
+    <span>Qayta urinish</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BOT USERNAME + QR KOD
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(34, 158, 217, 0.15);">
+      <i class="fab fa-telegram text-[#229ED9]"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Bot ma'lumotlari
+    </h3>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <!-- QR kod -->
+    <div class="text-center">
+      <div id="qrCode"
+           class="w-full aspect-square rounded-2xl flex items-center justify-center p-3"
+           style="background: white;">
+        <!-- QR to'ldiriladi JS orqali -->
+      </div>
+      <p class="text-xs mt-2" style="color: var(--tg-hint);">
+        📱 Skanerlang
+      </p>
+    </div>
+
+    <!-- Username + Copy -->
+    <div class="flex flex-col justify-center">
+      <p class="text-xs mb-2" style="color: var(--tg-hint);">
+        Yoki qidiruv orqali:
+      </p>
+      <div class="p-3 rounded-xl mb-2"
+           style="background: var(--tg-bg);">
+        <p class="font-mono text-sm font-bold text-center">
+          @digion_bot
+        </p>
+      </div>
+      <button onclick="copyBotUsername()"
+              class="btn btn-sm"
+              style="background: var(--tg-line); color: var(--tg-text);">
+        <i class="fas fa-copy"></i>
+        <span>Nusxa olish</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bot statistikasi -->
+  <div class="divider"></div>
+
+  <div class="grid grid-cols-3 gap-3 text-center text-xs">
+    <div>
+      <p class="text-2xl mb-1">🤖</p>
+      <p style="color: var(--tg-hint);">Bot</p>
+      <p class="font-bold">Aktiv</p>
+    </div>
+    <div>
+      <p class="text-2xl mb-1">⚡</p>
+      <p style="color: var(--tg-hint);">Tezlik</p>
+      <p class="font-bold">Tez</p>
+    </div>
+    <div>
+      <p class="text-2xl mb-1">🔒</p>
+      <p style="color: var(--tg-hint);">Xavfsiz</p>
+      <p class="font-bold">Ha</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NIMA UCHUN LOGIN KERAK?
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(16, 185, 129, 0.15);">
+      <i class="fas fa-shield-halved text-success"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Nega login kerak?
+    </h3>
+  </div>
+
+  <div class="space-y-2">
+    <div class="flex items-start gap-3 text-sm">
+      <i class="fas fa-check-circle text-success mt-1"></i>
+      <p>Shaxsiy ma'lumotlaringizni himoyalash</p>
+    </div>
+    <div class="flex items-start gap-3 text-sm">
+      <i class="fas fa-check-circle text-success mt-1"></i>
+      <p>Faqat sizga tegishli vazifalarni ko'rsatish</p>
+    </div>
+    <div class="flex items-start gap-3 text-sm">
+      <i class="fas fa-check-circle text-success mt-1"></i>
+      <p>Natijalaringizni xavfsiz saqlash</p>
+    </div>
+    <div class="flex items-start gap-3 text-sm">
+      <i class="fas fa-check-circle text-success mt-1"></i>
+      <p>Parolni eslab qolish shart emas</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TELEGRAM ICHIDA OCHILGANMI?
+     ═══════════════════════════════════════════════════════════ -->
+<div id="outsideWarning"
+     class="card mb-4 hidden animate-shake"
+     style="border-left: 4px solid #F59E0B;">
+  <div class="flex items-start gap-3">
+    <i class="fas fa-exclamation-triangle text-warm text-2xl"></i>
+    <div class="flex-1">
+      <p class="font-bold mb-1">Siz Telegram tashqarisida ochdingiz</p>
+      <p class="text-xs mb-3" style="color: var(--tg-hint);">
+        Bu sahifa <b>Telegram Mini App</b> da ishlash uchun mo'ljallangan.
+        Iltimos, Telegram bot orqali oching.
+      </p>
+      <button onclick="openBot()"
+              class="btn btn-sm w-full"
+              style="background: #F59E0B; color: white;">
+        <i class="fab fa-telegram"></i>
+        <span>Telegram orqali ochish</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TROUBLESHOOTING
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(239, 68, 68, 0.15);">
+      <i class="fas fa-wrench text-rose"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Muammo bormi?
+    </h3>
+  </div>
+
+  <div class="space-y-2">
+    <!-- Muammo 1 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Bot javob bermayapti
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed space-y-1" style="color: var(--tg-hint);">
+        <p>• Botga <code class="px-1 rounded bg-black/10">/start</code> yuboring</p>
+        <p>• 1-2 daqiqa kuting</p>
+        <p>• Internet aloqasini tekshiring</p>
+        <p>• Botni qayta ochib ko'ring</p>
+      </div>
+    </details>
+
+    <!-- Muammo 2 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Telefon raqamni yuborish tugmasi yo'q
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed space-y-1" style="color: var(--tg-hint);">
+        <p>• Telegram mobil ilovada ochish kerak</p>
+        <p>• Telegram Desktop da ba'zan ishlamaydi</p>
+        <p>• Botga <code class="px-1 rounded bg-black/10">/start</code> qayta yuboring</p>
+      </div>
+    </details>
+
+    <!-- Muammo 3 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          «Kirish kerak» deyapti, lekin men bog'laganman
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed space-y-1" style="color: var(--tg-hint);">
+        <p>• Sahifani <b>yangilang</b> (pastdagi tugma)</p>
+        <p>• Brauzer keshini tozalang</p>
+        <p>• Telegram botdan yangi havola oling</p>
+        <p>• Agar muammo davom etsa — adminga murojaat</p>
+      </div>
+    </details>
+
+    <!-- Muammo 4 -->
+    <details class="group rounded-xl overflow-hidden"
+             style="background: var(--tg-bg);">
+      <summary class="flex items-center justify-between p-3 cursor-pointer list-none">
+        <p class="font-semibold text-sm">
+          <i class="fas fa-circle-question text-primary mr-2"></i>
+          Telegram WebApp ochilmayapti
+        </p>
+        <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"
+           style="color: var(--tg-hint);"></i>
+      </summary>
+      <div class="px-3 pb-3 text-xs leading-relaxed space-y-1" style="color: var(--tg-hint);">
+        <p>• Telegram ilovasi oxirgi versiyada bo'lsin</p>
+        <p>• Telefon qayta ishga tushiring</p>
+        <p>• Botni qaytadan oching</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ADMIN BILAN BOG'LANISH
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center"
+         style="background: rgba(6, 182, 212, 0.15);">
+      <i class="fas fa-headset text-accent"></i>
+    </div>
+    <h3 class="font-bold text-sm uppercase tracking-wide">
+      Yordam kerakmi?
+    </h3>
+  </div>
+
+  <p class="text-xs mb-3" style="color: var(--tg-hint);">
+    Muammoni hal qila olmasangiz, biz bilan bog'laning
+  </p>
+
+  <div class="space-y-2">
+    <!-- Admin -->
+    <button onclick="contactAdmin()"
+            class="flex items-center gap-3 p-3 rounded-xl w-full text-left transition-all"
+            style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-user-shield text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Adminga yozish</p>
+        <p class="text-xs" style="color: var(--tg-hint);">
+          Eng tezkor usul
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </button>
+
+    <!-- Support -->
+    <a href="https://t.me/digion_support"
+       target="_blank"
+       class="flex items-center gap-3 p-3 rounded-xl transition-all"
+       style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-[#229ED9] flex items-center justify-center flex-shrink-0">
+        <i class="fab fa-telegram text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Qo'llab-quvvatlash</p>
+        <p class="text-xs" style="color: var(--tg-hint);">
+          @digion_support
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </a>
+
+    <!-- Telefon -->
+    <a href="tel:+998901234567"
+       class="flex items-center gap-3 p-3 rounded-xl transition-all"
+       style="background: var(--tg-bg);">
+      <div class="w-10 h-10 rounded-full bg-success flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-phone text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm">Qo'ng'iroq</p>
+        <p class="text-xs" style="color: var(--tg-hint);">
+          +998 90 123 45 67
+        </p>
+      </div>
+      <i class="fas fa-chevron-right text-xs" style="color: var(--tg-hint);"></i>
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     AUTO CHECK STATUS
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card mb-4 animate-slide-up" id="autoCheckCard"
+     style="border-left: 4px solid #4F46E5;">
+  <div class="flex items-center gap-3">
+    <div class="loading-spinner loading-spinner-dark"
+         style="width: 20px; height: 20px;"></div>
+    <div class="flex-1">
+      <p class="font-bold text-sm">Holat tekshirilmoqda...</p>
+      <p class="text-xs mt-0.5" style="color: var(--tg-hint);">
+        <span id="checkCountdown">30</span> sekunddan keyin qayta tekshiriladi
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DEBUG INFO
+     ═══════════════════════════════════════════════════════════ -->
+{% if debug %}
+<div class="card mb-4 animate-slide-up"
+     style="border-left: 4px solid #F59E0B;">
+  <details class="group">
+    <summary class="flex items-center justify-between cursor-pointer list-none">
+      <div class="flex items-center gap-2">
+        <i class="fas fa-bug text-warm"></i>
+        <p class="font-bold text-sm">Debug</p>
+      </div>
+      <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
+    </summary>
+    <div class="mt-3 text-xs font-mono space-y-1" style="color: var(--tg-hint);">
+      <p><b>URL:</b> <span id="debugUrl"></span></p>
+      <p><b>Has Telegram:</b> <span id="debugHasTg">—</span></p>
+      <p><b>InitData:</b> <span id="debugInitData">—</span></p>
+      <p><b>User:</b> <span id="debugUser">—</span></p>
+      <p><b>Platform:</b> <span id="debugPlatform">—</span></p>
+      <p><b>Version:</b> <span id="debugVersion">—</span></p>
+    </div>
+  </details>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════════
+     PASTKI QISM
+     ═══════════════════════════════════════════════════════════ -->
+<div class="text-center py-6">
+  <p class="text-xs mb-1" style="color: var(--tg-hint);">
+    DIGION © 2026
+  </p>
+  <p class="text-[10px]" style="color: var(--tg-hint);">
+    Xavfsiz ta'lim platformasi
+  </p>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+// ═══════════════════════════════════════════════════════════
+// KONFIGURATSIYA
+// ═══════════════════════════════════════════════════════════
+const BOT_USERNAME = 'digion_bot';
+const ADMIN_BOT = 'digion_support';
+const BOT_URL = `https://t.me/${BOT_USERNAME}?start=login`;
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(function init() {
+  console.log('🔐 Need login page');
+
+  // Telegram ichida ochilganmi?
+  const hasTg = !!tg?.initData;
+  if (!hasTg) {
+    document.getElementById('outsideWarning')?.classList.remove('hidden');
+  }
+
+  // QR kod generatsiya
+  generateQR();
+
+  // Debug
+  if (document.getElementById('debugUrl')) {
+    document.getElementById('debugUrl').textContent = window.location.href;
+    document.getElementById('debugHasTg').textContent = tg ? 'Ha' : "Yo'q";
+    document.getElementById('debugInitData').textContent =
+      tg?.initData ? `${tg.initData.length} belgi` : "Yo'q";
+    document.getElementById('debugUser').textContent =
+      JSON.stringify(tg?.initDataUnsafe?.user || {});
+    document.getElementById('debugPlatform').textContent = tg?.platform || '—';
+    document.getElementById('debugVersion').textContent = tg?.version || '—';
+  }
+
+  // Haptic
+  hapticNotify('warning');
+
+  // Auto-check boshlash
+  startAutoCheck();
+})();
+
+// ═══════════════════════════════════════════════════════════
+// QR KOD GENERATSIYA
+// ═══════════════════════════════════════════════════════════
+function generateQR() {
+  const container = document.getElementById('qrCode');
+  if (!container) return;
+
+  // QR kod rasmi Telegram API dan
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(BOT_URL)}`;
+
+  const img = document.createElement('img');
+  img.src = qrUrl;
+  img.alt = 'QR Code';
+  img.className = 'w-full h-full object-contain';
+  img.onerror = () => {
+    // Fallback: matn
+    container.innerHTML = '<p class="text-xs text-center" style="color: #666;">QR yuklanmadi</p>';
+  };
+
+  container.innerHTML = '';
+  container.appendChild(img);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOTNI OCHISH
+// ═══════════════════════════════════════════════════════════
+function openBot() {
+  haptic('medium');
+
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(BOT_URL);
+  } else {
+    window.open(BOT_URL, '_blank');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAHIFANI YANGILASH
+// ═══════════════════════════════════════════════════════════
+function reloadPage() {
+  haptic('light');
+  showLoading('Yangilanmoqda...');
+
+  setTimeout(() => {
+    hideLoading();
+    location.reload();
+  }, 500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOT USERNAME NUSXA OLISH
+// ═══════════════════════════════════════════════════════════
+function copyBotUsername() {
+  haptic('light');
+  const username = `@${BOT_USERNAME}`;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(username).then(() => {
+      hapticNotify('success');
+      showToast('Nusxa olindi: ' + username, 'success', 1500);
+    });
+  } else {
+    // Fallback
+    const el = document.createElement('textarea');
+    el.value = username;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    hapticNotify('success');
+    showToast('Nusxa olindi', 'success', 1500);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADMINGA MUROJAAT
+// ═══════════════════════════════════════════════════════════
+function contactAdmin() {
+  haptic('medium');
+
+  const message = encodeURIComponent(
+    `👋 Assalomu alaykum!\n\n` +
+    `🔐 Muammo: Telegram bog'lanish\n` +
+    `📍 URL: ${window.location.href}\n\n` +
+    `Iltimos, yordam bering.`
+  );
+
+  const url = `https://t.me/${ADMIN_BOT}?text=${message}`;
+
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
+
+  hapticNotify('success');
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTO CHECK STATUS
+// ═══════════════════════════════════════════════════════════
+let checkInterval = null;
+let countdown = 30;
+
+function startAutoCheck() {
+  const countdownEl = document.getElementById('checkCountdown');
+  if (!countdownEl) return;
+
+  // Countdown
+  checkInterval = setInterval(() => {
+    countdown--;
+    if (countdownEl) countdownEl.textContent = countdown;
+
+    if (countdown <= 0) {
+      clearInterval(checkInterval);
+      performCheck();
+    }
+  }, 1000);
+}
+
+async function performCheck() {
+  console.log('🔄 Auto check status');
+
+  try {
+    const response = await fetch(window.location.href, {
+      method: 'GET',
+      headers: {
+        'X-Telegram-Init-Data': getInitData(),
+      },
+    });
+
+    // Agar 200 va login sahifasi emas — demak login bo'ldi
+    if (response.status === 200) {
+      const text = await response.text();
+
+      // Hali need_login bo'lsa — qayta tekshirish
+      if (text.includes('Kirish talab qilinadi')) {
+        resetCountdown();
+      } else {
+        // Login bo'ldi!
+        console.log('✅ Login bo\'ldi!');
+        hapticNotify('success');
+        showToast('Login muvaffaqiyatli!', 'success');
+        setTimeout(() => location.reload(), 1000);
+      }
+    }
+  } catch (err) {
+    console.log('Check error:', err.message);
+    resetCountdown();
+  }
+}
+
+function resetCountdown() {
+  countdown = 30;
+  const countdownEl = document.getElementById('checkCountdown');
+  if (countdownEl) countdownEl.textContent = countdown;
+
+  if (checkInterval) clearInterval(checkInterval);
+  startAutoCheck();
+}
+
+// ═══════════════════════════════════════════════════════════
+// VISIBILITY CHANGE (tab qaytganda)
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    console.log('👀 Tab qaytdi — status tekshirish');
+    performCheck();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', (e) => {
+  // R — reload
+  if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+    reloadPage();
+  }
+  // B — bot
+  if (e.key === 'b' && e.altKey) {
+    e.preventDefault();
+    openBot();
+  }
+  // C — copy
+  if (e.key === 'c' && e.altKey) {
+    e.preventDefault();
+    copyBotUsername();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// GREETING
+// ═══════════════════════════════════════════════════════════
+console.log(`👋 Salom! Login kerak. Bot: @${BOT_USERNAME}`);
+{% endblock %}

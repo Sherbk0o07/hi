@@ -1,0 +1,199 @@
+﻿{% extends 'admin_user/base.html' %}
+
+{% block title %}{{ student.user.get_full_name }} | Admin Panel{% endblock %}
+
+{% block content %}
+<!-- Qo‘lda Telegram SMS yuborish -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i class="fab fa-telegram text-blue-500"></i>
+      Telegram xabar yuborish
+    </h3>
+  </div>
+  <div class="card-body">
+    <textarea id="tgMessage" rows="4"
+              class="w-full p-3 rounded-lg border focus:border-primary outline-none"
+              placeholder="Xabar matnini yozing..."></textarea>
+
+    <div class="flex gap-2 mt-3 flex-wrap">
+      <button class="quick-msg px-3 py-1.5 text-xs rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100"
+              data-msg="📚 Bugun darsga qaytishingizni kutamiz!">
+        📚 Darsga chaqirish
+      </button>
+      <button class="quick-msg px-3 py-1.5 text-xs rounded-full bg-green-50 text-green-700 hover:bg-green-100"
+              data-msg="🎉 Ajoyib natijangiz bilan tabriklaymiz!">
+        🎉 Tabriklash
+      </button>
+      <button class="quick-msg px-3 py-1.5 text-xs rounded-full bg-amber-50 text-amber-700 hover:bg-amber-100"
+              data-msg="⏰ Test topshirish vaqti keldi!">
+        ⏰ Eslatma
+      </button>
+    </div>
+
+    <button id="sendTgBtn"
+            class="btn btn-primary w-full mt-3"
+            data-user-id="{{ student.user.id }}">
+      <i class="fab fa-telegram"></i>
+      Yuborish
+    </button>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.quick-msg').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('tgMessage').value = btn.dataset.msg;
+  });
+});
+
+document.getElementById('sendTgBtn')?.addEventListener('click', async function() {
+  const userId = this.dataset.userId;
+  const message = document.getElementById('tgMessage').value.trim();
+
+  if (!message) {
+    alert('Xabar yozing!');
+    return;
+  }
+
+  const original = this.innerHTML;
+  this.disabled = true;
+  this.innerHTML = '<span class="spinner"></span> Yuborilmoqda...';
+
+  try {
+    const res = await fetch(`/admin/foydalanuvchi/${userId}/telegram-sms/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await res.json();
+    if (data.ok) {
+      alert('✅ ' + data.message);
+      document.getElementById('tgMessage').value = '';
+    } else {
+      alert('❌ ' + data.error);
+    }
+  } catch (err) {
+    alert('❌ Tarmoq xatosi');
+  } finally {
+    this.disabled = false;
+    this.innerHTML = original;
+  }
+});
+</script>
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">{{ student.user.get_full_name }}</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ student.user.phone_number }}</p>
+    </div>
+    <a href="{% url 'admin_students' %}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-xl text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+        <i class="fas fa-arrow-left text-xs"></i> Ro‘yxatga qaytish
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <!-- Asosiy ma'lumotlar -->
+    <div class="lg:col-span-2 space-y-5">
+        <div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/40 p-5">
+            <h3 class="font-bold text-lg mb-4">Profil ma'lumotlari</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Ism</p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">{{ student.user.first_name }} {{ student.user.last_name }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Telefon</p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">{{ student.user.phone_number }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Tug'ilgan sana</p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">{{ student.birth_date|default:"—" }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Ota-ona telefoni</p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">{{ student.parent_phone|default:"—" }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Balans</p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">{{ student.balance }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Coinlar</p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">{{ student.coins }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Holat</p>
+                    <span class="badge
+                        {% if student.status == 'active' %}bg-emerald-100 text-emerald-700
+                        {% elif student.status == 'frozen' %}bg-cyan-100 text-cyan-700
+                        {% elif student.status == 'graduated' %}bg-purple-100 text-purple-700
+                        {% else %}bg-rose-100 text-rose-700{% endif %}">
+                        {{ student.get_status_display }}
+                    </span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Qo'shilgan sana</p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200">{{ student.user.date_joined|date:"d.m.Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/40 p-5">
+            <h3 class="font-bold text-lg mb-4">Guruhlar</h3>
+            <div class="flex flex-wrap gap-2">
+                {% for group in student.groups.all %}
+                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-slate-700">
+                    <span class="text-sm font-medium">{{ group.name }}</span>
+                    <form method="post" action="{% url 'admin_student_action' student.pk %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="remove_group">
+                        <input type="hidden" name="group_id" value="{{ group.id }}">
+                        <button type="submit" class="text-rose-500 hover:text-rose-700 transition-colors">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    </form>
+                </div>
+                {% empty %}
+                <p class="text-gray-400">Guruhga qo'shilmagan</p>
+                {% endfor %}
+            </div>
+
+            <form method="post" action="{% url 'admin_student_action' student.pk %}" class="mt-4 flex gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_group">
+                <select name="group_id" class="py-2 px-3 rounded-xl border outline-none text-sm bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200">
+                    {% for group in all_groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-all">
+                    <i class="fas fa-plus mr-1"></i> Qo'shish
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Boshqaruv paneli -->
+    <div class="space-y-5">
+        <div class="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/40 p-5">
+            <h3 class="font-bold text-lg mb-4">Holatni o'zgartirish</h3>
+            <form method="post" action="{% url 'admin_student_action' student.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="change_status">
+                <select name="status" class="w-full py-3 pl-4 pr-9 rounded-xl border text-sm outline-none cursor-pointer bg-gray-50 dark:bg-slate-700/60 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-200 mb-3">
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if student.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="w-full py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all">
+                    Saqlash
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
